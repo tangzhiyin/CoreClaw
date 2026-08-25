@@ -32,16 +32,9 @@ PhoneClaw is a local AI agent framework for phones and edge devices. It runs Gem
 
 ## Latest Updates
 
-**2026-06-23**
+**2026-08-25**
 
-- Added **LiveLand**: use PhoneClaw from Dynamic Island. The local AI listens, understands your request, runs the task, and shows the result right there
-- Launch LiveLand from Home Screen widgets, Lock Screen widgets, Shortcuts, Control Center widgets, or inside the app. It also works on non-iOS 27 systems
-- Task progress is easier to follow: PhoneClaw now shows when it received your command, is understanding it, is querying or executing, is preparing the result, and is done
-- More natural phone tasks: ask for health data, create reminders, schedule calendar events, find contacts, translate text, and more through natural language
-- Fixed a LiveLand widget launch issue that could incorrectly show "download model first" or "model loading" even after the model was already installed
-- Safer actions: unclear times, titles, contacts, deletes, and bulk operations ask for clarification or confirmation before running
-- LiveLand runs on local models by default, with a fully offline local path and local execution free of per-call token billing
-- TestFlight link: [https://testflight.apple.com/join/YuUSwq78](https://testflight.apple.com/join/YuUSwq78)
+
 
 **2026-06-08**
 
@@ -50,25 +43,9 @@ PhoneClaw is a local AI agent framework for phones and edge devices. It runs Gem
 - Remote models are only used after you explicitly pair a Mac and select one. With Ollama, inference stays on your Mac; with CLI or other upstream providers, data handling follows that provider's behavior
 - How to use: download [PhoneClawGateway-macOS-v0.1.1.zip](https://github.com/tangzhiyin/PhoneClaw_Crisp/releases/download/mac-gateway-v0.1.1/PhoneClawGateway-macOS-v0.1.1.zip), unzip it, open `PhoneClawGateway.app`, allow Local Network permission, then pair from `Mac Remote` on the iPhone; see [Use the Mac client for remote inference](#7-use-the-mac-client-for-remote-inference)
 
-**2026-06-05**
-
-- PhoneClaw is live on TestFlight — [Join TestFlight](https://testflight.apple.com/join/YuUSwq78)
-- Rebuilt the overall Agent framework: improved Skill result semantics, Skill routing, tool-call chains, contextual follow-ups, and multi-step task handling, so the model can more reliably choose whether to answer directly, call tools, or continue from the previous result while reducing accidental tool triggers, repeated calls, and off-track follow-ups
-- Added Health range reports: summarize steps, distance, active energy, heart rate, sleep, workouts, weight, and HRV across a selected time range, then generate a local health summary, trends, and key metric explanations
-
 <details>
 <summary>Update history</summary>
 
-### 2026-06-01
-
-- PhoneClaw is live on TestFlight — [Join TestFlight](https://testflight.apple.com/join/YuUSwq78)
-- Added Calendar read support: query today's, tomorrow's, this week's, and next 7 days' schedule, with busyness and free-time analysis
-- Improved Web Search and long-answer browsing: realtime information can be summarized, and history remains scrollable while the model is responding
-
-### 2026-05-17
-
-- PhoneClaw is live on TestFlight — [Join TestFlight](https://testflight.apple.com/join/YuUSwq78)
-- A private local Agent running on iPhone, performing inference and Skill calls entirely on-device with a fully offline local path
 
 ### 2026-05-12
 
