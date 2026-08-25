@@ -1,0 +1,3306 @@
+import CoreImage
+import Foundation
+
+// MARK: - ToolChain 内部数据类型
+
+enum SingleToolExtractionOutcome {
+    case toolCall(name: String, arguments: [String: Any])
+    case needsClarification(String)
+    case failed
+}
+
+private struct PhoneGroundAnswerValidation {
+    let issues: [String]
+    let shouldTryAlternativeFetch: Bool
+
+    var shouldRepair: Bool {
+        !issues.isEmpty
+    }
+}
+
+private struct PhoneGroundPayloadValidation {
+    let issues: [String]
+
+    var isValid: Bool {
+        issues.isEmpty
+    }
+}
+
+private struct PhoneGroundPayloadNormalization {
+    let detail: String
+    let recoveredIssues: [String]
+    let remainingIssues: [String]
+}
+
+private struct SideEffectGateBlock {
+    let reply: String
+}
+
+protocol ToolResultCanonicalizer {
+    func canonicalize(toolName: String, toolResult: String) -> CanonicalToolResult
+}
+
+struct LegacyToolCanonicalizer: ToolResultCanonicalizer {
+    func canonicalize(toolName: String, toolResult: String) -> CanonicalToolResult {
+        canonicalToolResult(toolName: toolName, toolResult: toolResult)
+    }
+}
+
+extension AgentEngine {
+
+    // MARK: - Tool 注册查询
+
+    func registeredTools(for skillId: String, allowedToolNames: [String]? = nil) -> [RegisteredTool] {
+        func scoped(_ tools: [RegisteredTool]) -> [RegisteredTool] {
+            guard let allowedToolNames else { return tools }
+            let allowed = Set(allowedToolNames)
+            return tools.filter { allowed.contains($0.name) }
+        }
+
+        if let def = skillRegistry.getDefinition(skillId) {
+            let tools = toolRegistry.toolsFor(names: def.metadata.allowedTools)
+            if !tools.isEmpty { return scoped(tools) }
+        }
+
+        if let entry = skillEntries.first(where: { $0.id == skillId }) {
+            let tools = entry.tools.compactMap { toolRegistry.find(name: $0.name) }
+            if !tools.isEmpty { return scoped(tools) }
+        }
+
+        return []
+    }
+
+    private func modelPlannedWebQueries(
+        userQuestion: String,
+        initialQuery: String,
+        images: [CIImage]
+    ) async -> [String] {
+        let trimmedQuestion = userQuestion.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedQuery = initialQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedQuestion.isEmpty || !trimmedQuery.isEmpty else {
+            return []
+        }
+
+        let prompt = PromptBuilder.buildWebQueryPlanPrompt(
+            userQuestion: trimmedQuestion.isEmpty ? trimmedQuery : trimmedQuestion,
+            initialQuery: trimmedQuery.isEmpty ? trimmedQuestion : trimmedQuery,
+            currentImageCount: images.count
+        )
+        guard let raw = await streamLLM(prompt: prompt, images: images),
+              let payload = parseJSONObject(raw) ?? parseJSONObject(cleanOutput(raw)) else {
+            return []
+        }
+
+        let rawQueries = (payload["queries"] as? [Any])?.compactMap { $0 as? String } ?? []
+        let cleanedQueries = sanitizedWebQueryPlan(
+            rawQueries,
+            userQuestion: trimmedQuestion,
+            initialQuery: trimmedQuery
+        )
+        if !cleanedQueries.isEmpty {
+            log("[Agent] web-search model query plan: \(cleanedQueries.joined(separator: " | "))")
+        }
+        return cleanedQueries
+    }
+
+    private func sanitizedWebQueryPlan(
+        _ queries: [String],
+        userQuestion: String,
+        initialQuery: String
+    ) -> [String] {
+        var seen = Set<String>()
+        var output: [String] = []
+        for query in queries {
+            let normalized = query
+                .replacingOccurrences(of: "\r", with: " ")
+                .replacingOccurrences(of: "\n", with: " ")
+                .replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            guard normalized.count >= 2, normalized.count <= 120 else {
+                continue
+            }
+            guard !normalized.contains("<tool_call>"),
+                  !normalized.contains("{"),
+                  !normalized.contains("}") else {
+                continue
+            }
+            let key = normalized.lowercased()
+            guard !seen.contains(key) else { continue }
+            seen.insert(key)
+            output.append(normalized)
+            if output.count >= 4 { break }
+        }
+
+        let fallback = initialQuery.isEmpty ? userQuestion : initialQuery
+        if output.isEmpty, !fallback.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return [fallback.trimmingCharacters(in: .whitespacesAndNewlines)]
+        }
+        return output
+    }
+
+    /// Model-driven evidence curation (the SourceCurator step of a mature search
+    /// agent). One headless LLM call reads the candidate sources and extracts only
+    /// the facts that answer the question, preserving verbatim values and dropping
+    /// irrelevant sources. Returns a clean fact digest for synthesis, or nil when
+    /// nothing usable is extracted (synthesis then falls back to the raw evidence).
+    /// This replaces hand-tuned heuristic ranking — the model judges relevance and
+    /// pulls the answer, so it generalizes across domains.
+    private func curateWebEvidence(
+        userQuestion: String,
+        toolResultDetail: String,
+        images: [CIImage]
+    ) async -> String? {
+        let candidates = webEvidenceCandidatesText(fromToolResultDetail: toolResultDetail)
+        guard candidates.count >= 40 else { return nil }
+
+        let prompt = PromptBuilder.buildWebCurationPrompt(
+            userQuestion: userQuestion,
+            candidates: candidates,
+            currentImageCount: images.count
+        )
+        guard let raw = await streamLLM(prompt: prompt, images: images) else { return nil }
+        let digest = cleanOutput(raw).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard digest.count >= 8,
+              !looksLikePromptEcho(digest),
+              !digest.contains("<tool_call>") else {
+            return nil
+        }
+        let lowered = digest.lowercased()
+        if lowered.contains("无相关事实") || lowered.contains("no relevant facts") {
+            log("[Agent] web curation: no relevant facts extracted")
+            return nil
+        }
+        log("[Agent] web curation digest (\(digest.count) chars): \(digest.prefix(100))")
+        return digest
+    }
+
+    /// Build a clean, numbered candidate list for curation from a web tool result.
+    /// Prefers fetched-page passages + snippet chunks (evidence_pack), supplemented
+    /// by the search-result snippets (already query-focused summaries). Deduplicated
+    /// by source; each entry tagged so the curation can cite [source N].
+    private func webEvidenceCandidatesText(fromToolResultDetail detail: String) -> String {
+        guard let data = detail.data(using: .utf8),
+              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return ""
+        }
+        var lines: [String] = []
+        var seen = Set<String>()
+
+        func append(title: String, host: String, date: String, text: String, url: String) {
+            let body = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard body.count >= 20, lines.count < 10 else { return }
+            let key = normalizedSourceKey(url) + "|" + String(body.prefix(48))
+            guard !seen.contains(key) else { return }
+            seen.insert(key)
+            let datePart = date.isEmpty ? "" : ", \(tr("发布", "published", "公開")) \(date)"
+            let clipped = String(body.prefix(340))
+            lines.append("[\(tr("来源", "source", "ソース"))\(lines.count + 1)] \(title) (\(host)\(datePart))\n\(clipped)")
+        }
+
+        if let pack = payload["evidence_pack"] as? [String: Any],
+           let chunks = pack["chunks"] as? [[String: Any]] {
+            for chunk in chunks.prefix(8) {
+                append(
+                    title: (chunk["title"] as? String) ?? "",
+                    host: (chunk["host"] as? String) ?? "",
+                    date: (chunk["published_at"] as? String) ?? "",
+                    text: (chunk["text"] as? String) ?? "",
+                    url: (chunk["url"] as? String) ?? ""
+                )
+            }
+        }
+        if let results = payload["results"] as? [[String: Any]] {
+            for result in results.prefix(8) {
+                append(
+                    title: (result["title"] as? String) ?? "",
+                    host: (result["host"] as? String) ?? "",
+                    date: (result["published_at"] as? String) ?? "",
+                    text: (result["snippet"] as? String) ?? "",
+                    url: (result["url"] as? String) ?? ""
+                )
+            }
+        }
+        return lines.joined(separator: "\n\n")
+    }
+
+    private func modelReplannedWebQueries(
+        userQuestion: String,
+        previousSearchDetail: String,
+        images: [CIImage]
+    ) async -> [String] {
+        guard webSearchResultNeedsReplan(previousSearchDetail) else {
+            return []
+        }
+
+        let prompt = PromptBuilder.buildWebQueryReplanPrompt(
+            userQuestion: userQuestion,
+            previousSearchSummary: compactWebSearchDetailForReplan(previousSearchDetail),
+            currentImageCount: images.count
+        )
+        guard let raw = await streamLLM(prompt: prompt, images: images),
+              let payload = parseJSONObject(raw) ?? parseJSONObject(cleanOutput(raw)) else {
+            return []
+        }
+
+        let previousQueries = Set(webSearchQueries(fromDetail: previousSearchDetail).map { $0.lowercased() })
+        let rawQueries = (payload["queries"] as? [Any])?.compactMap { $0 as? String } ?? []
+        let cleanedQueries = sanitizedWebQueryPlan(
+            rawQueries,
+            userQuestion: userQuestion,
+            initialQuery: userQuestion
+        )
+        .filter { !previousQueries.contains($0.lowercased()) }
+
+        if !cleanedQueries.isEmpty {
+            log("[Agent] web-search replan queries: \(cleanedQueries.joined(separator: " | "))")
+        }
+        return Array(cleanedQueries.prefix(4))
+    }
+
+    private func retryWebSearchWithReplannedQueriesIfNeeded(
+        searchDetail: String,
+        userQuestion: String,
+        images: [CIImage]
+    ) async -> CanonicalToolResult? {
+        let queries = await modelReplannedWebQueries(
+            userQuestion: userQuestion,
+            previousSearchDetail: searchDetail,
+            images: images
+        )
+        guard !queries.isEmpty else { return nil }
+
+        do {
+            let result = try await handleToolExecutionCanonical(
+                toolName: "web-search",
+                args: [
+                    "query": queries.first ?? userQuestion,
+                    "question": userQuestion,
+                    "planned_queries": queries,
+                    "max_results": 6
+                ]
+            )
+            log("[Agent] web-search second-pass completed queries=\(queries.count)")
+            return result
+        } catch {
+            log("[Agent] web-search second-pass failed: \(error.localizedDescription)")
+            return nil
+        }
+    }
+
+    private func webSearchResultNeedsReplan(_ detail: String) -> Bool {
+        guard let data = detail.data(using: .utf8),
+              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              (payload["success"] as? Bool) == true else {
+            return false
+        }
+
+        if payload["answerability"] as? String == "direct" {
+            return false
+        }
+        if payload["direct_evidence_sufficient"] as? Bool == true {
+            return false
+        }
+        if let evidencePack = payload["evidence_pack"] as? [String: Any] {
+            if evidencePack["sufficiency"] as? String == "sufficient" {
+                return false
+            }
+            let chunkCount = (evidencePack["chunk_count"] as? Int)
+                ?? ((evidencePack["chunks"] as? [[String: Any]])?.count ?? 0)
+            let fetchedCount = evidencePack["fetched_document_count"] as? Int ?? 0
+            if chunkCount >= 2 && fetchedCount > 0 {
+                return false
+            }
+        }
+
+        let directCount = payload["direct_answer_result_count"] as? Int ?? 0
+        return directCount == 0 || (payload["answerability"] as? String) == "needs_fetch"
+    }
+
+    private func webSearchQueries(fromDetail detail: String) -> [String] {
+        guard let data = detail.data(using: .utf8),
+              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let queryPlan = payload["query_plan"] as? [String: Any] else {
+            return []
+        }
+        return (queryPlan["queries"] as? [Any])?.compactMap { $0 as? String } ?? []
+    }
+
+    private func compactWebSearchDetailForReplan(_ detail: String) -> String {
+        guard let data = detail.data(using: .utf8),
+              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return detail
+        }
+        var lines: [String] = []
+        if let queryPlan = payload["query_plan"] as? [String: Any] {
+            let queries = (queryPlan["queries"] as? [Any])?.compactMap { $0 as? String } ?? []
+            if !queries.isEmpty {
+                lines.append("queries: \(queries.joined(separator: " | "))")
+            }
+            if let planner = queryPlan["planner"] as? String {
+                lines.append("planner: \(planner)")
+            }
+        }
+        if let answerability = payload["answerability"] as? String {
+            lines.append("answerability: \(answerability)")
+        }
+        if let evidencePack = payload["evidence_pack"] as? [String: Any] {
+            let sufficiency = evidencePack["sufficiency"] as? String ?? "unknown"
+            let chunkCount = (evidencePack["chunk_count"] as? Int)
+                ?? ((evidencePack["chunks"] as? [[String: Any]])?.count ?? 0)
+            lines.append("evidence_pack: sufficiency=\(sufficiency), chunks=\(chunkCount)")
+        }
+        if let results = payload["results"] as? [[String: Any]] {
+            let resultLines = results.prefix(6).enumerated().map { index, result in
+                let title = (result["title"] as? String) ?? ""
+                let host = (result["host"] as? String) ?? ""
+                let confidence = (result["confidence"] as? String) ?? ""
+                let needsFetch = (result["needs_fetch"] as? Bool) == true
+                return "\(index + 1). \(title) host=\(host) confidence=\(confidence) needs_fetch=\(needsFetch)"
+            }
+            lines.append("results:\n\(resultLines.joined(separator: "\n"))")
+        }
+        return lines.isEmpty ? detail : lines.joined(separator: "\n")
+    }
+
+    // MARK: - 单 Skill 自动 / 引导式工具调用
+
+    func autoToolCallForLoadedSkills(
+        skillIds: [String],
+        allowedToolNames: [String]? = nil
+    ) -> (name: String, arguments: [String: Any])? {
+        let uniqueSkillIds = Array(NSOrderedSet(array: skillIds)) as? [String] ?? skillIds
+
+        guard uniqueSkillIds.count == 1,
+              let skillId = uniqueSkillIds.first,
+              let def = skillRegistry.getDefinition(skillId),
+              def.isEnabled else {
+            return nil
+        }
+
+        let tools = registeredTools(for: skillId, allowedToolNames: allowedToolNames)
+        guard tools.count == 1,
+              let tool = tools.first,
+              tool.isParameterless else {
+            return nil
+        }
+
+        return (tool.name, [:])
+    }
+
+    func singleRegisteredToolForLoadedSkills(skillIds: [String]) -> RegisteredTool? {
+        let uniqueSkillIds = Array(NSOrderedSet(array: skillIds)) as? [String] ?? skillIds
+        guard uniqueSkillIds.count == 1,
+              let skillId = uniqueSkillIds.first else {
+            return nil
+        }
+
+        let tools = registeredTools(for: skillId)
+        guard tools.count == 1 else { return nil }
+        return tools.first
+    }
+
+    func extractToolCallForLoadedSkills(
+        originalPrompt: String,
+        userQuestion: String,
+        skillInstructions: String,
+        skillIds: [String],
+        images: [CIImage],
+        allowedToolNames: [String]? = nil
+    ) async -> SingleToolExtractionOutcome {
+        let uniqueSkillIds = Array(NSOrderedSet(array: skillIds)) as? [String] ?? skillIds
+        guard uniqueSkillIds.count == 1,
+              let skillId = uniqueSkillIds.first else {
+            return .failed
+        }
+
+        let tools = registeredTools(for: skillId, allowedToolNames: allowedToolNames)
+            .filter { !$0.isParameterless }
+        guard !tools.isEmpty else {
+            return .failed
+        }
+
+        if tools.count == 1, let tool = tools.first {
+            let extractionPrompt = PromptBuilder.buildSingleToolArgumentsPrompt(
+                originalPrompt: originalPrompt,
+                userQuestion: userQuestion,
+                skillInstructions: skillInstructions,
+                toolName: tool.name,
+                toolParameters: tool.parameters,
+                includeTimeAnchor: requiresTimeAnchor(forSkillId: skillId),
+                currentImageCount: images.count
+            )
+
+            if let raw = await streamLLM(prompt: extractionPrompt, images: images) {
+                let cleaned = cleanOutput(raw)
+                if let payload = parseJSONObject(cleaned) {
+                    if let clarification = payload["_needs_clarification"] as? String,
+                       !clarification.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty {
+                        return .needsClarification(clarification)
+                    }
+
+                    if toolRegistry.validatesArguments(payload, for: tool.name) {
+                        return .toolCall(name: tool.name, arguments: payload)
+                    }
+                }
+            }
+
+            return .failed
+        }
+
+        let allowedToolsSummary = tools.map {
+            "- \($0.name): \($0.description)\n  参数: \($0.parameters)"
+        }.joined(separator: "\n")
+
+        let extractionPrompt = PromptBuilder.buildSkillToolSelectionPrompt(
+            originalPrompt: originalPrompt,
+            userQuestion: userQuestion,
+            skillInstructions: skillInstructions,
+            allowedToolsSummary: allowedToolsSummary,
+            includeTimeAnchor: requiresTimeAnchor(forSkillId: skillId),
+            currentImageCount: images.count
+        )
+
+        if let raw = await streamLLM(prompt: extractionPrompt, images: images) {
+            let cleaned = cleanOutput(raw)
+            if let payload = parseJSONObject(cleaned) {
+                if let clarification = payload["_needs_clarification"] as? String,
+                   !clarification.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty {
+                    return .needsClarification(clarification)
+                }
+
+                if let rawName = payload["name"] as? String,
+                   let arguments = payload["arguments"] as? [String: Any] {
+                    let toolName = canonicalToolName(rawName, arguments: arguments)
+                    if tools.contains(where: { $0.name == toolName }),
+                       toolRegistry.validatesArguments(arguments, for: toolName) {
+                        return .toolCall(name: toolName, arguments: arguments)
+                    }
+                }
+            }
+        }
+
+        return .failed
+    }
+
+    func canFallbackToPreloadedSkillTool(
+        skillIds: [String],
+        preloadedSkills: [PromptBuilder.PreloadedSkill]
+    ) -> Bool {
+        let scopedToolNames = scopedToolNames(for: skillIds, preloadedSkills: preloadedSkills)
+        if autoToolCallForLoadedSkills(skillIds: skillIds, allowedToolNames: scopedToolNames) != nil {
+            return true
+        }
+
+        let uniqueSkillIds = Array(NSOrderedSet(array: skillIds)) as? [String] ?? skillIds
+        guard uniqueSkillIds.count == 1,
+              let skillId = uniqueSkillIds.first else {
+            return false
+        }
+
+        return registeredTools(for: skillId, allowedToolNames: scopedToolNames).contains { !$0.isParameterless }
+    }
+
+    func scopedToolNames(
+        for skillIds: [String],
+        preloadedSkills: [PromptBuilder.PreloadedSkill]
+    ) -> [String]? {
+        let preloadedById = Dictionary(uniqueKeysWithValues: preloadedSkills.map { ($0.id, $0) })
+        let uniqueSkillIds = Array(NSOrderedSet(array: skillIds)) as? [String] ?? skillIds
+        guard uniqueSkillIds.count == 1,
+              let skillId = uniqueSkillIds.first,
+              let preloaded = preloadedById[skillId] else {
+            return nil
+        }
+        return preloaded.allowedTools
+    }
+
+    func inferredPriorToolScopeForCorrection(
+        skillIds: [String],
+        preloadedSkills: [PromptBuilder.PreloadedSkill],
+        userQuestion: String
+    ) -> [String]? {
+        if scopedToolNames(for: skillIds, preloadedSkills: preloadedSkills)?.count == 1 {
+            return nil
+        }
+
+        let preloadedById = Dictionary(uniqueKeysWithValues: preloadedSkills.map { ($0.id, $0) })
+        let uniqueSkillIds = Array(NSOrderedSet(array: skillIds)) as? [String] ?? skillIds
+        guard uniqueSkillIds.count == 1,
+              let skillId = uniqueSkillIds.first,
+              let artifact = latestRefreshablePriorToolArtifact(),
+              artifact.skillId == skillId,
+              let artifactToolName = artifact.toolName?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !artifactToolName.isEmpty,
+              let request = priorToolRequest(from: artifact),
+              request.toolName == artifactToolName,
+              lastIntegerMention(in: userQuestion) != nil,
+              correctableIntegerArgumentKey(in: request.arguments) != nil else {
+            return nil
+        }
+
+        let allowedTools =
+            preloadedById[skillId]?.allowedTools
+            ?? skillRegistry.getDefinition(skillId)?.metadata.allowedTools
+            ?? []
+        guard allowedTools.isEmpty || allowedTools.contains(artifactToolName) else {
+            return nil
+        }
+        return [artifactToolName]
+    }
+
+    func compactSkillInstructionsForToolFallback(
+        skillIds: [String],
+        preloadedSkills: [PromptBuilder.PreloadedSkill]
+    ) -> String {
+        let preloadedById = Dictionary(uniqueKeysWithValues: preloadedSkills.map { ($0.id, $0) })
+        let uniqueSkillIds = Array(NSOrderedSet(array: skillIds)) as? [String] ?? skillIds
+
+        return uniqueSkillIds.compactMap { skillId -> String? in
+            let activationMode =
+                preloadedById[skillId]?.activationMode
+                ?? skillRegistry.getDefinition(skillId)?.metadata.activationMode
+                ?? .prompt
+            guard activationMode.injectsPromptMaterial else { return nil }
+
+            let displayName =
+                preloadedById[skillId]?.displayName
+                ?? skillRegistry.getDefinition(skillId)?.metadata.name
+                ?? skillId
+            let tools = registeredTools(
+                for: skillId,
+                allowedToolNames: preloadedById[skillId]?.allowedTools
+            )
+            let toolTuples = tools.map {
+                (
+                    name: $0.name,
+                    description: $0.description,
+                    parameters: $0.parameters,
+                    requiredParameters: $0.requiredParameters
+                )
+            }
+            let schema = PromptBuilder.PreloadedSkill.makeCompactSchema(
+                skillName: displayName,
+                tools: toolTuples
+            )
+            return "Skill: \(displayName)\n\(schema)"
+        }
+        .joined(separator: "\n\n")
+    }
+
+    func scopedPriorToolContextInstructions(
+        scopedToolNames: [String]?
+    ) -> String {
+        guard let scopedToolNames,
+              scopedToolNames.count == 1,
+              let scopedToolName = scopedToolNames.first,
+              let artifact = latestRefreshablePriorToolArtifact(),
+              artifact.toolName == scopedToolName else {
+            return ""
+        }
+
+        let summary = artifact.promptSummary
+        let detail = String(artifact.detail.prefix(2_000))
+        return """
+
+        Previous tool context for parameter correction:
+        - tool: \(scopedToolName)
+        - source: \(artifact.sourceName)
+        - summary:
+        \(summary)
+        - detail:
+        \(detail)
+
+        If the current user only corrects a parameter, call the same tool again.
+        Preserve the prior metric/entity/query unless the user explicitly changes it.
+        Update only the corrected parameter from the current user message.
+        """
+    }
+
+    func priorToolRequest(from artifact: RecentContextArtifact) -> (toolName: String, arguments: [String: Any])? {
+        guard let payload = parseJSONObject(artifact.detail),
+              let request = payload["phoneclaw_tool_request"] as? [String: Any],
+              let toolName = request["tool"] as? String,
+              !toolName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              let arguments = request["arguments"] as? [String: Any] else {
+            return nil
+        }
+        return (toolName, arguments)
+    }
+
+    func correctedPriorToolCall(
+        userQuestion: String,
+        scopedToolNames: [String]?
+    ) -> (name: String, arguments: [String: Any])? {
+        guard let scopedToolNames,
+              scopedToolNames.count == 1,
+              let scopedToolName = scopedToolNames.first,
+              let artifact = latestRefreshablePriorToolArtifact(),
+              artifact.toolName == scopedToolName,
+              let request = priorToolRequest(from: artifact),
+              request.toolName == scopedToolName,
+              let correctedInteger = lastIntegerMention(in: userQuestion),
+              let correctedKey = correctableIntegerArgumentKey(in: request.arguments) else {
+            return nil
+        }
+
+        var corrected = request.arguments
+        corrected[correctedKey] = correctedInteger
+
+        guard !NSDictionary(dictionary: corrected).isEqual(to: request.arguments),
+              toolRegistry.validatesArguments(corrected, for: scopedToolName) else {
+            return nil
+        }
+        return (scopedToolName, corrected)
+    }
+
+    func correctableIntegerArgumentKey(in arguments: [String: Any]) -> String? {
+        if arguments.keys.contains("days") {
+            return "days"
+        }
+
+        let numericKeys = arguments.keys.filter { key in
+            guard let value = arguments[key] else { return false }
+            return value is Int
+                || value is Double
+                || value is Float
+                || Int("\(value)") != nil
+        }
+        guard numericKeys.count == 1 else { return nil }
+        return numericKeys.first
+    }
+
+    func lastIntegerMention(in text: String) -> Int? {
+        let nsText = text as NSString
+        let pattern = #"(?<![\d.])\d{1,3}(?![\d.])"#
+        guard let regex = try? NSRegularExpression(pattern: pattern) else { return nil }
+        let matches = regex.matches(in: text, range: NSRange(location: 0, length: nsText.length))
+        return matches.last.flatMap { Int(nsText.substring(with: $0.range)) }
+    }
+
+    func annotateToolResultDetailWithRequest(
+        _ detail: String,
+        toolName: String,
+        arguments: [String: Any]
+    ) -> String {
+        guard JSONSerialization.isValidJSONObject(arguments),
+              var payload = parseJSONObject(detail) else {
+            return detail
+        }
+        payload["phoneclaw_tool_request"] = [
+            "tool": toolName,
+            "arguments": arguments
+        ]
+        guard JSONSerialization.isValidJSONObject(payload),
+              let data = try? JSONSerialization.data(withJSONObject: payload, options: [.sortedKeys]),
+              let encoded = String(data: data, encoding: .utf8) else {
+            return detail
+        }
+        return encoded
+    }
+
+    func executePreloadedSkillToolFallback(
+        extractionPromptBase: String,
+        toolChainPrompt: String,
+        userQuestion: String,
+        skillIds: [String],
+        preloadedSkills: [PromptBuilder.PreloadedSkill],
+        images: [CIImage],
+        msgIndex: Int,
+        fallbackText: String,
+        turnContext: GenerationTurnContext? = nil
+    ) async {
+        let scopedToolNames =
+            inferredPriorToolScopeForCorrection(
+                skillIds: skillIds,
+                preloadedSkills: preloadedSkills,
+                userQuestion: userQuestion
+            )
+            ?? scopedToolNames(for: skillIds, preloadedSkills: preloadedSkills)
+        let skillInstructions = compactSkillInstructionsForToolFallback(
+            skillIds: skillIds,
+            preloadedSkills: preloadedSkills
+        ) + scopedPriorToolContextInstructions(scopedToolNames: scopedToolNames)
+        guard !skillInstructions.isEmpty else {
+            let finalReply = fallbackReplyAfterPreloadedSkillFallbackFailure(fallbackText)
+            if messages.indices.contains(msgIndex) {
+                messages[msgIndex].update(content: finalReply)
+            }
+            finishTurn(context: turnContext)
+            return
+        }
+        guard !Task.isCancelled else {
+            abandonTurnIfOwner(turnContext, reason: "preloaded_fallback_task_cancelled")
+            return
+        }
+
+        if let autoCall = autoToolCallForLoadedSkills(skillIds: skillIds, allowedToolNames: scopedToolNames) {
+            log("[Agent] preloaded skill fallback auto tool: \(autoCall.name)")
+            let syntheticToolCall = syntheticToolCallText(
+                name: autoCall.name,
+                arguments: autoCall.arguments
+            )
+            await executeToolChain(
+                prompt: toolChainPrompt,
+                fullText: syntheticToolCall,
+                userQuestion: userQuestion,
+                images: images,
+                sessionID: turnContext?.sessionID,
+                turnContext: turnContext
+            )
+            return
+        }
+
+        if let correctedCall = correctedPriorToolCall(userQuestion: userQuestion, scopedToolNames: scopedToolNames) {
+            log("[Agent] preloaded skill fallback corrected previous tool: \(correctedCall.name)")
+            let syntheticToolCall = syntheticToolCallText(
+                name: correctedCall.name,
+                arguments: correctedCall.arguments
+            )
+            await executeToolChain(
+                prompt: toolChainPrompt,
+                fullText: syntheticToolCall,
+                userQuestion: userQuestion,
+                images: images,
+                sessionID: turnContext?.sessionID,
+                turnContext: turnContext
+            )
+            return
+        }
+
+        let fallbackSessionID = sessionStore.currentSessionID
+        let extraction = await extractToolCallForLoadedSkills(
+            originalPrompt: extractionPromptBase,
+            userQuestion: userQuestion,
+            skillInstructions: skillInstructions,
+            skillIds: skillIds,
+            images: images,
+            allowedToolNames: scopedToolNames
+        )
+        guard !Task.isCancelled else {
+            abandonTurnIfOwner(turnContext, reason: "preloaded_fallback_task_cancelled")
+            return
+        }
+        guard sessionStore.currentSessionID == fallbackSessionID else {
+            log("[Agent] preloaded skill fallback abandoned after session change")
+            abandonTurnIfOwner(turnContext, reason: "preloaded_fallback_session_changed")
+            return
+        }
+
+        switch extraction {
+        case .toolCall(let name, let arguments):
+            log("[Agent] preloaded skill fallback extracted tool: \(name)")
+            let syntheticToolCall = syntheticToolCallText(name: name, arguments: arguments)
+            await executeToolChain(
+                prompt: toolChainPrompt,
+                fullText: syntheticToolCall,
+                userQuestion: userQuestion,
+                images: images,
+                sessionID: fallbackSessionID,
+                turnContext: turnContext
+            )
+
+        case .needsClarification(let clarification):
+            if messages.indices.contains(msgIndex) {
+                messages[msgIndex].update(content: clarification)
+            }
+            finishTurn(context: turnContext)
+
+        case .failed:
+            log("[Agent] preloaded skill fallback extraction failed")
+            let finalReply = fallbackReplyAfterPreloadedSkillFallbackFailure(fallbackText)
+            if messages.indices.contains(msgIndex) {
+                messages[msgIndex].update(content: finalReply)
+            }
+            finishTurn(context: turnContext)
+        }
+    }
+
+    func fallbackReplyAfterPreloadedSkillFallbackFailure(_ fallbackText: String) -> String {
+        let cleaned = cleanOutput(fallbackText)
+        if cleaned.isEmpty
+            || looksLikeStructuredIntermediateOutput(cleaned)
+            || looksLikePromptEcho(cleaned) {
+            return PromptLocale.current.emptyReplyPlaceholder
+        }
+        return cleaned
+    }
+
+    // MARK: - synthetic / payload helpers
+
+    func syntheticToolCallText(
+        name: String,
+        arguments: [String: Any]
+    ) -> String {
+        let jsonData = try? JSONSerialization.data(withJSONObject: [
+            "name": name,
+            "arguments": arguments
+        ])
+        let jsonString = jsonData.flatMap { String(data: $0, encoding: .utf8) }
+            ?? "{\"name\":\"\(name)\",\"arguments\":{}}"
+        return """
+        <tool_call>
+        \(jsonString)
+        </tool_call>
+        """
+    }
+
+    func parsedToolPayload(from toolResult: String) -> [String: Any]? {
+        guard let data = toolResult.data(using: .utf8),
+              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        return payload
+    }
+
+    private func regroundedTemporalArguments(
+        toolName: String,
+        arguments: [String: Any],
+        userQuestion: String
+    ) -> [String: Any] {
+        let temporalKey: String
+        switch toolName {
+        case "calendar-create-event":
+            temporalKey = "start"
+        case "reminders-create":
+            temporalKey = "due"
+        default:
+            return arguments
+        }
+
+        guard let rawUserTemporal = rawChineseOmittedMonthDayDateTimeExpression(in: userQuestion),
+              let modelTemporal = arguments[temporalKey] as? String else {
+            return arguments
+        }
+
+        let userTemporal = rawUserTemporal.trimmingCharacters(in: .whitespacesAndNewlines)
+        let currentTemporal = modelTemporal.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !userTemporal.isEmpty,
+              !currentTemporal.isEmpty,
+              currentTemporal != userTemporal,
+              TemporalSlotResolver.resolve(userTemporal).status == .resolved,
+              TemporalSlotResolver.resolve(currentTemporal).status == .resolved else {
+            return arguments
+        }
+
+        var regrounded = arguments
+        regrounded[temporalKey] = userTemporal
+        return regrounded
+    }
+
+    private func sideEffectGateBlock(
+        skillId: String,
+        displayName: String,
+        toolName: String,
+        arguments: [String: Any],
+        userQuestion: String
+    ) -> SideEffectGateBlock? {
+        guard let definition = skillRegistry.getDefinition(skillId) else {
+            return nil
+        }
+
+        let policy = definition.metadata.sideEffects.effectivePolicy(forTool: toolName)
+        guard policy.isDeclared else {
+            return nil
+        }
+
+        if policy.level == .destructive {
+            if truthyArgument(arguments["all"]) || looksLikeBulkDestructiveIntent(userQuestion) {
+                return SideEffectGateBlock(reply: tr(
+                    "这是破坏性操作, 不能批量执行。请提供要删除的单个对象的编号、电话、邮箱或 identifier。",
+                    "This is a destructive action and cannot be performed in bulk. Please provide the single item's number, phone, email, or identifier.",
+                    "これは破壊的な操作のため一括実行できません。削除する1件の番号、電話番号、メールアドレス、または identifier を指定してください。"
+                ))
+            }
+
+            if destructiveTargetNeedsDisambiguation(arguments) {
+                return SideEffectGateBlock(reply: tr(
+                    "这个删除操作还没有精确到单个对象。请提供要删除对象的编号、电话、邮箱或 identifier。",
+                    "This delete action is not narrowed to a single item yet. Please provide the item's number, phone, email, or identifier.",
+                    "この削除操作はまだ1件に絞り込まれていません。削除対象の番号、電話番号、メールアドレス、または identifier を指定してください。"
+                ))
+            }
+        }
+
+        if policy.confirmation == .always {
+            return SideEffectGateBlock(reply: destructiveConfirmationPrompt(
+                displayName: displayName,
+                toolName: toolName,
+                arguments: arguments
+            ))
+        }
+
+        if policy.confirmation == .lowConfidence,
+           let issue = lowConfidenceWriteSlotPrompt(
+               toolName: toolName,
+               arguments: arguments,
+               userQuestion: userQuestion
+           ) {
+            return SideEffectGateBlock(reply: issue)
+        }
+
+        return nil
+    }
+
+    private func lowConfidenceWriteSlotPrompt(
+        toolName: String,
+        arguments: [String: Any],
+        userQuestion: String
+    ) -> String? {
+        if let titleIssue = lowConfidenceTitlePrompt(
+            toolName: toolName,
+            arguments: arguments,
+            userQuestion: userQuestion
+        ) {
+            return titleIssue
+        }
+
+        let temporalKeys = ["due", "start", "end", "date", "time"]
+        for key in temporalKeys {
+            guard let raw = arguments[key] as? String else { continue }
+            let value = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !value.isEmpty else { continue }
+
+            let resolution = TemporalSlotResolver.resolve(value)
+            guard resolution.status == .resolved,
+                  let resolved = resolution.value,
+                  let provenance = resolution.provenance else {
+                continue
+            }
+
+            if !resolved.hasExplicitTime {
+                return tr(
+                    "「\(value)」还缺少具体时间。请告诉我几点执行。",
+                    "\"\(value)\" is missing a specific time. Please tell me what time to use.",
+                    "「\(value)」には具体的な時刻がありません。何時にするか教えてください。"
+                )
+            }
+
+            if provenance.confidence < 0.75 {
+                return tr(
+                    "我对「\(value)」的时间理解还不够确定。请换一种更明确的说法, 例如具体日期和几点。",
+                    "I'm not confident enough about the time \"\(value)\". Please say it more explicitly, for example with a date and time.",
+                    "「\(value)」の時刻解釈に十分な確信がありません。日付と時刻をより明確に指定してください。"
+                )
+            }
+        }
+
+        return nil
+    }
+
+    private func lowConfidenceTitlePrompt(
+        toolName: String,
+        arguments: [String: Any],
+        userQuestion: String
+    ) -> String? {
+        guard toolName == "calendar-create-event" else {
+            return nil
+        }
+
+        let title = (arguments["title"] as? String)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard title.isEmpty || looksLikeGenericCalendarTitle(title, userQuestion: userQuestion) else {
+            return nil
+        }
+
+        return tr(
+            "这个日程还缺少主题。请告诉我会议是关于什么的。",
+            "This calendar event is missing a subject. Please tell me what the meeting is about.",
+            "この予定には件名が不足しています。何についての会議か教えてください。"
+        )
+    }
+
+    private func looksLikeGenericCalendarTitle(_ title: String, userQuestion: String) -> Bool {
+        let normalizedTitle = normalizedGenericTitleProbe(title)
+        guard !normalizedTitle.isEmpty else { return true }
+
+        let genericTokens = [
+            "安排", "创建", "新建", "添加", "预约", "预定", "定", "约", "开",
+            "一下", "一个", "个", "场", "次", "这", "那", "的", "个会",
+            "会", "会议", "开会", "约会", "日程", "行程", "事项", "活动",
+            "schedule", "book", "create", "add", "new", "set", "up", "calendar",
+            "event", "meeting", "appointment"
+        ]
+        let residue = genericTokens
+            .sorted { $0.count > $1.count }
+            .reduce(normalizedTitle) { partial, token in
+            partial.replacingOccurrences(of: token, with: "")
+        }
+        let concreteResidue = normalizedGenericTitleProbe(residue)
+        if concreteResidue.isEmpty {
+            return true
+        }
+
+        let normalizedQuestion = normalizedGenericTitleProbe(userQuestion)
+        if normalizedQuestion == normalizedTitle {
+            return true
+        }
+
+        return false
+    }
+
+    private func normalizedGenericTitleProbe(_ value: String) -> String {
+        value
+            .lowercased()
+            .replacingOccurrences(of: " ", with: "")
+            .replacingOccurrences(of: "\n", with: "")
+            .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines.union(.punctuationCharacters))
+    }
+
+    private func destructiveConfirmationPrompt(
+        displayName: String,
+        toolName: String,
+        arguments: [String: Any]
+    ) -> String {
+        let summary = sideEffectArgumentSummary(arguments)
+        _ = displayName
+        _ = toolName
+        return tr(
+            "请确认是否执行这个删除操作：\(summary)。确认后请明确回复要删除的对象。",
+            "Please confirm this delete action: \(summary). To proceed, reply with explicit confirmation and the item to delete.",
+            "この削除操作を確認してください：\(summary)。続行する場合は、削除対象を明示して確認してください。"
+        )
+    }
+
+    private func sideEffectArgumentSummary(_ arguments: [String: Any]) -> String {
+        let preferredKeys = ["title", "name", "phone", "email", "identifier", "query", "due", "start", "text"]
+        let parts = preferredKeys.compactMap { key -> String? in
+            guard let value = arguments[key] else { return nil }
+            let text = "\(value)".trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !text.isEmpty else { return nil }
+            return "\(key)=\(text)"
+        }
+        if !parts.isEmpty {
+            return parts.joined(separator: ", ")
+        }
+        return tr("当前请求", "the current request", "現在のリクエスト")
+    }
+
+    private func looksLikeBulkDestructiveIntent(_ userQuestion: String) -> Bool {
+        let normalized = userQuestion
+            .lowercased()
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty else { return false }
+        return [
+            "全部", "都删", "都删除", "都移除", "两个都", "一起删", "一起删除",
+            "all", "both", "every", "delete all", "remove all"
+        ].contains { normalized.contains($0) }
+    }
+
+    private func destructiveTargetNeedsDisambiguation(_ arguments: [String: Any]) -> Bool {
+        let uniqueKeys = ["identifier", "id", "phone", "email", "url", "path"]
+        if uniqueKeys.contains(where: { key in
+            guard let raw = arguments[key] else { return false }
+            return !"\(raw)".trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }) {
+            return false
+        }
+
+        let ambiguousKeys = ["name", "query", "title", "text"]
+        return ambiguousKeys.contains { key in
+            guard let raw = arguments[key] else { return false }
+            return !"\(raw)".trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+    }
+
+    private func truthyArgument(_ value: Any?) -> Bool {
+        if let bool = value as? Bool {
+            return bool
+        }
+        if let string = value as? String {
+            switch string.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
+            case "1", "true", "yes", "on", "all":
+                return true
+            default:
+                return false
+            }
+        }
+        if let number = value as? NSNumber {
+            return number.boolValue
+        }
+        return false
+    }
+
+    func toolResultSummaryForModel(
+        toolName: String,
+        toolResult: String
+    ) -> String {
+        toolResultCanonicalizer
+            .canonicalize(toolName: toolName, toolResult: toolResult)
+            .summary
+    }
+
+    func fallbackReplyForEmptyToolFollowUp(
+        toolName: String,
+        toolResultSummary: String,
+        toolResultDetail: String
+    ) -> String {
+        let trimmed = toolResultDetail.trimmingCharacters(in: .whitespacesAndNewlines)
+        let summary = toolResultSummary.trimmingCharacters(in: .whitespacesAndNewlines)
+        if usesGroundedSourcesContract(toolName) {
+            return groundedFallbackReplyForEmptyToolFollowUp(
+                toolName: toolName,
+                toolResultSummary: summary,
+                toolResultDetail: trimmed
+            )
+        }
+        if !summary.isEmpty, summary != trimmed {
+            return summary
+        }
+
+        if trimmed.isEmpty {
+            return tr(
+                "已完成，但没有返回可展示的内容。",
+                "Done, but there was no displayable result.",
+                "完了しましたが、表示できる内容はありませんでした。"
+            )
+        }
+
+        if LanguageService.shared.current.isChinese {
+            return """
+            已完成，不过我没能整理出自然回复。
+            结果如下：
+            \(trimmed)
+            """
+        } else if LanguageService.shared.current.isJapanese {
+            return """
+            完了しましたが、自然な返答にまとめられませんでした。
+            結果は以下のとおりです:
+            \(trimmed)
+            """
+        } else {
+            return """
+            Done, but I could not compose a natural reply.
+            Result:
+            \(trimmed)
+            """
+        }
+    }
+
+    private func groundedFallbackReplyForEmptyToolFollowUp(
+        toolName: String,
+        toolResultSummary: String,
+        toolResultDetail: String
+    ) -> String {
+        let summaryText = bestEvidenceSnippet(fromToolResultDetail: toolResultDetail)
+            ?? removeInlineWebLinks(removeExistingSourceSection(toolResultSummary))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+        let clippedSummary = clippedPlainText(summaryText, maxCharacters: 420)
+        let body: String
+        if clippedSummary.isEmpty {
+            body = tr(
+                "- 结果：这次工具返回了可检查的来源，但没有稳定生成自然语言结论。\n- 建议：请优先打开下方来源核对最新信息。",
+                "- Result: The tool returned checkable sources, but a natural-language conclusion was not generated reliably.\n- Recommendation: Verify the latest information from the sources below.",
+                "- 結果: 今回のツールは確認可能なソースを返しましたが、自然な文章での結論を安定して生成できませんでした。\n- 推奨: まず下記のソースを開いて最新情報を確認してください。"
+            )
+        } else if LanguageService.shared.current.isChinese {
+            body = "- 结论：我找到了可用的搜索证据。\n- 关键证据：\(clippedSummary)"
+        } else if LanguageService.shared.current.isJapanese {
+            body = "- 結論: 利用できる検索の根拠が見つかりました。\n- 主な根拠: \(clippedSummary)"
+        } else {
+            body = "- Conclusion: I found usable search evidence.\n- Key evidence: \(clippedSummary)"
+        }
+
+        return appendSourceCitationIfNeeded(
+            to: body,
+            toolName: toolName,
+            toolResultDetail: toolResultDetail
+        )
+    }
+
+    private func bestEvidenceSnippet(fromToolResultDetail detail: String) -> String? {
+        guard let data = detail.data(using: .utf8),
+              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let evidencePack = payload["evidence_pack"] as? [String: Any],
+              let chunks = evidencePack["chunks"] as? [[String: Any]] else {
+            return nil
+        }
+
+        let sortedChunks = chunks.sorted { lhs, rhs in
+            let lhsScore = lhs["score"] as? Double ?? 0
+            let rhsScore = rhs["score"] as? Double ?? 0
+            if lhsScore != rhsScore { return lhsScore > rhsScore }
+            return ((lhs["source_rank"] as? Int) ?? Int.max) < ((rhs["source_rank"] as? Int) ?? Int.max)
+        }
+        return sortedChunks
+            .compactMap { $0["text"] as? String }
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .first { !$0.isEmpty }
+    }
+
+    private func clippedPlainText(_ text: String, maxCharacters: Int) -> String {
+        let normalized = text
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .replacingOccurrences(of: "\r", with: "\n")
+            .replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard normalized.count > maxCharacters else { return normalized }
+        let end = normalized.index(normalized.startIndex, offsetBy: maxCharacters)
+        return String(normalized[..<end]).trimmingCharacters(in: .whitespacesAndNewlines) + "..."
+    }
+
+    func shouldUseCompactToolFollowUp(
+        _ prompt: String,
+        toolName: String? = nil
+    ) -> Bool {
+        if let toolName, Self.prefersCompactToolFollowUp(toolName: toolName) {
+            log("[Agent] tool follow-up compact prompt: tool=\(toolName)")
+            return true
+        }
+
+        let estimatedPromptTokens = PromptTokenEstimator.estimate(prompt)
+        let reservedOutputTokens = min(
+            inference.maxOutputTokens,
+            selectedModelCapabilities.defaultReservedOutputTokens
+        )
+        let budget = selectedModelCapabilities.safeContextBudgetTokens
+        let shouldCompact = estimatedPromptTokens + reservedOutputTokens > budget
+        if shouldCompact {
+            log("[Agent] tool follow-up compact prompt: estimated=\(estimatedPromptTokens) reserved=\(reservedOutputTokens) budget=\(budget)")
+        }
+        return shouldCompact
+    }
+
+    private static func prefersCompactToolFollowUp(toolName: String) -> Bool {
+        switch toolName {
+        case "web-search", "web-fetch":
+            return true
+        default:
+            return false
+        }
+    }
+
+    func fallbackReplyForEmptySkillFollowUp(skillName: String) -> String {
+        tr(
+            "我已经准备好这项能力了，但还缺少下一步。请把需求说得更具体一些。",
+            "I'm ready to use this capability, but I need a more specific request.",
+            "この機能を使う準備はできていますが、次のステップが分かりません。ご要望をもう少し具体的に教えてください。"
+        )
+    }
+
+    func markSkillsDone(_ displayNames: [String]) {
+        guard !displayNames.isEmpty else { return }
+        for index in messages.indices {
+            guard messages[index].role == .system,
+                  let skillName = messages[index].skillName,
+                  displayNames.contains(skillName),
+                  messages[index].content == "identified" || messages[index].content == "loaded" else {
+                continue
+            }
+            messages[index].update(role: .system, content: "done", skillName: skillName)
+        }
+    }
+
+    /// Ensure grounded web answers have an explicit summary section. The model is
+    /// prompted to emit this, but the post-processor owns the presentation
+    /// contract so search answers stay stable across models and sampling.
+    private func ensureLeadingSummaryHeading(_ text: String) -> String {
+        var lines = text.components(separatedBy: "\n")
+        while let first = lines.first,
+              first.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            lines.removeFirst()
+        }
+        guard let first = lines.first else {
+            return ""
+        }
+        let body = lines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !body.isEmpty else {
+            return ""
+        }
+        if isSummarySectionHeading(first.trimmingCharacters(in: .whitespacesAndNewlines)) {
+            return body
+        }
+        return summarySectionHeading() + "\n" + body
+    }
+
+    private func summarySectionHeading() -> String {
+        tr("总结", "Summary", "総結")
+    }
+
+    func appendSourceCitationIfNeeded(
+        to answer: String,
+        toolName: String,
+        toolResultDetail: String
+    ) -> String {
+        guard usesGroundedSourcesContract(toolName) else {
+            return answer
+        }
+        let detailURLs = sourceURLs(fromToolResultDetail: toolResultDetail)
+        let detailSourceKeys = Set(detailURLs.map { normalizedSourceKey($0) })
+        let answerURLs = detailSourceKeys.isEmpty
+            ? []
+            : sourceURLs(fromAnswerText: answer).filter { url in
+                detailSourceKeys.contains(normalizedSourceKey(url))
+            }
+        let urls = detailURLs + answerURLs
+        let cleanedAnswer = removeInlineSourceParentheticals(answer)
+        let bodyAnswer = ensureLeadingSummaryHeading(removeInlineWebLinks(removeExistingSourceSection(cleanedAnswer)))
+        guard !urls.isEmpty else {
+            let sources = emptySourceSection()
+            return bodyAnswer.isEmpty ? sources : bodyAnswer + "\n\n" + sources
+        }
+
+        let uniqueURLs = uniqueSourceURLs(urls)
+        let sources = sourceSection(for: uniqueURLs)
+        guard !sources.isEmpty else { return bodyAnswer }
+        return bodyAnswer.isEmpty ? sources : bodyAnswer + "\n\n" + sources
+    }
+
+    func finalizeWebAnswer(
+        _ answer: String,
+        toolName: String,
+        toolResultSummary: String,
+        toolResultDetail: String,
+        userQuestion: String,
+        images: [CIImage]
+    ) async -> String {
+        guard usesGroundedSourcesContract(toolName) else {
+            return answer
+        }
+
+        let normalized = appendSourceCitationIfNeeded(
+            to: answer,
+            toolName: toolName,
+            toolResultDetail: toolResultDetail
+        )
+        let validation = validateGroundedWebAnswer(
+            normalized,
+            toolName: toolName,
+            toolResultDetail: toolResultDetail
+        )
+        guard validation.shouldRepair else {
+            return normalized
+        }
+
+        log("[Agent] web answer repair needed: \(validation.issues.joined(separator: "; "))")
+        let repairPrompt = PromptBuilder.buildWebAnswerRepairPrompt(
+            userQuestion: userQuestion,
+            toolName: toolName,
+            toolResultSummary: toolResultSummary,
+            draftAnswer: normalized,
+            validationIssues: validation.issues,
+            currentImageCount: images.count
+        )
+        // Generate the repair headlessly (no msgIndex) so it does NOT re-stream
+        // over the already-visible answer. The caller writes the returned text to
+        // the message exactly once, so the user sees the answer settle, not a
+        // jarring refresh + re-output.
+        guard let repairedText = await streamLLM(prompt: repairPrompt, images: images) else {
+            return normalized
+        }
+
+        let repaired = cleanOutput(repairedText)
+        guard !repaired.isEmpty,
+              !looksLikeStructuredIntermediateOutput(repaired),
+              !looksLikePromptEcho(repaired) else {
+            return normalized
+        }
+
+        let repairedNormalized = appendSourceCitationIfNeeded(
+            to: repaired,
+            toolName: toolName,
+            toolResultDetail: toolResultDetail
+        )
+        let repairedValidation = validateGroundedWebAnswer(
+            repairedNormalized,
+            toolName: toolName,
+            toolResultDetail: toolResultDetail
+        )
+        return repairedValidation.issues.count <= validation.issues.count
+            ? repairedNormalized
+            : normalized
+    }
+
+    private func sourceURLs(fromToolResultDetail detail: String) -> [String] {
+        guard let data = detail.data(using: .utf8),
+              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return []
+        }
+
+        var urls: [String] = []
+        if let url = payload["url"] as? String, !url.isEmpty {
+            urls.append(url)
+        }
+
+        let answerability = payload["answerability"] as? String
+        let recencyWindow = WebFreshness.window(named: payload["recency_window"] as? String)
+        if let evidencePack = payload["evidence_pack"] as? [String: Any],
+           let chunks = evidencePack["chunks"] as? [[String: Any]] {
+            let sortedChunks = chunks.sorted { lhs, rhs in
+                let lhsScore = lhs["score"] as? Double ?? 0
+                let rhsScore = rhs["score"] as? Double ?? 0
+                if lhsScore != rhsScore { return lhsScore > rhsScore }
+                return ((lhs["source_rank"] as? Int) ?? Int.max) < ((rhs["source_rank"] as? Int) ?? Int.max)
+            }
+            for chunk in sortedChunks {
+                guard sourceItemFreshEnough(chunk, window: recencyWindow) else { continue }
+                if let url = chunk["url"] as? String, !url.isEmpty {
+                    urls.append(url)
+                }
+            }
+        }
+
+        guard answerability != "insufficient" else {
+            return uniqueSourceURLs(urls)
+        }
+
+        if let results = payload["results"] as? [[String: Any]] {
+            let sortedResults = results.sorted { lhs, rhs in
+                let lhsRank = sourcePriority(lhs)
+                let rhsRank = sourcePriority(rhs)
+                if lhsRank != rhsRank { return lhsRank < rhsRank }
+                return ((lhs["rank"] as? Int) ?? Int.max) < ((rhs["rank"] as? Int) ?? Int.max)
+            }
+            for result in sortedResults {
+                guard isUsableSourceResult(result, window: recencyWindow) else { continue }
+                if let url = result["url"] as? String, !url.isEmpty {
+                    urls.append(url)
+                }
+            }
+        }
+
+        return uniqueSourceURLs(urls)
+    }
+
+    private func uniqueSourceURLs(_ urls: [String]) -> [String] {
+        var seen = Set<String>()
+        return urls.filter { rawURL in
+            let url = normalizedSourceURL(rawURL)
+            guard !url.isEmpty else { return false }
+            let key = normalizedSourceKey(url)
+            guard !seen.contains(key) else { return false }
+            seen.insert(key)
+            return true
+        }.map(normalizedSourceURL)
+    }
+
+    private func sourceURLs(fromAnswerText answer: String) -> [String] {
+        let sourcePatterns = [
+            #"\]\((https?://[^\s)]+)\)"#,
+            #"(https?://[^\s\]\)）>，。；;、]+)"#,
+            #"(?:来源|Source)\s*[:：]\s*((?:https?://|www\.)[A-Za-z0-9._~:/?#\[\]@!$&'()*+,;=%-]+)"#,
+            #"(?:来源|Source)\s*[:：]\s*([A-Za-z0-9.-]+\.[A-Za-z]{2,}(?:/[^\s）),，。；;]*)?)"#,
+            #"(?<![@/:])\b((?:www\.)[A-Za-z0-9.-]+\.[A-Za-z]{2,}(?:/[^\s\]\)）>，。；;、]*)?)"#
+        ]
+        var urls: [String] = []
+        let nsAnswer = answer as NSString
+        for pattern in sourcePatterns {
+            guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else {
+                continue
+            }
+            let matches = regex.matches(
+                in: answer,
+                range: NSRange(location: 0, length: nsAnswer.length)
+            )
+            for match in matches where match.numberOfRanges >= 2 {
+                let raw = nsAnswer.substring(with: match.range(at: 1))
+                urls.append(normalizedSourceURL(raw))
+            }
+        }
+        return uniqueSourceURLs(urls)
+    }
+
+    private func normalizedSourceURL(_ rawURL: String) -> String {
+        var url = rawURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trailing = CharacterSet(charactersIn: "）).,，。；;、")
+        url = url.trimmingCharacters(in: trailing)
+        guard !url.isEmpty else { return "" }
+        if url.hasPrefix("http://") || url.hasPrefix("https://") {
+            return url
+        }
+        return "https://\(url)"
+    }
+
+    private func isLowValueSourceURL(_ rawURL: String) -> Bool {
+        let normalized = normalizedSourceURL(rawURL).lowercased()
+        return normalized == "https://example.com" || normalized == "http://example.com"
+    }
+
+    private func isUsableSourceResult(_ result: [String: Any], window: WebFreshness.Window) -> Bool {
+        // Relevance, confidence and homepage-likeness gate a citation. For
+        // explicitly time-sensitive queries, stale dated results are gated too:
+        // reading a known-old page is how "today/latest" answers become wrong.
+        if result["query_relevant"] as? Bool == false { return false }
+        if result["confidence"] as? String == "low" { return false }
+        if result["is_homepage_like"] as? Bool == true { return false }
+        if !sourceItemFreshEnough(result, window: window) { return false }
+        return true
+    }
+
+    private func sourceItemFreshEnough(_ item: [String: Any], window: WebFreshness.Window) -> Bool {
+        guard window != .none else { return true }
+        if let maxAgeDays = window.maxAcceptableAgeDays,
+           let ageDays = item["age_days"] as? Int {
+            return ageDays <= maxAgeDays
+        }
+
+        let rawDate = item["published_at"] as? String
+        let sourceText = [
+            item["title"] as? String,
+            item["snippet"] as? String,
+            item["text"] as? String,
+            item["url"] as? String
+        ]
+        .compactMap { $0 }
+        .joined(separator: "\n")
+        let providerDate = WebFreshness.parsePublishedDate(rawDate, now: Date())
+        guard WebFreshness.isWithinWindow(date: providerDate, window: window) else {
+            return false
+        }
+        let sourceDate = WebFreshness.parsePublishedDate(sourceText, now: Date())
+        guard WebFreshness.isWithinWindow(date: sourceDate, window: window) else {
+            return false
+        }
+        return true
+    }
+
+    private func sourcePriority(_ result: [String: Any]) -> Int {
+        if result["query_relevant"] as? Bool == false { return 10 }
+        if result["directly_usable"] as? Bool == true { return 0 }
+        if result["needs_fetch"] as? Bool == false { return 1 }
+        if result["confidence"] as? String == "low" { return 3 }
+        return 2
+    }
+
+    private func removeExistingSourceSection(_ answer: String) -> String {
+        var output: [String] = []
+        for line in answer.components(separatedBy: "\n") {
+            if isSourceSectionHeading(line.trimmingCharacters(in: .whitespacesAndNewlines)) {
+                break
+            }
+            output.append(line)
+        }
+        return output.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func splitWebAnswerSections(_ answer: String) -> (body: String, sources: String?) {
+        var body: [String] = []
+        var sources: [String] = []
+        var inSources = false
+        for line in answer.components(separatedBy: "\n") {
+            if isSourceSectionHeading(line.trimmingCharacters(in: .whitespacesAndNewlines)) {
+                inSources = true
+            }
+            if inSources {
+                sources.append(line)
+            } else {
+                body.append(line)
+            }
+        }
+        let sourceText = sources.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+        return (
+            body.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines),
+            sourceText.isEmpty ? nil : sourceText
+        )
+    }
+
+    private func sourceSection(for urls: [String]) -> String {
+        let filteredURLs = urls.filter { !isLowValueSourceURL($0) }
+        guard !filteredURLs.isEmpty else { return "" }
+        let lines = filteredURLs.prefix(5).enumerated().map { index, url in
+            "\(index + 1). [\(sourceLabel(for: url))](\(url))"
+        }.joined(separator: "\n")
+        return tr("引用网址\n\(lines)", "Sources\n\(lines)", "出典\n\(lines)")
+    }
+
+    private func emptySourceSection() -> String {
+        tr("引用网址\n无可用来源", "Sources\nNo usable sources.", "出典\n利用できるソースはありません。")
+    }
+
+    private func sourceLabel(for rawURL: String) -> String {
+        guard let url = URL(string: rawURL),
+              let host = url.host,
+              !host.isEmpty else {
+            return rawURL.replacingOccurrences(of: "]", with: "")
+        }
+        let label = host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
+        return label.replacingOccurrences(of: "]", with: "")
+    }
+
+    private func removeInlineSourceParentheticals(_ answer: String) -> String {
+        var result = answer
+        let patterns = [
+            #"（\s*(来源|Source)\s*[:：][^）]{0,260}）"#,
+            #"\(\s*(来源|Source)\s*[:：][^)]{0,260}\)"#,
+            #"\s*(来源|Source)\s*[:：]\s*(?:https?://|www\.)[A-Za-z0-9._~:/?#\[\]@!$&'()*+,;=%-]+"#,
+            #"\s*(来源|Source)\s*[:：]\s*[A-Za-z0-9.-]+\.[A-Za-z]{2,}(?:/[^\s）),，。；;]*)?"#
+        ]
+        for pattern in patterns {
+            guard let regex = try? NSRegularExpression(
+                pattern: pattern,
+                options: [.caseInsensitive]
+            ) else {
+                continue
+            }
+            let range = NSRange(location: 0, length: (result as NSString).length)
+            result = regex.stringByReplacingMatches(
+                in: result,
+                range: range,
+                withTemplate: ""
+            )
+        }
+        result = result.replacingOccurrences(of: #" +([，。；：,.!?])"#, with: "$1", options: .regularExpression)
+        result = result.replacingOccurrences(of: #"\s+([）)])"#, with: "$1", options: .regularExpression)
+        result = result.replacingOccurrences(of: #"[（(]\s*[）)]"#, with: "", options: .regularExpression)
+        result = result.replacingOccurrences(of: #"[ \t]{2,}"#, with: " ", options: .regularExpression)
+        result = result.replacingOccurrences(of: #"\n{3,}"#, with: "\n\n", options: .regularExpression)
+        return result.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func removeInlineWebLinks(_ answer: String) -> String {
+        var result = answer
+        result = result.replacingOccurrences(
+            of: #"\[([^\]\n]{1,120})\]\(https?://[^\s)]+\)"#,
+            with: "$1",
+            options: .regularExpression
+        )
+        result = result.replacingOccurrences(
+            of: #"https?://[^\s\]\)）>，。；;、]+"#,
+            with: "",
+            options: .regularExpression
+        )
+        result = result.replacingOccurrences(
+            of: #"(?<![@/:])\bwww\.[A-Za-z0-9.-]+\.[A-Za-z]{2,}(?:/[^\s\]\)）>，。；;、]*)?"#,
+            with: "",
+            options: .regularExpression
+        )
+        result = result.replacingOccurrences(of: #"[ \t]{2,}"#, with: " ", options: .regularExpression)
+        result = result.replacingOccurrences(of: #" +([，。；：,.!?])"#, with: "$1", options: .regularExpression)
+        result = result.replacingOccurrences(of: #"\n{3,}"#, with: "\n\n", options: .regularExpression)
+        return result.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func isSourceSectionHeading(_ text: String) -> Bool {
+        // Strip markdown heading (#) and emphasis (*, _) wrappers so a model-bolded
+        // "**引用网址**" / "**Sources**" is still detected — otherwise the model's own
+        // source section survives removeExistingSourceSection and a second rebuilt
+        // section gets appended (duplicate 引用网址).
+        let normalized = text.lowercased()
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .trimmingCharacters(in: CharacterSet(charactersIn: "#*_ "))
+        return normalized == "引用网址"
+            || normalized == "引用"
+            || normalized == "引用链接"
+            || normalized == "参考来源"
+            || normalized == "参考链接"
+            || normalized == "sources"
+            || normalized == "references"
+            || normalized.hasPrefix("引用网址：")
+            || normalized.hasPrefix("引用：")
+            || normalized.hasPrefix("引用链接：")
+            || normalized.hasPrefix("参考来源：")
+            || normalized.hasPrefix("参考链接：")
+            || normalized.hasPrefix("sources:")
+            || normalized.hasPrefix("references:")
+    }
+
+    private func validateGroundedWebAnswer(
+        _ answer: String,
+        toolName: String,
+        toolResultDetail: String
+    ) -> PhoneGroundAnswerValidation {
+        guard usesGroundedSourcesContract(toolName) else {
+            return PhoneGroundAnswerValidation(issues: [], shouldTryAlternativeFetch: false)
+        }
+
+        let sections = splitWebAnswerSections(answer)
+        let body = sections.body
+        let sources = sections.sources ?? ""
+        // The deterministic post-processor should add this heading even when the
+        // model omits it. Treat absence as a contract failure so regressions are
+        // visible instead of silently producing free-form web answers.
+        let expectedURLs = sourceURLs(fromToolResultDetail: toolResultDetail)
+            .filter { !isLowValueSourceURL($0) }
+        var issues: [String] = []
+        let bodyLines = body
+            .components(separatedBy: "\n")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        if bodyLines.first.map(isSummarySectionHeading) != true {
+            issues.append(tr("缺少独立的“总结”段。", "Missing separate Summary section.", "独立した「総結」セクションがありません。"))
+        }
+        if body.trimmingCharacters(in: .whitespacesAndNewlines).count < 12 {
+            issues.append(tr("总结正文为空或过短。", "Summary body is empty or too short.", "要約本文が空か、短すぎます。"))
+        }
+        if webAnswerLooksUnstructured(body) {
+            issues.append(tr("总结正文是单段长文，缺少可扫描结构。", "Summary body is one long paragraph and lacks scannable structure.", "要約本文が一段落の長文で、ざっと読める構造がありません。"))
+        }
+        if webAnswerContainsPlaceholder(answer) {
+            issues.append(tr("回答包含占位符或模板文本。", "Answer contains placeholder or template text.", "回答にプレースホルダーやテンプレートのテキストが含まれています。"))
+        }
+        if groundedAnswerLanguageMismatch(body) {
+            issues.append(tr(
+                "回答语言与当前会话语言不一致。",
+                "Answer language does not match the current conversation language.",
+                "回答の言語が現在の会話の言語と一致していません。"
+            ))
+        }
+        if !expectedURLs.isEmpty {
+            if sections.sources == nil {
+                issues.append(tr("缺少独立的“引用网址”段。", "Missing separate Sources section.", "独立した「出典」セクションがありません。"))
+            } else if markdownLinkCount(in: sources) == 0 {
+                issues.append(tr("引用网址段没有 Markdown 可点击链接。", "Sources section has no clickable Markdown links.", "出典セクションにクリックできる Markdown リンクがありません。"))
+            }
+        }
+        if !sourceURLs(fromAnswerText: body).isEmpty {
+            issues.append(tr("总结正文仍混入 URL 或来源链接。", "Summary body still contains URLs or source links.", "要約本文にまだ URL や出典リンクが混ざっています。"))
+        }
+        if bodyContainsInlineSourceMarker(body) {
+            issues.append(tr("总结正文仍混入来源括号或来源标记。", "Summary body still contains inline source markers.", "要約本文にまだ出典の括弧や出典の表記が混ざっています。"))
+        }
+        if webAnswerUsesLowRelevanceEvidence(body, toolResultDetail: toolResultDetail) {
+            issues.append(tr("总结正文使用了低相关搜索结果。", "Summary body uses low-relevance search results.", "要約本文で関連性の低い検索結果を使っています。"))
+        }
+
+        let hasUsableEvidence = webToolDetailHasUsableEvidence(toolResultDetail)
+        let insufficientAnswer = webAnswerLooksInsufficient(body)
+        if hasUsableEvidence && insufficientAnswer {
+            issues.append(tr("工具结果已有可用证据，但回答仍说证据不足。", "Tool result has usable evidence, but the answer still claims insufficient evidence.", "ツールの結果には利用できる根拠があるのに、回答ではまだ根拠が不十分だと述べています。"))
+        }
+
+        return PhoneGroundAnswerValidation(
+            issues: issues,
+            shouldTryAlternativeFetch: toolName == "web-fetch" && insufficientAnswer
+        )
+    }
+
+    private func groundedAnswerLanguageMismatch(_ body: String) -> Bool {
+        let cleaned = body
+            .replacingOccurrences(of: #"https?://\S+"#, with: " ", options: .regularExpression)
+            .replacingOccurrences(of: #"`[^`]+`"#, with: " ", options: .regularExpression)
+        let cjkCount = cleaned.unicodeScalars.filter { scalar in
+            (0x4E00...0x9FFF).contains(Int(scalar.value))
+        }.count
+
+        if LanguageService.shared.current.isChinese {
+            return cjkCount < 6
+        }
+
+        let latinWords = regexMatchCount(pattern: #"\b[A-Za-z][A-Za-z'-]{2,}\b"#, in: cleaned)
+        let cjkLimit = max(12, cleaned.count / 20)
+        return latinWords < 5 || cjkCount > cjkLimit
+    }
+
+    private func isSummarySectionHeading(_ text: String) -> Bool {
+        // Normalize away markdown heading (#) and emphasis (*, _) wrappers so
+        // "总结", "## 总结", "**总结**", "__Summary__" all match — the model varies
+        // the heading style and any of these should count as the summary heading.
+        let normalized = text.lowercased()
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .trimmingCharacters(in: CharacterSet(charactersIn: "#*_ "))
+        return normalized == "总结"
+            || normalized == "summary"
+            || normalized.hasPrefix("总结：")
+            || normalized.hasPrefix("summary:")
+    }
+
+    private func webAnswerLooksUnstructured(_ body: String) -> Bool {
+        var lines = body
+            .components(separatedBy: "\n")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        if let first = lines.first, isSummarySectionHeading(first) {
+            lines.removeFirst()
+        }
+        guard lines.count == 1, let onlyLine = lines.first else {
+            return false
+        }
+        guard !onlyLine.hasPrefix("- "),
+              !onlyLine.hasPrefix("* "),
+              !onlyLine.hasPrefix("1."),
+              !onlyLine.contains("|") else {
+            return false
+        }
+        let sentenceCount = regexMatchCount(pattern: #"[。！？.!?]"#, in: onlyLine)
+        return onlyLine.count > 120 || sentenceCount >= 3
+    }
+
+    private func webAnswerUsesLowRelevanceEvidence(_ body: String, toolResultDetail: String) -> Bool {
+        let normalizedBody = normalizedEvidenceMatchText(body)
+        guard !normalizedBody.isEmpty,
+              let data = toolResultDetail.data(using: .utf8),
+              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let results = payload["results"] as? [[String: Any]] else {
+            return false
+        }
+
+        let recencyWindow = WebFreshness.window(named: payload["recency_window"] as? String)
+        for result in results where !isUsableSourceResult(result, window: recencyWindow) {
+            for fragment in lowRelevanceEvidenceFragments(result) {
+                if normalizedBody.contains(fragment) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    private func lowRelevanceEvidenceFragments(_ result: [String: Any]) -> [String] {
+        var fragments: [String] = []
+
+        let fields = [
+            result["title"] as? String,
+            result["host"] as? String
+        ].compactMap { $0 }
+        for field in fields {
+            let normalized = normalizedEvidenceMatchText(field)
+            if normalized.count >= 4 {
+                fragments.append(normalized)
+            }
+        }
+
+        let snippet = (result["snippet"] as? String) ?? ""
+        let segments = snippet.components(separatedBy: CharacterSet(charactersIn: "。！？；;，,、\n\r\t -"))
+        for segment in segments {
+            let normalized = normalizedEvidenceMatchText(segment)
+            guard normalized.count >= 8 else { continue }
+            let maxLength = min(24, normalized.count)
+            let end = normalized.index(normalized.startIndex, offsetBy: maxLength)
+            fragments.append(String(normalized[..<end]))
+        }
+
+        return uniqueStringsPreservingOrder(fragments)
+    }
+
+    private func normalizedEvidenceMatchText(_ text: String) -> String {
+        text
+            .lowercased()
+            .replacingOccurrences(of: #"https?://\S+"#, with: " ", options: .regularExpression)
+            .replacingOccurrences(of: #"\s+"#, with: "", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func usesGroundedSourcesContract(_ toolName: String) -> Bool {
+        toolRegistry.answerContract(for: toolName) == .groundedSources
+    }
+
+    func normalizePhoneGroundPayloadIfNeeded(toolName: String, detail: String) -> String {
+        normalizePhoneGroundPayload(toolName: toolName, detail: detail).detail
+    }
+
+    @discardableResult
+    private func validatePhoneGroundPayloadIfNeeded(toolName: String, detail: String) -> PhoneGroundPayloadValidation {
+        let normalized = normalizePhoneGroundPayload(toolName: toolName, detail: detail)
+        return PhoneGroundPayloadValidation(issues: normalized.remainingIssues)
+    }
+
+    private func normalizePhoneGroundPayload(
+        toolName: String,
+        detail: String
+    ) -> PhoneGroundPayloadNormalization {
+        guard let contract = toolRegistry.phoneGroundContract(for: toolName),
+              contract.answerContract != .none else {
+            return PhoneGroundPayloadNormalization(detail: detail, recoveredIssues: [], remainingIssues: [])
+        }
+
+        guard let payload = phoneGroundPayloadDictionary(from: detail) else {
+            let issues = ["payload is not JSON"]
+            log("[PhoneGround] contract issues tool=\(toolName) issues=\(issues.joined(separator: "; "))")
+            return PhoneGroundPayloadNormalization(detail: detail, recoveredIssues: [], remainingIssues: issues)
+        }
+
+        let originalValidation = validatePhoneGroundPayload(toolName: toolName, contract: contract, payload: payload)
+        var normalizedPayload = payload
+        var recoveredIssues: [String] = []
+
+        if normalizedPayload["phone_ground"] as? [String: Any] == nil {
+            normalizedPayload["phone_ground"] = synthesizedPhoneGroundMetadata(for: contract, payload: payload)
+            recoveredIssues.append("missing phone_ground metadata")
+        }
+
+        if var evidencePack = normalizedPayload["evidence_pack"] as? [String: Any],
+           evidencePack["phone_ground"] as? [String: Any] == nil {
+            evidencePack["phone_ground"] = synthesizedPhoneGroundMetadata(for: contract, payload: payload)
+            normalizedPayload["evidence_pack"] = evidencePack
+        }
+
+        if contract.answerContract == .groundedDataSummary,
+           (normalizedPayload["success"] as? Bool) == true,
+           normalizedPayload["evidence_pack"] as? [String: Any] == nil,
+           let evidencePack = synthesizedDataEvidencePack(for: contract, payload: normalizedPayload) {
+            normalizedPayload["evidence_pack"] = evidencePack
+            recoveredIssues.append("groundedDataSummary missing evidence_pack")
+        }
+
+        let normalizedDetail = jsonString(normalizedPayload)
+        let normalizedValidation = validatePhoneGroundPayload(
+            toolName: toolName,
+            contract: contract,
+            detail: normalizedDetail
+        )
+
+        if !recoveredIssues.isEmpty, normalizedValidation.isValid {
+            log("[PhoneGround] recovered tool=\(toolName) issues=\(recoveredIssues.joined(separator: "; "))")
+            return PhoneGroundPayloadNormalization(
+                detail: normalizedDetail,
+                recoveredIssues: recoveredIssues,
+                remainingIssues: []
+            )
+        }
+
+        guard normalizedValidation.isValid else {
+            let issues = normalizedValidation.issues
+            log("[PhoneGround] contract issues tool=\(toolName) issues=\(issues.joined(separator: "; "))")
+            normalizedPayload["phone_ground_validation"] = [
+                "status": "invalid",
+                "issues": issues,
+                "recovered_issues": recoveredIssues
+            ]
+            return PhoneGroundPayloadNormalization(
+                detail: jsonString(normalizedPayload),
+                recoveredIssues: recoveredIssues,
+                remainingIssues: issues
+            )
+        }
+
+        return PhoneGroundPayloadNormalization(
+            detail: originalValidation.isValid ? detail : normalizedDetail,
+            recoveredIssues: recoveredIssues,
+            remainingIssues: []
+        )
+    }
+
+    private func validatePhoneGroundPayload(
+        toolName: String,
+        contract: PhoneGroundToolContract,
+        detail: String
+    ) -> PhoneGroundPayloadValidation {
+        guard let payload = phoneGroundPayloadDictionary(from: detail) else {
+            return PhoneGroundPayloadValidation(issues: ["payload is not JSON"])
+        }
+
+        return validatePhoneGroundPayload(toolName: toolName, contract: contract, payload: payload)
+    }
+
+    private func validatePhoneGroundPayload(
+        toolName: String,
+        contract: PhoneGroundToolContract,
+        payload: [String: Any]
+    ) -> PhoneGroundPayloadValidation {
+        var issues: [String] = []
+        let topMetadata = payload["phone_ground"] as? [String: Any]
+        let evidencePack = payload["evidence_pack"] as? [String: Any]
+        let evidenceMetadata = evidencePack?["phone_ground"] as? [String: Any]
+        let metadata = topMetadata ?? evidenceMetadata
+
+        guard let metadata else {
+            return PhoneGroundPayloadValidation(issues: ["missing phone_ground metadata"])
+        }
+
+        let allowedEvidenceTypes = Set(contract.evidenceTypes.map(\.rawValue))
+        let evidenceType = metadata["evidence_type"] as? String
+        if evidenceType.map({ allowedEvidenceTypes.contains($0) }) != true {
+            issues.append("evidence_type expected \(allowedEvidenceTypes.sorted()), got \(evidenceType ?? "nil")")
+        }
+
+        let answerContract = metadata["answer_contract"] as? String
+        if answerContract != contract.answerContract.rawValue {
+            issues.append("answer_contract expected \(contract.answerContract.rawValue), got \(answerContract ?? "nil")")
+        }
+
+        if contract.freshness != .unspecified,
+           let freshness = metadata["freshness"] as? String,
+           freshness != contract.freshness.rawValue {
+            issues.append("freshness expected \(contract.freshness.rawValue), got \(freshness)")
+        }
+
+        if let success = payload["success"] as? Bool, success {
+            switch contract.answerContract {
+            case .groundedSources:
+                if sourceURLs(fromToolResultDetail: jsonString(payload)).isEmpty {
+                    issues.append("groundedSources payload has no source URL")
+                }
+            case .groundedDataSummary:
+                guard let evidencePack else {
+                    issues.append("groundedDataSummary missing evidence_pack")
+                    break
+                }
+                let sourceType = evidencePack["source_type"] as? String
+                if sourceType.map({ allowedEvidenceTypes.contains($0) }) != true {
+                    issues.append("evidence_pack source_type expected \(allowedEvidenceTypes.sorted()), got \(sourceType ?? "nil")")
+                }
+                let sufficiency = evidencePack["sufficiency"] as? String
+                if sufficiency == nil {
+                    issues.append("evidence_pack missing sufficiency")
+                }
+                let items = evidencePack["items"] as? [[String: Any]] ?? []
+                let itemCount = evidencePack["item_count"] as? Int ?? items.count
+                if itemCount > 0 && items.isEmpty {
+                    issues.append("evidence_pack item_count > 0 but items empty")
+                }
+            case .none:
+                break
+            }
+        }
+
+        return PhoneGroundPayloadValidation(issues: issues)
+    }
+
+    private func phoneGroundPayloadDictionary(from detail: String) -> [String: Any]? {
+        guard let data = detail.data(using: .utf8),
+              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return nil
+        }
+        return payload
+    }
+
+    private func synthesizedPhoneGroundMetadata(
+        for contract: PhoneGroundToolContract,
+        payload: [String: Any]
+    ) -> [String: Any] {
+        let evidenceType = contract.evidenceTypes.first?.rawValue ?? PhoneGroundEvidenceType.system.rawValue
+        let status = payload["status"] as? String
+            ?? ((payload["success"] as? Bool) == false ? "failed" : "succeeded")
+        return [
+            "version": "phoneground_v0",
+            "evidence_type": evidenceType,
+            "answer_contract": contract.answerContract.rawValue,
+            "freshness": contract.freshness.rawValue,
+            "privacy": phoneGroundPrivacy(for: contract),
+            "status": status,
+            "generated_by": "phoneground_normalizer"
+        ]
+    }
+
+    private func phoneGroundPrivacy(for contract: PhoneGroundToolContract) -> String {
+        if contract.evidenceTypes.contains(.web) {
+            return "public_web"
+        }
+        if contract.evidenceTypes.contains(.health) {
+            return "device_local"
+        }
+        return "local_or_user_scoped"
+    }
+
+    private func synthesizedDataEvidencePack(
+        for contract: PhoneGroundToolContract,
+        payload: [String: Any]
+    ) -> [String: Any]? {
+        let content = [
+            payload["result"] as? String,
+            payload["summary"] as? String,
+            payload["message"] as? String,
+            payload["error"] as? String
+        ]
+        .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+        .first { !$0.isEmpty } ?? ""
+
+        guard !content.isEmpty else { return nil }
+
+        let evidenceType = contract.evidenceTypes.first ?? .system
+        let status = payload["status"] as? String
+            ?? ((payload["success"] as? Bool) == false ? "failed" : "succeeded")
+        return [
+            "version": "phoneground_data_v0",
+            "source_type": evidenceType.rawValue,
+            "sufficiency": status,
+            "generated_at": ISO8601DateFormatter().string(from: Date()),
+            "item_count": 1,
+            "items": [
+                [
+                    "id": "normalized_summary",
+                    "type": evidenceType.rawValue,
+                    "title": tr("工具结果摘要", "Tool result summary", "ツール結果の要約"),
+                    "content": content,
+                    "confidence": "normalized_tool_result"
+                ] as [String: Any]
+            ],
+            "phone_ground": synthesizedPhoneGroundMetadata(for: contract, payload: payload)
+        ]
+    }
+
+    private func webAnswerContainsPlaceholder(_ answer: String) -> Bool {
+        let lower = answer.lowercased()
+        let fragments = [
+            "[此处",
+            "应根据工具返回",
+            "待补充",
+            "占位",
+            "placeholder",
+            "todo",
+            "to be filled"
+        ]
+        return fragments.contains { lower.contains($0.lowercased()) }
+    }
+
+    private func bodyContainsInlineSourceMarker(_ body: String) -> Bool {
+        body.range(of: #"(来源|Source)\s*[:：]"#, options: [.regularExpression, .caseInsensitive]) != nil
+    }
+
+    private func markdownLinkCount(in text: String) -> Int {
+        regexMatchCount(pattern: #"\[[^\]\n]{1,160}\]\(https?://[^\s)]+\)"#, in: text)
+    }
+
+    private func regexMatchCount(pattern: String, in text: String) -> Int {
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else {
+            return 0
+        }
+        return regex.numberOfMatches(
+            in: text,
+            range: NSRange(location: 0, length: (text as NSString).length)
+        )
+    }
+
+    private func webToolDetailHasUsableEvidence(_ detail: String) -> Bool {
+        guard let data = detail.data(using: .utf8),
+              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return false
+        }
+        if payload["answerability"] as? String == "direct" {
+            return true
+        }
+        if payload["direct_evidence_sufficient"] as? Bool == true {
+            return true
+        }
+        if let evidencePack = payload["evidence_pack"] as? [String: Any] {
+            if evidencePack["sufficiency"] as? String == "sufficient" {
+                return true
+            }
+            if let count = evidencePack["chunk_count"] as? Int, count >= 2 {
+                return true
+            }
+            if let chunks = evidencePack["chunks"] as? [[String: Any]], chunks.count >= 2 {
+                return true
+            }
+        }
+        if payload["success"] as? Bool == true,
+           payload["has_concrete_data"] as? Bool == true {
+            let content = ((payload["content"] as? String) ?? (payload["result"] as? String) ?? "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            return content.count >= 80
+        }
+        return false
+    }
+
+
+    private func webAnswerLooksInsufficient(_ answer: String) -> Bool {
+        let fragments = [
+            "无法直接回答",
+            "不能直接回答",
+            "无法提供",
+            "不能提供",
+            "无法获取",
+            "不能获取",
+            "无法确定",
+            "无法给出",
+            "无法得出",
+            "没有足够可",
+            "没有提供",
+            "没有包含",
+            "没有找到",
+            "没有返回明确",
+            "没有返回足够",
+            "页面中没有",
+            "网页中没有",
+            "不包含",
+            "未包含",
+            "未找到",
+            "not enough",
+            "insufficient",
+            "not found",
+            "cannot directly answer",
+            "can't directly answer",
+            "unable to provide",
+            "cannot provide",
+            "unable to get",
+            "unable to find",
+            "could not determine",
+            "does not provide",
+            "doesn't provide",
+            "does not specify",
+            "doesn't specify",
+            "does not contain",
+            "doesn't contain",
+            "webpage fetch failed",
+            "resource could not be loaded"
+        ]
+        let normalized = answer.lowercased()
+        return fragments.contains { normalized.contains($0.lowercased()) }
+    }
+
+    private func webFetchResultNeedsSourceFallback(_ detail: String, userQuestion: String? = nil) -> Bool {
+        guard let data = detail.data(using: .utf8),
+              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return true
+        }
+        guard (payload["success"] as? Bool) == true else {
+            return true
+        }
+        if payload["looks_like_boilerplate"] as? Bool == true {
+            return true
+        }
+        if payload["has_concrete_data"] as? Bool == false {
+            return true
+        }
+        let content = ((payload["content"] as? String) ?? (payload["result"] as? String) ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard content.count >= 300 else {
+            return true
+        }
+        let lower = content.lowercased()
+        let failureMarkers = [
+            "oops, something went wrong",
+            "something went wrong",
+            "access denied",
+            "temporarily unavailable",
+            "please try another search",
+            "popular searches",
+            "get 50% off",
+            "free sign up",
+            "sign in free sign up",
+            "open in app",
+            "enable javascript",
+            "please enable javascript",
+            "captcha",
+            "not available right now",
+            "advertisement advertisement advertisement",
+            "loading score",
+            "載入比分中",
+            "加载比分中",
+            "載入中",
+            "加载中",
+            "著作權所有",
+            "服務條款",
+            "服务条款",
+            "會員中心",
+            "会员中心"
+        ]
+        if failureMarkers.contains(where: { lower.contains($0) }) {
+            return true
+        }
+
+        let title = (payload["title"] as? String) ?? ""
+        if let userQuestion,
+           !fetchedPageLooksRelevant(title: title, content: content, userQuestion: userQuestion) {
+            return true
+        }
+
+        return false
+    }
+
+    private func fallbackWebFetchFromRecentSearch(excluding attemptedURL: String?, userQuestion: String) async -> CanonicalToolResult? {
+        let attemptedKey = normalizedSourceKey(attemptedURL ?? "")
+        let lastUserIdx = messages.lastIndex(where: { $0.role == .user }) ?? -1
+        let currentTurnSlice = lastUserIdx >= 0 ? Array(messages.suffix(from: lastUserIdx)) : Array(messages)
+        guard let searchResult = currentTurnSlice.last(where: {
+            $0.role == .skillResult
+                && $0.skillResultKind == .toolExecution
+                && $0.skillName == "web-search"
+        }) else {
+            return nil
+        }
+
+        let candidateURLs = sourceURLs(fromToolResultDetail: searchResult.content)
+            .filter { normalizedSourceKey($0) != attemptedKey }
+            .prefix(6)
+
+        for url in candidateURLs {
+            do {
+                let result = try await handleToolExecutionCanonical(
+                    toolName: "web-fetch",
+                    args: ["url": url, "max_characters": 6000]
+                )
+                if !webFetchResultNeedsSourceFallback(result.detail, userQuestion: userQuestion) {
+                    log("[Agent] web-fetch fallback source succeeded: \(url)")
+                    return result
+                }
+                log("[Agent] web-fetch fallback source still insufficient: \(url)")
+            } catch {
+                log("[Agent] web-fetch fallback source failed: \(url) \(error.localizedDescription)")
+            }
+        }
+        return nil
+    }
+
+    /// Normalize web sources for final-answer exits that bypass the full
+    /// `finalizeWebAnswer` (the duplicate-tool-skip path, load_skill paths, the
+    /// Planner synthesis). Replaces whatever URLs the model wrote — typically raw,
+    /// long URLs — with the deterministic short-host Markdown "引用网址" section
+    /// built from this turn's most recent web tool result. No-op (returns the
+    /// answer unchanged) when the turn ran no web tool, so it is safe to apply at
+    /// generic answer exits. Synchronous + deterministic — never re-streams.
+    func normalizeWebSourcesFromRecentTurn(_ answer: String) -> String {
+        let lastUserIdx = messages.lastIndex(where: { $0.role == .user }) ?? -1
+        let currentTurnSlice = lastUserIdx >= 0 ? Array(messages.suffix(from: lastUserIdx)) : Array(messages)
+        guard let webResult = currentTurnSlice.last(where: {
+            $0.role == .skillResult
+                && $0.skillResultKind == .toolExecution
+                && ($0.skillName == "web-search" || $0.skillName == "web-fetch")
+        }), let toolName = webResult.skillName else {
+            return answer
+        }
+        return appendSourceCitationIfNeeded(
+            to: answer,
+            toolName: toolName,
+            toolResultDetail: webResult.content
+        )
+    }
+
+    private func webSearchResultNeedsFetch(_ detail: String) -> Bool {
+        guard let data = detail.data(using: .utf8),
+              let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return false
+        }
+        return (payload["answerability"] as? String) == "needs_fetch"
+    }
+
+    private func automaticWebFetchFromSearchResult(_ searchDetail: String, userQuestion: String) async -> CanonicalToolResult? {
+        let candidateURLs = sourceURLs(fromToolResultDetail: searchDetail).prefix(6)
+        for url in candidateURLs {
+            do {
+                let result = try await handleToolExecutionCanonical(
+                    toolName: "web-fetch",
+                    args: ["url": url, "max_characters": 6000]
+                )
+                if !webFetchResultNeedsSourceFallback(result.detail, userQuestion: userQuestion) {
+                    log("[Agent] web-search needs_fetch auto-fetched source: \(url)")
+                    return result
+                }
+                log("[Agent] web-search needs_fetch auto-fetch source insufficient: \(url)")
+            } catch {
+                log("[Agent] web-search needs_fetch auto-fetch source failed: \(url) \(error.localizedDescription)")
+            }
+        }
+        return nil
+    }
+
+    private func retryWebAnswerWithFallbackSourceIfNeeded(
+        answer: String,
+        followUpToolName: String,
+        toolResultDetail: String,
+        userQuestion: String,
+        images: [CIImage]
+    ) async -> (answer: String, toolName: String, toolResultSummary: String, toolResultDetail: String)? {
+        let validation = validateGroundedWebAnswer(
+            appendSourceCitationIfNeeded(to: answer, toolName: followUpToolName, toolResultDetail: toolResultDetail),
+            toolName: followUpToolName,
+            toolResultDetail: toolResultDetail
+        )
+        guard followUpToolName == "web-fetch",
+              (webAnswerLooksInsufficient(answer) || validation.shouldTryAlternativeFetch),
+              let attemptedURL = sourceURLs(fromToolResultDetail: toolResultDetail).first,
+              let fallbackResult = await fallbackWebFetchFromRecentSearch(
+                excluding: attemptedURL,
+                userQuestion: userQuestion
+              ) else {
+            return nil
+        }
+
+        let fallbackResultDetail = normalizePhoneGroundPayloadIfNeeded(
+            toolName: "web-fetch",
+            detail: fallbackResult.detail
+        )
+        messages.append(ChatMessage(
+            role: .skillResult,
+            content: fallbackResultDetail,
+            skillName: "web-fetch",
+            skillResultKind: .toolExecution
+        ))
+        let retryPrompt = PromptBuilder.buildCompactToolAnswerPrompt(
+            userQuestion: userQuestion,
+            toolName: "web-fetch",
+            toolResultSummary: fallbackResult.summary,
+            currentImageCount: images.count,
+            enableThinking: false
+        )
+        // Headless: generate the fallback re-answer off-screen so the visible
+        // message is not cleared to "▍" and re-streamed. It is written once by
+        // the caller after finalizeWebAnswer.
+        guard let retryText = await streamLLM(prompt: retryPrompt, images: images) else {
+            return nil
+        }
+
+        let cleaned = cleanOutput(retryText)
+        guard !cleaned.isEmpty,
+              !looksLikeStructuredIntermediateOutput(cleaned),
+              !looksLikePromptEcho(cleaned) else {
+            return nil
+        }
+
+        log("[Agent] web-fetch answer insufficient; retried with fallback source")
+        return (cleaned, "web-fetch", fallbackResult.summary, fallbackResultDetail)
+    }
+
+    private func normalizedSourceKey(_ rawURL: String) -> String {
+        guard var components = URLComponents(string: rawURL.trimmingCharacters(in: .whitespacesAndNewlines)) else {
+            return rawURL.lowercased()
+        }
+        components.scheme = "https"
+        components.query = nil
+        components.fragment = nil
+        return (components.url?.absoluteString ?? rawURL).lowercased()
+    }
+
+    private func fetchedPageLooksRelevant(title: String, content: String, userQuestion: String) -> Bool {
+        let concepts = significantQuestionConcepts(userQuestion)
+        guard !concepts.isEmpty else { return true }
+
+        let haystack = content.lowercased()
+        var totalOccurrences = 0
+        let matchCount = concepts.reduce(into: 0) { count, alternatives in
+            var conceptOccurrences = 0
+            for term in alternatives {
+                let needle = term.lowercased()
+                conceptOccurrences += haystack.components(separatedBy: needle).count - 1
+            }
+            if conceptOccurrences > 0 {
+                count += 1
+                totalOccurrences += conceptOccurrences
+            }
+        }
+        let requiredMatches = concepts.count >= 2 ? 2 : 1
+        return matchCount >= requiredMatches && totalOccurrences >= requiredMatches + 1
+    }
+
+    private func significantQuestionConcepts(_ question: String) -> [[String]] {
+        var normalized = question.lowercased()
+        let stopPhrases = [
+            "帮我", "请问", "查一下", "搜一下", "搜索", "查询", "一下",
+            "今天", "今日", "现在", "当前", "最近", "最新", "多少", "如何", "怎么样", "怎样",
+            "的是", "的吗", "是吗", "是", "吗", "呢", "么",
+            "the", "and", "for", "with", "to", "from", "what", "whats", "what's", "today", "current", "latest",
+            "search", "look", "lookup", "find", "are", "is", "was", "were", "about", "please"
+        ]
+        for phrase in stopPhrases {
+            normalized = normalized.replacingOccurrences(of: phrase, with: " ")
+        }
+
+        var concepts: [[String]] = []
+
+        let cjkPattern = #"[\p{Han}]{2,}"#
+        if let regex = try? NSRegularExpression(pattern: cjkPattern) {
+            let nsRange = NSRange(normalized.startIndex..., in: normalized)
+            for match in regex.matches(in: normalized, range: nsRange) {
+                guard let range = Range(match.range, in: normalized) else { continue }
+                let chunk = String(normalized[range])
+                var alternatives = [chunk]
+                let chars = Array(chunk)
+                if chars.count > 2 {
+                    alternatives.append(String(chars.prefix(2)))
+                    alternatives.append(String(chars.suffix(2)))
+                    for index in 0..<(chars.count - 1) {
+                        alternatives.append(String(chars[index...(index + 1)]))
+                    }
+                }
+                concepts.append(uniqueTerms(alternatives))
+            }
+        }
+
+        let latinTokens = normalized
+            .split { !$0.isLetter && !$0.isNumber }
+            .map(String.init)
+            .filter { $0.count >= 2 }
+            .filter { !isAllHan($0) }
+        concepts.append(contentsOf: latinTokens.map { [$0] })
+
+        var seen = Set<String>()
+        return concepts.compactMap { alternatives in
+            let cleaned = uniqueTerms(alternatives).filter { $0.count >= 2 }
+            guard !cleaned.isEmpty else { return nil }
+            let key = cleaned.joined(separator: "|")
+            guard !seen.contains(key) else { return nil }
+            seen.insert(key)
+            return cleaned
+        }
+    }
+
+    private func uniqueTerms(_ terms: [String]) -> [String] {
+        var seen = Set<String>()
+        return terms.filter { term in
+            guard !seen.contains(term) else { return false }
+            seen.insert(term)
+            return true
+        }
+    }
+
+    private func isAllHan(_ text: String) -> Bool {
+        text.range(of: #"^[\p{Han}]+$"#, options: .regularExpression) != nil
+    }
+
+    // MARK: - Tool 调用主循环
+
+    func executeToolChain(
+        prompt: String,
+        fullText: String,
+        userQuestion: String,
+        images: [CIImage],
+        round: Int = 1,
+        maxRounds: Int = 10,
+        sessionID: UUID? = nil,
+        turnContext: GenerationTurnContext? = nil
+    ) async {
+        let toolChainSessionID = sessionID ?? sessionStore.currentSessionID
+
+        func isCurrentToolChainSession() -> Bool {
+            sessionStore.currentSessionID == toolChainSessionID
+        }
+
+        func continueIfCurrentToolChainSession() -> Bool {
+            guard !Task.isCancelled else {
+                log("[Agent] tool chain abandoned after task cancellation")
+                abandonTurnIfOwner(turnContext, reason: "tool_chain_task_cancelled")
+                return false
+            }
+            guard isCurrentToolChainSession() else {
+                log("[Agent] tool chain abandoned after session change")
+                abandonTurnIfOwner(turnContext, reason: "tool_chain_session_changed")
+                return false
+            }
+            return true
+        }
+
+        func finishTurnIfCurrentToolChainSession() {
+            guard continueIfCurrentToolChainSession() else { return }
+            finishTurn(context: turnContext)
+        }
+
+        @discardableResult
+        func updateMessageContentIfCurrent(at index: Int, content: String) -> Bool {
+            guard continueIfCurrentToolChainSession() else { return false }
+            guard messages.indices.contains(index) else {
+                log("[Agent] tool chain message index \(index) no longer exists")
+                return false
+            }
+            messages[index].update(content: content)
+            return true
+        }
+
+        @discardableResult
+        func updateMessageStateIfCurrent(
+            at index: Int,
+            role: ChatMessage.Role,
+            content: String,
+            skillName: String? = nil
+        ) -> Bool {
+            guard continueIfCurrentToolChainSession() else { return false }
+            guard messages.indices.contains(index) else {
+                log("[Agent] tool chain message index \(index) no longer exists")
+                return false
+            }
+            messages[index].update(role: role, content: content, skillName: skillName)
+            return true
+        }
+
+        // P1-D (2026-04-17): 内存紧 + 进入 tool_call 链 → 限轮数 + skip duplicates.
+        // 真机 E4B 真机 multi-SKILL: 模型可能跟自己第二次调同 tool (不进步) — 单
+        // 短路会把后续合法的 reminders/contacts 步骤一起砍掉. 设计:
+        //   1. 同名 tool 在最近 6 条 skillResult 已成功跑过 ≥1 次 → SKIP 本次
+        //      执行 (不再调真 tool, 不消耗副作用 quota), 但塞一个 fake "已完成"
+        //      tool_result 给模型, 让它继续推进下一个 tool 或给最终答案.
+        //   2. maxRounds 内存紧时上限 6 (从原 3 抬上去) — 多 SKILL 串联场景:
+        //      load_skill + tool + load_skill + tool + tool + 最终答案 大概 5-6 round.
+        let effectiveMax = (MemoryStats.headroomMB < 1500) ? min(maxRounds, 6) : maxRounds
+        guard round <= effectiveMax else {
+            log("[Agent] 达到最大工具链轮数 \(effectiveMax) (memory-aware)")
+            finishTurnIfCurrentToolChainSession()
+            return
+        }
+
+        // 重复检测 — 同名 tool 在【当前 user turn】内已跑过 ≥1 次 → 跳过本次执行,
+        // 让模型继续推进. 只算"距离最后一条 user message 之间"的 skillResult,
+        // 跨 turn 不算 (e.g. turn 1 fired reminders, turn 2 又 fire 是合法补参, 不是循环).
+        let lastUserIdx = messages.lastIndex(where: { $0.role == .user }) ?? -1
+        let currentTurnSlice = lastUserIdx >= 0 ? Array(messages.suffix(from: lastUserIdx)) : Array(messages)
+        // 只数「真实工具执行」(toolExecution) 的结果 —— load_skill 注入的说明书 (skillInstructions)
+        // 和 content skill 生成文本 (generatedContent) 不算"工具已跑过"。否则 skill-id == tool-name
+        // (如 web-search) 时, "已加载说明书" 会被误判成 "工具已执行"、跳过真正的搜索 → 模型瞎编占位符。
+        let recentResults = currentTurnSlice.filter {
+            $0.role == .skillResult && $0.skillResultKind == .toolExecution
+        }
+        if let parsedCall = parseToolCall(fullText) {
+            let candidateName = canonicalToolName(parsedCall.name, arguments: parsedCall.arguments)
+            let sameNameCount = recentResults.filter {
+                ($0.skillName ?? "") == candidateName
+            }.count
+            // load_skill 不应用此规则 — 模型可能合法地多次 load 不同 SKILL
+            // (canonical 会把所有 load_skill 归一成同名, 易误判).
+            if sameNameCount >= 1, candidateName != "load_skill" {
+                log("[Agent] 检测到 tool \(candidateName) 已在前面跑过, skip 本次重复, 让模型继续")
+                let lastResult = recentResults.last(where: { ($0.skillName ?? "") == candidateName })?.content ?? tr("已完成", "Done", "完了")
+                let pseudoSummary = tr(
+                    "[\(candidateName) 已经在前面成功执行, 不需要再调用. 请继续完成用户其他请求, 或给最终中文回复]\n上一次结果: \(lastResult)",
+                    "[\(candidateName) has already executed successfully; do not invoke again. Continue with the user's other requests, or give the final answer in English.]\nLast result: \(lastResult)",
+                    "[\(candidateName) はすでに正常に実行済みです。再度呼び出す必要はありません。ユーザーの他のリクエストを続けて処理するか、最終的な回答を日本語で返してください。]\n前回の結果: \(lastResult)"
+                )
+                let followUpPrompt = PromptBuilder.appendToolResult(
+                    toR1Prompt: prompt,
+                    r1Output: fullText,
+                    toolName: candidateName,
+                    toolResultSummary: pseudoSummary
+                )
+
+                messages.append(ChatMessage(role: .assistant, content: "▍"))
+                let followUpIndex = messages.count - 1
+
+                guard let nextText = await streamLLM(prompt: followUpPrompt, msgIndex: followUpIndex, images: images, turnContext: turnContext) else {
+                    finishTurnIfCurrentToolChainSession()
+                    return
+                }
+                guard continueIfCurrentToolChainSession() else { return }
+
+                if parseToolCall(nextText) != nil {
+                    guard updateMessageContentIfCurrent(at: followUpIndex, content: "") else { return }
+                    await executeToolChain(
+                        prompt: followUpPrompt,
+                        fullText: nextText,
+                        userQuestion: userQuestion,
+                        images: images,
+                        round: round + 1,
+                        maxRounds: maxRounds,
+                        sessionID: toolChainSessionID,
+                        turnContext: turnContext
+                    )
+                } else {
+                    guard updateMessageContentIfCurrent(
+                        at: followUpIndex,
+                        content: normalizeWebSourcesFromRecentTurn(cleanOutput(nextText))
+                    ) else { return }
+                    finishTurnIfCurrentToolChainSession()
+                }
+                return
+            }
+        }
+
+        guard let parsedCall = parseToolCall(fullText) else {
+            let cleaned = cleanOutput(fullText)
+            if let lastAssistant = messages.lastIndex(where: { $0.role == .assistant }) {
+                guard updateMessageContentIfCurrent(
+                    at: lastAssistant,
+                    content: cleaned.isEmpty ? PromptLocale.current.emptyReplyPlaceholder : cleaned
+                ) else { return }
+            }
+            finishTurnIfCurrentToolChainSession()
+            return
+        }
+
+        let call = (
+            name: canonicalToolName(parsedCall.name, arguments: parsedCall.arguments),
+            arguments: parsedCall.arguments
+        )
+
+        log("[Agent] Round \(round): tool_call name=\(call.name)")
+
+        // ── list_skills ──
+        if call.name == "list_skills" {
+            let query = (call.arguments["query"] as? String ?? "").lowercased()
+            let results = skillEntries.filter(\.isEnabled).filter { entry in
+                guard !query.isEmpty else { return true }
+                return entry.id.lowercased().contains(query)
+                    || entry.name.lowercased().contains(query)
+                    || entry.description.lowercased().contains(query)
+            }
+            let listing = results.map { "\($0.id): \($0.description)" }.joined(separator: "\n")
+            let resultText = results.isEmpty
+                ? tr("没有找到匹配「\(query)」的能力。",
+                     "No abilities found matching \"\(query)\".",
+                     "「\(query)」に一致する機能は見つかりませんでした。")
+                : tr("可用能力（\(results.count) 个）：\n\(listing)",
+                     "Available abilities (\(results.count)):\n\(listing)",
+                     "利用できる機能（\(results.count) 件）:\n\(listing)")
+            log("[Agent] list_skills query=\"\(query)\" results=\(results.count)")
+
+            let toolResultSummary = toolResultSummaryForModel(toolName: "list_skills", toolResult: resultText)
+            messages.append(ChatMessage(role: .skillResult, content: resultText, skillName: "list_skills", skillResultKind: .toolExecution))
+
+            // F3: R2 = R1 + R1 output + tool_result (continuation form).
+            let followUpPrompt = PromptBuilder.appendToolResult(
+                toR1Prompt: prompt,
+                r1Output: fullText,
+                toolName: "list_skills",
+                toolResultSummary: toolResultSummary
+            )
+
+            messages.append(ChatMessage(role: .assistant, content: "▍"))
+            let followUpIndex = messages.count - 1
+
+            guard let nextText = await streamLLM(prompt: followUpPrompt, msgIndex: followUpIndex, images: images, turnContext: turnContext) else {
+                finishTurnIfCurrentToolChainSession()
+                return
+            }
+            guard continueIfCurrentToolChainSession() else { return }
+
+            if parseToolCall(nextText) != nil {
+                log("[Agent] list_skills 后检测到 tool 调用 (round \(round + 1))")
+                guard updateMessageContentIfCurrent(at: followUpIndex, content: "") else { return }
+                await executeToolChain(
+                    prompt: followUpPrompt, fullText: nextText,
+                    userQuestion: userQuestion, images: images, round: round + 1, maxRounds: maxRounds,
+                    sessionID: toolChainSessionID,
+                    turnContext: turnContext
+                )
+            } else {
+                let cleaned = cleanOutput(nextText)
+                guard updateMessageContentIfCurrent(
+                    at: followUpIndex,
+                    content: cleaned.isEmpty ? PromptLocale.current.emptyReplyPlaceholder : cleaned
+                ) else { return }
+                finishTurnIfCurrentToolChainSession()
+            }
+            return
+        }
+
+        // ── load_skill ──
+        if call.name == "load_skill" {
+            let allCalls = parseAllToolCalls(fullText)
+            let loadSkillCalls = allCalls.filter { $0.name == "load_skill" }
+
+            var allInstructions = ""
+            var loadedDisplayNames: [String] = []
+            var loadedSkillIds: [String] = []
+            for lsCall in loadSkillCalls {
+                let requestedSkillName = (lsCall.arguments["skill"] as? String)
+                             ?? (lsCall.arguments["name"] as? String)
+                             ?? ""
+                let skillName = skillRegistry.canonicalSkillId(for: requestedSkillName)
+                log("[Agent] load_skill: \(requestedSkillName)")
+
+                let displayName = findDisplayName(for: skillName)
+                loadedDisplayNames.append(displayName)
+                messages.append(ChatMessage(role: .system, content: "identified", skillName: displayName))
+                let cardIdx = messages.count - 1
+
+                guard let instructions = handleLoadSkill(skillName: skillName) else {
+                    guard updateMessageStateIfCurrent(
+                        at: cardIdx,
+                        role: .system,
+                        content: "done",
+                        skillName: displayName
+                    ) else { return }
+                    continue
+                }
+
+                try? await Task.sleep(for: .milliseconds(300))
+                guard updateMessageStateIfCurrent(
+                    at: cardIdx,
+                    role: .system,
+                    content: "loaded",
+                    skillName: displayName
+                ) else { return }
+                messages.append(ChatMessage(role: .skillResult, content: instructions, skillName: skillName, skillResultKind: .skillInstructions))
+                allInstructions += instructions + "\n\n"
+                loadedSkillIds.append(skillName)
+            }
+
+            guard !allInstructions.isEmpty else {
+                finishTurnIfCurrentToolChainSession()
+                return
+            }
+
+            if let autoCall = autoToolCallForLoadedSkills(skillIds: loadedSkillIds) {
+                let syntheticToolCall = syntheticToolCallText(
+                    name: autoCall.name,
+                    arguments: autoCall.arguments
+                )
+                await executeToolChain(
+                    prompt: prompt,
+                    fullText: syntheticToolCall,
+                    userQuestion: userQuestion,
+                    images: images,
+                    round: round + 1,
+                    maxRounds: maxRounds,
+                    sessionID: toolChainSessionID,
+                    turnContext: turnContext
+                )
+                return
+            }
+
+            let singleToolExtraction = await extractToolCallForLoadedSkills(
+                originalPrompt: prompt,
+                userQuestion: userQuestion,
+                skillInstructions: allInstructions,
+                skillIds: loadedSkillIds,
+                images: images
+            )
+            guard continueIfCurrentToolChainSession() else { return }
+            switch singleToolExtraction {
+            case .toolCall(let name, let arguments):
+                log("[Agent] load_skill 参数提取后执行工具: \(name)")
+                let syntheticToolCall = syntheticToolCallText(name: name, arguments: arguments)
+                await executeToolChain(
+                    prompt: prompt,
+                    fullText: syntheticToolCall,
+                    userQuestion: userQuestion,
+                    images: images,
+                    round: round + 1,
+                    maxRounds: maxRounds,
+                    sessionID: toolChainSessionID,
+                    turnContext: turnContext
+                )
+                return
+
+            case .needsClarification(let clarification):
+                messages.append(ChatMessage(role: .assistant, content: clarification))
+                markSkillsDone(loadedDisplayNames)
+                finishTurnIfCurrentToolChainSession()
+                return
+
+            case .failed:
+                break
+            }
+
+            // 计算所有 loaded skill 的 allowed-tools 并集 (去重)
+            // — 这是 Scaffold T2 disclosure 的输入: 告诉模型哪些工具实际可调
+            let availableTools: [String] = {
+                var seen = Set<String>()
+                var ordered: [String] = []
+                for skillId in loadedSkillIds {
+                    guard let def = skillRegistry.getDefinition(skillId) else { continue }
+                    for toolName in def.metadata.allowedTools where !seen.contains(toolName) {
+                        seen.insert(toolName)
+                        ordered.append(toolName)
+                    }
+                }
+                return ordered
+            }()
+
+            let followUpPrompt = PromptBuilder.buildLoadedSkillPrompt(
+                originalPrompt: prompt,
+                userQuestion: userQuestion,
+                skillInstructions: allInstructions,
+                availableTools: availableTools,
+                includeTimeAnchor: requiresTimeAnchor(forSkillIds: loadedSkillIds),
+                currentImageCount: images.count
+            )
+
+            messages.append(ChatMessage(role: .assistant, content: "▍"))
+            let followUpIndex = messages.count - 1
+
+            guard let nextText = await streamLLM(prompt: followUpPrompt, msgIndex: followUpIndex, images: images, turnContext: turnContext) else {
+                finishTurnIfCurrentToolChainSession()
+                return
+            }
+            guard continueIfCurrentToolChainSession() else { return }
+
+            if parseToolCall(nextText) != nil {
+                log("[Agent] load_skill 后检测到 tool 调用 (round \(round + 1))")
+                guard updateMessageContentIfCurrent(at: followUpIndex, content: "") else { return }
+                await executeToolChain(
+                    prompt: followUpPrompt, fullText: nextText,
+                    userQuestion: userQuestion, images: images, round: round + 1, maxRounds: maxRounds,
+                    sessionID: toolChainSessionID,
+                    turnContext: turnContext
+                )
+            } else {
+                let cleaned = cleanOutput(nextText)
+                if cleaned.isEmpty
+                    || looksLikeStructuredIntermediateOutput(cleaned)
+                    || looksLikePromptEcho(cleaned) {
+                    let retryPrompt = PromptBuilder.buildLoadedSkillPrompt(
+                        originalPrompt: prompt,
+                        userQuestion: userQuestion,
+                        skillInstructions: allInstructions,
+                        availableTools: availableTools,
+                        includeTimeAnchor: requiresTimeAnchor(forSkillIds: loadedSkillIds),
+                        currentImageCount: images.count,
+                        forceResponse: true
+                    )
+
+                    guard let retryText = await streamLLM(prompt: retryPrompt, msgIndex: followUpIndex, images: images, turnContext: turnContext) else {
+                        finishTurnIfCurrentToolChainSession()
+                        return
+                    }
+                    guard continueIfCurrentToolChainSession() else { return }
+
+                    if parseToolCall(retryText) != nil {
+                        log("[Agent] load_skill 重试后检测到 tool 调用 (round \(round + 1))")
+                        guard updateMessageContentIfCurrent(at: followUpIndex, content: "") else { return }
+                        await executeToolChain(
+                            prompt: retryPrompt,
+                            fullText: retryText,
+                            userQuestion: userQuestion,
+                            images: images,
+                            round: round + 1,
+                            maxRounds: maxRounds,
+                            sessionID: toolChainSessionID,
+                            turnContext: turnContext
+                        )
+                    } else {
+                        let retryCleaned = cleanOutput(retryText)
+                        let loadedSkillName = loadedDisplayNames.joined(separator: ", ").isEmpty
+                            ? tr("已加载的能力", "loaded ability", "読み込み済みの機能")
+                            : loadedDisplayNames.joined(separator: ", ")
+                        let finalReply = retryCleaned.isEmpty
+                            || looksLikeStructuredIntermediateOutput(retryCleaned)
+                            || looksLikePromptEcho(retryCleaned)
+                            ? fallbackReplyForEmptySkillFollowUp(skillName: loadedSkillName)
+                            : retryCleaned
+                        guard updateMessageContentIfCurrent(
+                            at: followUpIndex,
+                            content: normalizeWebSourcesFromRecentTurn(finalReply)
+                        ) else { return }
+                        markSkillsDone(loadedDisplayNames)
+                        finishTurnIfCurrentToolChainSession()
+                    }
+                } else {
+                    guard updateMessageContentIfCurrent(
+                        at: followUpIndex,
+                        content: normalizeWebSourcesFromRecentTurn(cleaned)
+                    ) else { return }
+                    markSkillsDone(loadedDisplayNames)
+                    finishTurnIfCurrentToolChainSession()
+                }
+            }
+            return
+        }
+
+        // ── 具体 Tool 调用 ──
+
+        let canonicalCallName = canonicalToolName(call.name, arguments: call.arguments)
+        let ownerSkillId = findSkillId(
+            for: canonicalCallName,
+            preferredSkillIds: lastTurnMatchedSkillIds
+        )
+        let displayName = ownerSkillId
+            .flatMap { skillRegistry.getDefinition($0)?.metadata.displayName }
+            ?? findDisplayName(for: canonicalCallName)
+
+        let cardIndex: Int
+        if let idx = messages.lastIndex(where: {
+            $0.role == .system && ($0.skillName == displayName || $0.skillName == call.name)
+            && ($0.content == "identified" || $0.content == "loaded")
+        }) {
+            cardIndex = idx
+        } else {
+            messages.append(ChatMessage(role: .system, content: "identified", skillName: displayName))
+            cardIndex = messages.count - 1
+        }
+
+        guard let ownerSkillId else {
+            guard updateMessageStateIfCurrent(
+                at: cardIndex,
+                role: .system,
+                content: "done",
+                skillName: displayName
+            ) else { return }
+            messages.append(ChatMessage(role: .assistant, content: tr(
+                "⚠️ 未知工具: \(call.name)",
+                "⚠️ Unknown tool: \(call.name)",
+                "⚠️ 不明なツール: \(call.name)"
+            )))
+            finishTurnIfCurrentToolChainSession()
+            return
+        }
+
+        let enabledIds = Set(skillEntries.filter(\.isEnabled).map(\.id))
+        guard enabledIds.contains(ownerSkillId) else {
+            guard updateMessageStateIfCurrent(
+                at: cardIndex,
+                role: .system,
+                content: "done",
+                skillName: displayName
+            ) else { return }
+            messages.append(ChatMessage(role: .assistant, content: tr(
+                "⚠️ Skill \(displayName) 未启用",
+                "⚠️ Skill \(displayName) is not enabled",
+                "⚠️ Skill \(displayName) は有効になっていません"
+            )))
+            finishTurnIfCurrentToolChainSession()
+            return
+        }
+
+        let normalizedCallArguments = regroundedTemporalArguments(
+            toolName: canonicalCallName,
+            arguments: call.arguments,
+            userQuestion: userQuestion
+        )
+
+        if let block = sideEffectGateBlock(
+            skillId: ownerSkillId,
+            displayName: displayName,
+            toolName: canonicalCallName,
+            arguments: normalizedCallArguments,
+            userQuestion: userQuestion
+        ) {
+            guard updateMessageStateIfCurrent(
+                at: cardIndex,
+                role: .system,
+                content: "done",
+                skillName: displayName
+            ) else { return }
+            messages.append(ChatMessage(role: .assistant, content: block.reply))
+            finishTurnIfCurrentToolChainSession()
+            return
+        }
+
+        guard updateMessageStateIfCurrent(
+            at: cardIndex,
+            role: .system,
+            content: "executing:\(call.name)",
+            skillName: displayName
+        ) else { return }
+        await publishSkillActivityEvent(
+            skillID: ownerSkillId,
+            skillName: displayName,
+            toolName: call.name,
+            phase: .executing
+        )
+        guard continueIfCurrentToolChainSession() else { return }
+
+        do {
+            var executionArguments = normalizedCallArguments
+            if canonicalCallName == "web-search",
+               (executionArguments["question"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty != false {
+                executionArguments["question"] = userQuestion
+            }
+            if canonicalCallName == "web-search",
+               executionArguments["planned_queries"] == nil {
+                let initialQuery = (executionArguments["query"] as? String) ?? userQuestion
+                let plannedQueries = await modelPlannedWebQueries(
+                    userQuestion: userQuestion,
+                    initialQuery: initialQuery,
+                    images: images
+                )
+                guard continueIfCurrentToolChainSession() else { return }
+                if !plannedQueries.isEmpty {
+                    executionArguments["planned_queries"] = plannedQueries
+                }
+            }
+
+            await toolCallTraceSink?(RuntimeToolCall(
+                name: call.name,
+                arguments: executionArguments,
+                source: .textProtocol
+            ))
+            guard continueIfCurrentToolChainSession() else { return }
+
+            var canonicalResult: CanonicalToolResult
+            var toolResultDetail: String
+            if HotfixFeatureFlags.useHotfixPromptPipeline && HotfixFeatureFlags.enableCanonicalToolResult {
+                canonicalResult = try await handleToolExecutionCanonical(toolName: call.name, args: executionArguments)
+                toolResultDetail = canonicalResult.detail
+            } else {
+                let toolResult = try await handleToolExecution(toolName: call.name, args: executionArguments)
+                canonicalResult = canonicalToolResult(toolName: call.name, toolResult: toolResult)
+                toolResultDetail = toolResult
+            }
+            guard continueIfCurrentToolChainSession() else { return }
+
+            if call.name == "web-fetch",
+               webFetchResultNeedsSourceFallback(toolResultDetail, userQuestion: userQuestion),
+               let fallbackResult = await fallbackWebFetchFromRecentSearch(excluding: executionArguments["url"] as? String, userQuestion: userQuestion) {
+                guard continueIfCurrentToolChainSession() else { return }
+                canonicalResult = fallbackResult
+                toolResultDetail = fallbackResult.detail
+            }
+            guard continueIfCurrentToolChainSession() else { return }
+
+            guard updateMessageStateIfCurrent(
+                at: cardIndex,
+                role: .system,
+                content: "done",
+                skillName: displayName
+            ) else { return }
+            toolResultDetail = normalizePhoneGroundPayloadIfNeeded(toolName: call.name, detail: toolResultDetail)
+            toolResultDetail = annotateToolResultDetailWithRequest(
+                toolResultDetail,
+                toolName: call.name,
+                arguments: executionArguments
+            )
+            messages.append(ChatMessage(role: .skillResult, content: toolResultDetail, skillName: call.name, skillResultKind: .toolExecution))
+            log("[Agent] Tool \(call.name) round \(round) done")
+
+            if !canonicalResult.success {
+                messages.append(ChatMessage(role: .assistant, content: canonicalResult.summary))
+                finishTurnIfCurrentToolChainSession()
+                return
+            }
+
+            var followUpToolName = call.name
+            if call.name == "web-search", webSearchResultNeedsFetch(toolResultDetail) {
+                if let fetchedResult = await automaticWebFetchFromSearchResult(toolResultDetail, userQuestion: userQuestion) {
+                    guard continueIfCurrentToolChainSession() else { return }
+                    canonicalResult = fetchedResult
+                    toolResultDetail = fetchedResult.detail
+                    followUpToolName = "web-fetch"
+                    toolResultDetail = normalizePhoneGroundPayloadIfNeeded(toolName: followUpToolName, detail: toolResultDetail)
+                    messages.append(ChatMessage(role: .skillResult, content: toolResultDetail, skillName: followUpToolName, skillResultKind: .toolExecution))
+                } else if let replannedSearchResult = await retryWebSearchWithReplannedQueriesIfNeeded(
+                    searchDetail: toolResultDetail,
+                    userQuestion: userQuestion,
+                    images: images
+                ) {
+                    guard continueIfCurrentToolChainSession() else { return }
+                    canonicalResult = replannedSearchResult
+                    toolResultDetail = replannedSearchResult.detail
+                    followUpToolName = "web-search"
+                    toolResultDetail = normalizePhoneGroundPayloadIfNeeded(toolName: followUpToolName, detail: toolResultDetail)
+                    messages.append(ChatMessage(role: .skillResult, content: toolResultDetail, skillName: followUpToolName, skillResultKind: .toolExecution))
+
+                    if webSearchResultNeedsFetch(toolResultDetail),
+                       let fetchedResult = await automaticWebFetchFromSearchResult(toolResultDetail, userQuestion: userQuestion) {
+                        guard continueIfCurrentToolChainSession() else { return }
+                        canonicalResult = fetchedResult
+                        toolResultDetail = fetchedResult.detail
+                        followUpToolName = "web-fetch"
+                        toolResultDetail = normalizePhoneGroundPayloadIfNeeded(toolName: followUpToolName, detail: toolResultDetail)
+                        messages.append(ChatMessage(role: .skillResult, content: toolResultDetail, skillName: followUpToolName, skillResultKind: .toolExecution))
+                    }
+                }
+            }
+            guard continueIfCurrentToolChainSession() else { return }
+
+            if toolRegistry.shouldSkipFollowUp(for: followUpToolName) {
+                await publishSkillActivityEvent(
+                    skillID: ownerSkillId,
+                    skillName: displayName,
+                    toolName: followUpToolName,
+                    phase: .summarizing
+                )
+                guard continueIfCurrentToolChainSession() else { return }
+                messages.append(ChatMessage(role: .assistant, content: canonicalResult.summary))
+                finishTurnIfCurrentToolChainSession()
+                return
+            }
+
+            // Model-driven evidence curation (the SourceCurator step of a mature
+            // search agent): turn the raw multi-source evidence into a clean,
+            // query-focused fact digest before synthesis, so the model summarizes
+            // from extracted facts (verbatim values preserved) rather than raw page
+            // noise. Falls back to the raw summary when curation yields nothing.
+            // Headless — no extra visible re-stream.
+            var synthesisSummary = canonicalResult.summary
+            let curatedDigest = usesGroundedSourcesContract(followUpToolName)
+                ? await curateWebEvidence(
+                    userQuestion: userQuestion,
+                    toolResultDetail: toolResultDetail,
+                    images: images
+                )
+                : nil
+            guard continueIfCurrentToolChainSession() else { return }
+            if let digest = curatedDigest {
+                synthesisSummary = digest
+            }
+
+            // F3: R2 prompt = R1 prompt + R1 output + tool_result message.
+            // 物理上是 R1 conversation 的延伸 → KV cache 自然命中 R1 全部 token.
+            let followUpPrompt = PromptBuilder.appendToolResult(
+                toR1Prompt: prompt,
+                r1Output: fullText,
+                toolName: followUpToolName,
+                toolResultSummary: synthesisSummary
+            )
+
+            let selectedFollowUpPrompt = (effectiveEnableThinking || shouldUseCompactToolFollowUp(followUpPrompt, toolName: followUpToolName))
+                ? PromptBuilder.buildCompactToolAnswerPrompt(
+                    userQuestion: userQuestion,
+                    toolName: followUpToolName,
+                    toolResultSummary: synthesisSummary,
+                    currentImageCount: images.count,
+                    // 工具结果后的 R2/R3 是“基于已得证据输出最终答案/继续必要工具”的阶段。
+                    // Gemma 4 在这里重新开启 thinking 时容易输出未闭合 thought 通道, UI 会只显示思考卡片而没有最终答案。
+                    // 用户选择的 Think 仍作用于 R1 工具决策; 结果汇总阶段保持普通答案, 确保结果可见。
+                    enableThinking: false
+                )
+                : followUpPrompt
+
+            messages.append(ChatMessage(role: .assistant, content: "▍"))
+            let followUpIndex = messages.count - 1
+
+            // Grounded-web answers are post-processed after generation (citation
+            // normalization + contract validation, and sometimes a full repair
+            // regeneration), and that result overwrites this message via
+            // finalizeWebAnswer below. Streaming the draft first and then
+            // overwriting it produces a visible "refresh + re-output". So for the
+            // grounded-sources contract, generate headlessly: the card keeps the
+            // typing placeholder until the finalized answer is written exactly
+            // once. Non-grounded tool follow-ups keep streaming for live feedback.
+            await publishSkillActivityEvent(
+                skillID: ownerSkillId,
+                skillName: displayName,
+                toolName: followUpToolName,
+                phase: .summarizing
+            )
+            guard continueIfCurrentToolChainSession() else { return }
+            let groundedWebFollowUp = usesGroundedSourcesContract(followUpToolName)
+            let nextTextResult = groundedWebFollowUp
+                ? await streamLLM(prompt: selectedFollowUpPrompt, images: images, turnContext: turnContext)
+                : await streamLLM(prompt: selectedFollowUpPrompt, msgIndex: followUpIndex, images: images, turnContext: turnContext)
+            guard let nextText = nextTextResult else {
+                guard updateMessageStateIfCurrent(
+                    at: followUpIndex,
+                    role: .assistant,
+                    content: fallbackReplyForEmptyToolFollowUp(
+                        toolName: followUpToolName,
+                        toolResultSummary: canonicalResult.summary,
+                        toolResultDetail: toolResultDetail
+                    )
+                ) else { return }
+                finishTurnIfCurrentToolChainSession()
+                return
+            }
+            guard continueIfCurrentToolChainSession() else { return }
+
+            if !parseAllToolCalls(nextText).isEmpty {
+                log("[Agent] 检测到第 \(round + 1) 轮工具调用")
+                guard updateMessageContentIfCurrent(at: followUpIndex, content: "") else { return }
+                await executeToolChain(
+                    prompt: selectedFollowUpPrompt, fullText: nextText,
+                    userQuestion: userQuestion, images: images, round: round + 1, maxRounds: maxRounds,
+                    sessionID: toolChainSessionID,
+                    turnContext: turnContext
+                )
+            } else {
+                let cleaned = cleanOutput(nextText)
+                if cleaned.isEmpty
+                    || looksLikeStructuredIntermediateOutput(cleaned)
+                    || looksLikePromptEcho(cleaned) {
+                    guard updateMessageContentIfCurrent(
+                        at: followUpIndex,
+                        content: fallbackReplyForEmptyToolFollowUp(
+                            toolName: followUpToolName,
+                            toolResultSummary: canonicalResult.summary,
+                            toolResultDetail: toolResultDetail
+                        )
+                    ) else { return }
+                } else {
+                    let finalAnswer: String
+                    let finalToolName: String
+                    let finalToolResultSummary: String
+                    let finalToolResultDetail: String
+                    if let retry = await retryWebAnswerWithFallbackSourceIfNeeded(
+                        answer: cleaned,
+                        followUpToolName: followUpToolName,
+                        toolResultDetail: toolResultDetail,
+                        userQuestion: userQuestion,
+                        images: images
+                    ) {
+                        guard continueIfCurrentToolChainSession() else { return }
+                        finalAnswer = retry.answer
+                        finalToolName = retry.toolName
+                        finalToolResultSummary = retry.toolResultSummary
+                        finalToolResultDetail = retry.toolResultDetail
+                    } else {
+                        guard continueIfCurrentToolChainSession() else { return }
+                        finalAnswer = cleaned
+                        finalToolName = followUpToolName
+                        finalToolResultSummary = canonicalResult.summary
+                        finalToolResultDetail = toolResultDetail
+                    }
+                    let finalizedAnswer = await finalizeWebAnswer(
+                        finalAnswer,
+                        toolName: finalToolName,
+                        toolResultSummary: finalToolResultSummary,
+                        toolResultDetail: finalToolResultDetail,
+                        userQuestion: userQuestion,
+                        images: images
+                    )
+                    guard continueIfCurrentToolChainSession() else { return }
+                    guard updateMessageContentIfCurrent(at: followUpIndex, content: finalizedAnswer) else { return }
+                }
+                finishTurnIfCurrentToolChainSession()
+            }
+        } catch {
+            guard updateMessageStateIfCurrent(
+                at: cardIndex,
+                role: .system,
+                content: "done",
+                skillName: displayName
+            ) else { return }
+            messages.append(ChatMessage(role: .system, content: tr(
+                "这项操作没有完成：\(error.localizedDescription)",
+                "This action could not be completed: \(error.localizedDescription)",
+                "この操作は完了できませんでした: \(error.localizedDescription)"
+            )))
+            finishTurnIfCurrentToolChainSession()
+        }
+    }
+}

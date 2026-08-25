@@ -1,0 +1,1170 @@
+import CoreImage
+import Foundation
+
+// MARK: - Process Input
+//
+// 核心推理入口: processInput 处理用户输入 (文本/图像/音频),
+// 通过 prompt pipeline 构建完整 prompt 后调用 inference 流式生成。
+// 包含: 输入规范化, image follow-up 路由, skill 匹配,
+// prompt 构建, 上下文预算裁剪, 多模态/文本/planner 三条路径。
+
+extension AgentEngine {
+
+    func processInput(
+        _ text: String,
+        images: [PlatformImage] = [],
+        audio: AudioCaptureSnapshot? = nil,
+        replayImageAttachments: [ChatImageAttachment]? = nil,
+        attachReplayImagesToMessage: Bool = true,
+        forcedContextAct: DialogueAct? = nil
+    ) async {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let displayText = trimmed
+        let inputAttachments = images.compactMap(ChatImageAttachment.init(image:))
+        let displayAttachments = replayImageAttachments != nil && !attachReplayImagesToMessage
+            ? inputAttachments
+            : (replayImageAttachments ?? inputAttachments)
+        var promptAttachments = replayImageAttachments ?? inputAttachments
+        let audioClips = audio.flatMap(ChatAudioAttachment.init(snapshot:)).map { [$0] } ?? []
+        let audioInput = audio.map(AudioInput.from(snapshot:))
+        let normalizedText: String
+        if trimmed.isEmpty, !promptAttachments.isEmpty {
+            normalizedText = PromptLocale.current.describeImagePromptFallback
+        } else if audio != nil {
+            // 有音频就无脑前缀 anchor — E2B/E4B 小模型会把 "这是什么？" 之类短 prompt
+            // 当成问它自己, 给出 Gemma 自我介绍模板. 空 text 补一个默认意图作为填充,
+            // 不再分两个音频分支。偶尔出现的 "关于这段音频：请转写音频" 式轻微冗余可
+            // 接受, 胜过维护一套硬编 anchor 词表。
+            let intent = trimmed.isEmpty ? PromptLocale.current.transcribeAudioIntentFallback : trimmed
+            normalizedText = String(format: PromptLocale.current.audioContextFormat, intent)
+        } else {
+            normalizedText = trimmed
+        }
+        guard !normalizedText.isEmpty || !promptAttachments.isEmpty || audioInput != nil else { return }
+        let turnID = UUID()
+        let turnSessionID = sessionStore.currentSessionID
+        let isFirstMessage = messages.isEmpty
+        if isProcessing {
+            recordTurnRejected(
+                turnID: turnID,
+                sessionID: turnSessionID,
+                reason: "is_processing",
+                isFirstMessage: isFirstMessage
+            )
+            if !inference.isGenerating {
+                appendGenerationBusyMessage()
+            }
+            return
+        }
+
+        let currentUserMessage = ChatMessage(
+            role: .user,
+            content: displayText,
+            images: displayAttachments,
+            audios: audioClips
+        )
+        messages.append(currentUserMessage)
+
+        isProcessing = true
+        lastTurnRawModelOutputs.removeAll()
+        lastTurnPromptDiagnostics.removeAll()
+        lastTurnStreamingPrompt = nil
+        guard let turnContext = await beginGenerationTracking(
+            turnID: turnID,
+            sessionID: turnSessionID,
+            userMessageID: currentUserMessage.id,
+            isFirstMessage: isFirstMessage
+        ) else {
+            appendGenerationRejectedMessage()
+            isProcessing = false
+            return
+        }
+
+        var requiresMultimodal = !promptAttachments.isEmpty || audioInput != nil
+        var imageFollowUpBridgeSummary: String?
+        var forceImageFollowUpTextPrompt = false
+        let pendingImageFollowUpContext = !requiresMultimodal ? latestActiveImageFollowUpContext() : nil
+        var earlyAssistantPlaceholderIndex: Int?
+        if pendingImageFollowUpContext != nil {
+            messages.append(ChatMessage(role: .assistant, content: "▍"))
+            earlyAssistantPlaceholderIndex = messages.count - 1
+        }
+        if !requiresMultimodal,
+           let recentImageContext = pendingImageFollowUpContext {
+            let followUpRoute = await classifyImageFollowUpRoute(
+                assistantSummary: recentImageContext.assistantSummary,
+                userQuestion: normalizedText
+            )
+            switch followUpRoute {
+            case .reMultimodal:
+                promptAttachments = recentImageContext.attachments
+                requiresMultimodal = true
+                log("[ImageFollowUp] route=re_multimodal")
+            case .imageText:
+                imageFollowUpBridgeSummary = recentImageContext.assistantSummary
+                forceImageFollowUpTextPrompt = true
+                log("[ImageFollowUp] route=image_text")
+            case .normalText:
+                log("[ImageFollowUp] route=normal_text")
+            }
+            consumeActiveImageFollowUpContext()
+        }
+
+        applySamplingConfig()
+
+        var matchedSkillIdsForTurn = requiresMultimodal
+            ? []
+            : matchedSkillIds(for: normalizedText, allowSticky: false)
+        if !matchedSkillIdsForTurn.isEmpty {
+            log("[SkillRouter] source=trigger action=useSkill selected=\(matchedSkillIdsForTurn.joined(separator: ",")) reason=trigger_match")
+        }
+        var guardedRouteDecision: GuardedSkillRouteDecision?
+        if !requiresMultimodal, matchedSkillIdsForTurn.isEmpty {
+            guardedRouteDecision = guardedSkillRouteDecision(for: normalizedText)
+            if guardedRouteDecision?.action == .useSkill,
+               let skillID = guardedRouteDecision?.skillID {
+                matchedSkillIdsForTurn = [skillID]
+            }
+        }
+        let guardedRouteBlocksModelIntent = guardedRouteDecision?.action == .answerDirectly
+        var ios27RouteDecision: GuardedSkillRouteDecision?
+        if !requiresMultimodal, matchedSkillIdsForTurn.isEmpty, !guardedRouteBlocksModelIntent {
+            ios27RouteDecision = await ios27FoundationSkillRouteDecision(for: normalizedText)
+            if ios27RouteDecision?.action == .useSkill,
+               let skillID = ios27RouteDecision?.skillID {
+                matchedSkillIdsForTurn = [skillID]
+            }
+        }
+        let ios27RouteBlocksModelIntent = ios27RouteDecision?.action == .answerDirectly
+        if !requiresMultimodal, matchedSkillIdsForTurn.isEmpty, !guardedRouteBlocksModelIntent, !ios27RouteBlocksModelIntent {
+            matchedSkillIdsForTurn = await modelIntentRoutedSkillIds(for: normalizedText)
+        }
+        var allowPreloadedSkillFallbackForTurn = !matchedSkillIdsForTurn.isEmpty
+        var defaultSkillIdForTurn: String?
+        var forcedToolNameForTurn: String?
+        var suppressStickySkillRoutingForTurn = false
+        if !requiresMultimodal,
+           !forceImageFollowUpTextPrompt,
+           let previousArtifact = latestPriorContextArtifact() {
+            let refreshablePreviousToolArtifact = latestRefreshablePriorToolArtifact()
+            let previousSkillId = previousArtifact.skillId ?? refreshablePreviousToolArtifact?.skillId
+            let previousToolName = previousArtifact.toolName ?? refreshablePreviousToolArtifact?.toolName ?? ""
+            let previousSupportsRefresh = previousArtifact.supportsRefresh
+                || refreshablePreviousToolArtifact?.supportsRefresh == true
+            let routesToPreviousSkill = previousSkillId.map { matchedSkillIdsForTurn.contains($0) } == true
+                || (!previousToolName.isEmpty && matchedSkillIdsForTurn.contains(previousToolName))
+            let stickySkillId = matchedSkillIdsForTurn.isEmpty ? recentActiveSkillId() : nil
+            let shouldClassifyAgainstPrevious =
+                forcedContextAct != nil || routesToPreviousSkill || stickySkillId != nil || matchedSkillIdsForTurn.isEmpty
+            if shouldClassifyAgainstPrevious {
+                let decision = await classifyContextOperation(
+                    userQuestion: normalizedText,
+                    artifact: previousArtifact,
+                    forcedAct: forcedContextAct
+                )
+                if let decision {
+                    if decision.blocksToolExecution {
+                        switch decision.act {
+                        case .verifyLastResult, .explainLastResult, .clarifyLastResult, .elaborateLastResult, .transformLastResult:
+                            self.lastTurnMatchedSkillIds = []
+                            await answerFromPriorContextArtifact(
+                                userQuestion: normalizedText,
+                                artifact: previousArtifact,
+                                decision: decision,
+                                turnContext: turnContext
+                            )
+                            return
+                        case .cancelOrReject, .chitchat:
+                            suppressStickySkillRoutingForTurn = true
+                        case .newTask, .continueTask, .correctParameters, .refreshResult:
+                            break
+                        }
+                    }
+
+                    if matchedSkillIdsForTurn.isEmpty,
+                       decision.targetPreviousResult,
+                       decision.act.allowsToolExecution,
+                       previousSupportsRefresh,
+                       let previousSkillId {
+                        matchedSkillIdsForTurn = [previousSkillId]
+                        allowPreloadedSkillFallbackForTurn = true
+                    }
+                    if decision.targetPreviousResult,
+                       (decision.act == .correctParameters || decision.act == .refreshResult),
+                       previousSupportsRefresh,
+                       !previousToolName.isEmpty {
+                        forcedToolNameForTurn = previousToolName
+                    }
+                }
+                if matchedSkillIdsForTurn.isEmpty,
+                   !suppressStickySkillRoutingForTurn,
+                   let stickySkillId {
+                    matchedSkillIdsForTurn = [stickySkillId]
+                    allowPreloadedSkillFallbackForTurn = true
+                    if stickySkillId == previousSkillId,
+                       previousSupportsRefresh,
+                       !previousToolName.isEmpty {
+                        forcedToolNameForTurn = previousToolName
+                    }
+                }
+            }
+        } else if !requiresMultimodal,
+                  matchedSkillIdsForTurn.isEmpty,
+                  let stickySkillId = recentActiveSkillId() {
+            matchedSkillIdsForTurn = [stickySkillId]
+            allowPreloadedSkillFallbackForTurn = true
+        }
+        // Default Skill 是最后一级“已选 Skill”回退：显式 trigger、守护/模型
+        // 选中的 Skill 和上一轮 sticky Skill 都优先。answerDirectly 只会阻止语义
+        // 路由，没有选中 Skill 时仍由默认 Skill 提供人设/指令，这是默认模式的预期行为。
+        // 图片/音频与图片文本追问保持原有专用路径。
+        if !requiresMultimodal,
+           !forceImageFollowUpTextPrompt,
+           matchedSkillIdsForTurn.isEmpty,
+           let defaultSkillId = skillRegistry.defaultSkillId() {
+            matchedSkillIdsForTurn = [defaultSkillId]
+            defaultSkillIdForTurn = defaultSkillId
+            log("[SkillRouter] source=default action=useSkill selected=\(defaultSkillId) reason=no_other_route")
+        }
+        // 暴露给 CLI harness (ScenarioRunner) 做断言. iOS UI 不读, 0 行为影响.
+        self.lastTurnMatchedSkillIds = matchedSkillIdsForTurn
+        if activityEventSink != nil,
+           !requiresMultimodal,
+           let acceptedSkillID = matchedSkillIdsForTurn.first {
+            await publishSkillActivityEvent(
+                skillID: acceptedSkillID,
+                skillName: findDisplayName(for: acceptedSkillID),
+                toolName: nil,
+                phase: .accepted
+            )
+        }
+        // T2 (2026-04-17): 把 Planner 入口从 matched>=2 降到 matched>=1.
+        //
+        // 动机: Router 的 substring trigger 命中存在大量边界 fail (e.g. 用户说
+        // "评审会"但 trigger 是"会议", 用户说"查王总电话"但 trigger 是"查电话"),
+        // 漏掉一个 skill → planner 没被触发 → 多 skill 任务退化成单 skill agent 路径,
+        // T2c-revert (2026-04-17): 恢复 matched>=2 门槛.
+        //
+        // T2c 把门槛从 >=2 改成 >=1, 让 Selection LLM 每轮都跑.
+        // 真机验证: Selection 每次 ~1400 tok 全量 prefill (KV hit 4-6%),
+        // E4B 稳态 headroom ~1000-1200 MB, 多轮必崩 (jetsam).
+        // 且 Selection 实际表现: matched=1 返回同一个 skill (白跑),
+        // matched=2 返回子集 (比 Router 更差). 收益 < 0, 风险 = jetsam.
+        //
+        // 回到 >=2: 单 skill 直接 agent 路径, 不进 Planner, 不跑 Selection.
+        let shouldUsePlanner = !requiresMultimodal && matchedSkillIdsForTurn.count >= 2
+        let shouldUseFullAgentPrompt =
+            !requiresMultimodal
+            && !matchedSkillIdsForTurn.isEmpty
+        let activeSkillInfos: [SkillInfo]
+        if shouldUseFullAgentPrompt {
+            if matchedSkillIdsForTurn.isEmpty {
+                activeSkillInfos = enabledSkillInfos
+            } else {
+                let selectedIds = Set(matchedSkillIdsForTurn)
+                let matchedInfos = enabledSkillInfos.filter { selectedIds.contains($0.name) }
+                activeSkillInfos = matchedInfos.isEmpty ? enabledSkillInfos : matchedInfos
+            }
+        } else {
+            activeSkillInfos = []
+        }
+        let policy = catalog.runtimePolicy(for: catalog.selectedModel.id)
+        let headroomMB = Double(MemoryStats.headroomMB)
+        let historyDepth = requiresMultimodal ? 0 : policy.safeHistoryDepth(headroomMB: headroomMB)
+        let promptImages = promptImages(historyDepth: historyDepth, currentImages: promptAttachments)
+
+        // Tag 这条 assistant placeholder 的 skillName, 让 sticky routing 在
+        // 下一轮追问时能识别上下文 (即使本轮 LLM 没调 tool 只是澄清).
+        //
+        // 只对 type: device / network 的 skill 打 tag — content skill (如 translate)
+        // 是一问一答的纯变换, 它的 assistant reply 代表"已完成", 不应该让
+        // 下一轮闲聊被 sticky 粘回去翻译。联网搜索可能有"打开第一条/再查它"这种
+        // 追问, 需要保持上下文。框架在这里按 skill metadata 决定, 不硬编具体 skill 名。
+        let stickyEligibleSkillID: String? = {
+            guard let id = matchedSkillIdsForTurn.first,
+                  let def = skillRegistry.getDefinition(id) else { return nil }
+            return def.metadata.history.keepActiveSkill ? id : nil
+        }()
+
+        if requiresMultimodal {
+            let msgIndex: Int
+            if let existingIndex = earlyAssistantPlaceholderIndex,
+               messages.indices.contains(existingIndex) {
+                msgIndex = existingIndex
+            } else {
+                messages.append(ChatMessage(role: .assistant, content: "▍", skillName: stickyEligibleSkillID))
+                msgIndex = messages.count - 1
+            }
+            // Pure-vision path 默认返回空 system prompt (见 PromptBuilder.multimodalSystemPrompt),
+            // 空字符串时跳过 .system(...) 注入, 让 Gemma 4 只看 image + user text,
+            // 避免任何 system 框架把小模型带进"请提供图片"漂移.
+            let systemPrompt = PromptBuilder.multimodalSystemPrompt(
+                hasImages: !promptImages.isEmpty,
+                hasAudio: audioInput != nil,
+                enableThinking: effectiveEnableThinking
+            )
+            let multimodalPlan = makePromptPlan(
+                prompt: systemPrompt.isEmpty ? normalizedText : systemPrompt + "\n" + normalizedText,
+                shape: .multimodal,
+                history: messages,
+                historyDepth: 0
+            )
+            await prepareSessionGroupTransitionIfNeeded(for: multimodalPlan)
+            var multimodalBuffer = ""
+
+            markStreamingStarted(context: turnContext)
+            inference.generateMultimodal(
+                images: promptImages,
+                audios: audioInput.map { [$0] } ?? [],
+                prompt: normalizedText,
+                systemPrompt: systemPrompt
+            ) { [weak self] token in
+                guard let self = self,
+                      self.messages.indices.contains(msgIndex) else { return }
+                guard self.isCurrentTurnOwner(turnContext) else {
+                    self.inference.cancel()
+                    return
+                }
+                multimodalBuffer += token
+                let cleaned = self.cleanOutputStreaming(multimodalBuffer)
+                self.enqueueStreamingMessageContentUpdate(
+                    at: msgIndex,
+                    content: (cleaned.isEmpty ? "" : cleaned) + "▍"
+                )
+            } onComplete: { [weak self] result in
+                guard let self = self else { return }
+                guard self.isCurrentTurnOwner(turnContext) else {
+                    self.finishTurn(context: turnContext)
+                    return
+                }
+                guard self.messages.indices.contains(msgIndex) else {
+                    self.finishTurn(context: turnContext)
+                    return
+                }
+                switch result {
+                case .success(let fullText):
+                    self.lastTurnRawModelOutputs.append(fullText)
+                    #if DEBUG
+                    log("[Agent] 1st raw: \(fullText.prefix(300))")
+                    #endif
+                    let cleaned = self.cleanOutput(fullText)
+                    self.setStreamingMessageContent(
+                        at: msgIndex,
+                        content: cleaned.isEmpty ? PromptLocale.current.emptyReplyPlaceholder : cleaned
+                    )
+                    self.recordRecentImageFollowUpContext(
+                        attachments: promptAttachments,
+                        assistantSummary: cleaned.isEmpty ? fullText : cleaned
+                    )
+                    self.recordCompletedObservation(plan: multimodalPlan)
+                    self.finishTurn(context: turnContext)
+                case .failure(let error):
+                    if self.isUserCancellationError(error) {
+                        log("[Agent] multimodal cancelled")
+                        self.settleCancelledMessage(at: msgIndex)
+                        self.finishTurn(context: turnContext, userCancelled: true)
+                        return
+                    }
+                    log("[Agent] multimodal failed: \(error.localizedDescription)")
+                    if self.messages.indices.contains(msgIndex) {
+                        self.messages[msgIndex].update(role: .system, content: "❌ \(error.localizedDescription)")
+                    }
+                    self.recordCompletedObservation(
+                        plan: multimodalPlan,
+                        tokenCapHit: self.classifyTokenCapHit(error),
+                        memoryFloorHit: self.classifyMemoryFloorHit(error)
+                    )
+                    self.finishTurn(context: turnContext, error: error.localizedDescription)
+                }
+            }
+            return
+        }
+
+        // Router 确定性匹配到的 skill: 预加载 tool 调用 schema + 工具白名单,
+        // 让模型在 round 1 就看到 schema, 跳过 load_skill 往返。对小模型
+        // (E2B/E4B) 效果显著 — 避免它们在"要不要 load_skill"这种主观判断上翻车。
+        //
+        // Path 1-B (2026-04-17): memory-aware degradation.
+        //   - 内存富余 (HARNESS Mac, 真机第一轮): 用完整 SKILL body, 保留所有
+        //     行为细则 (追问逻辑, 跨轮合并, 多 tool 内部路由).
+        //   - 内存吃紧 (真机第 2/3 轮起, headroom < 1500 MB): 退化到 compactSchema,
+        //     ~200 chars/SKILL, 牺牲行为细节换 prefill 内存峰值, 避免 jetsam.
+        //
+        // 不是规则, 是 memory-pressure-aware degradation —— 跟 jetsam 共生的
+        // 工程实践. 阈值 1500 MB 是经验值 (E4B 单次 prefill ~700MB 峰值 + safety).
+        let useCompactSchema = MemoryStats.headroomMB < 1500
+        if useCompactSchema {
+            log("[Agent] preload compact schema (headroom=\(MemoryStats.headroomMB) MB < 1500)")
+        }
+        let turnRequiresTimeAnchor = requiresTimeAnchor(forSkillIds: matchedSkillIdsForTurn)
+        let includeImageHistoryMarkers =
+            HotfixFeatureFlags.useHotfixPromptPipeline
+            && HotfixFeatureFlags.enableImageFollowUpRegrounding
+        let preloadedSkills: [PromptBuilder.PreloadedSkill] = matchedSkillIdsForTurn.compactMap { id in
+            guard let body = skillRegistry.loadBody(skillId: id),
+                  let def = skillRegistry.getDefinition(id) else { return nil }
+            let defaultAllowedTools = def.metadata.allowedTools
+            let scopedAllowedTools: [String] = {
+                guard let forcedToolNameForTurn else {
+                    return defaultAllowedTools
+                }
+                let canonicalForcedTool = canonicalToolName(
+                    forcedToolNameForTurn,
+                    arguments: [:],
+                    preferredSkillId: id
+                )
+                guard defaultAllowedTools.contains(canonicalForcedTool) else {
+                    return defaultAllowedTools
+                }
+                return [canonicalForcedTool]
+            }()
+            let registered = toolRegistry.toolsFor(names: scopedAllowedTools)
+            let toolTuples = registered.map { (name: $0.name, description: $0.description, parameters: $0.parameters, requiredParameters: $0.requiredParameters) }
+            let compact = PromptBuilder.PreloadedSkill.makeCompactSchema(
+                skillName: def.metadata.name,
+                tools: toolTuples
+            )
+            let compactPrompt: String
+            if let instructions = def.metadata.compactInstructions?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+               !instructions.isEmpty {
+                compactPrompt = instructions + "\n" + compact
+            } else {
+                compactPrompt = compact
+            }
+            // 当 headroom 充裕, 把 body 同时塞进 compactSchema 字段, prompt 用的就是 body
+            // (零行为变化). 当 headroom 紧, compactSchema 是真紧凑版本, prompt 用紧凑.
+            // 最后一级默认回退也始终用紧凑指令，避免每个普通文本轮都注入完整 Skill body。
+            // 显式命中同一 Skill 时仍会在内存充足时使用完整 body。
+            // 参数修正/刷新上一轮结果时, 只暴露上一轮工具, 避免小模型把单项查询升级成报告。
+            return PromptBuilder.PreloadedSkill(
+                id: id,
+                displayName: def.metadata.name,
+                type: def.metadata.type,
+                activationMode: def.metadata.activationMode,
+                body: body,
+                allowedTools: scopedAllowedTools,
+                compactSchema: (
+                    useCompactSchema
+                    || scopedAllowedTools != defaultAllowedTools
+                    || defaultSkillIdForTurn == id
+                ) ? compactPrompt : body
+            )
+        }
+
+        // T2 (2026-04-17): 当 matched>=1, planner 和 agent 路径同时可能跑.
+        // - Planner 入参用 LIGHT prompt (它内部只取 system block, 大 agent prompt
+        //   会让 plan JSON 翻车 — E4B 在 3.6K char 输入下截断).
+        // - 落回单 skill streaming 用 agent prompt (含 preloaded SKILL body, 能调 tool).
+        let basePriorHistory = Array(messages.dropLast().suffix(historyDepth))
+        var promptBundle: (
+            lightPrompt: String,
+            agentPrompt: String?,
+            plannerInputPrompt: String,
+            streamingPrompt: String,
+            canUseDelta: Bool,
+            streamingPlanningHistory: [ChatMessage]
+        )
+        if forceImageFollowUpTextPrompt, let imageFollowUpBridgeSummary {
+            let imageFollowUpTextPrompt = PromptBuilder.buildImageFollowUpTextPrompt(
+                userMessage: normalizedText,
+                assistantSummary: imageFollowUpBridgeSummary,
+                systemPrompt: config.systemPrompt,
+                enableThinking: effectiveEnableThinking
+            )
+            promptBundle = (
+                lightPrompt: imageFollowUpTextPrompt,
+                agentPrompt: nil,
+                plannerInputPrompt: imageFollowUpTextPrompt,
+                streamingPrompt: imageFollowUpTextPrompt,
+                canUseDelta: false,
+                streamingPlanningHistory: []
+            )
+        } else {
+            promptBundle = buildTextPromptBundle(
+                priorHistory: basePriorHistory,
+                normalizedText: normalizedText,
+                shouldUsePlanner: shouldUsePlanner,
+                shouldUseFullAgentPrompt: shouldUseFullAgentPrompt,
+                includeTimeAnchor: turnRequiresTimeAnchor,
+                includeImageHistoryMarkers: includeImageHistoryMarkers,
+                imageFollowUpBridgeSummary: imageFollowUpBridgeSummary,
+                activeSkillInfos: activeSkillInfos,
+                matchedSkillIdsForTurn: matchedSkillIdsForTurn,
+                preloadedSkills: preloadedSkills,
+                currentUserMessage: currentUserMessage
+            )
+        }
+        let textPromptShape = promptShape(
+            requiresMultimodal: false,
+            shouldUseFullAgentPrompt: shouldUseFullAgentPrompt,
+            canUseDelta: promptBundle.canUseDelta
+        )
+        var textPromptPlan = makePromptPlan(
+            prompt: promptBundle.streamingPrompt,
+            shape: textPromptShape,
+            history: promptBundle.streamingPlanningHistory,
+            historyDepth: promptBundle.streamingPlanningHistory.count
+        )
+        if HotfixFeatureFlags.useHotfixPromptPipeline
+            && HotfixFeatureFlags.enablePreflightBudget
+            && !shouldUsePlanner
+            && !promptBundle.canUseDelta {
+            var trimmedPriorHistory = basePriorHistory
+            while exceedsSafeContextBudget(textPromptPlan.budgetDecision) {
+                guard HotfixFeatureFlags.enableHistoryTrim,
+                      let nextTrimmedHistory = ConversationMemoryPolicy.nextTrimmedPriorHistory(
+                        from: trimmedPriorHistory,
+                        historyPolicyForSkillOrTool: { [weak self] name in
+                            self?.historyPolicy(forSkillOrToolName: name)
+                        }
+                      ) else {
+                    let hardRejectMessage = PromptLocale.current.hardRejectContextTooLong
+                    if let existingIndex = earlyAssistantPlaceholderIndex,
+                       messages.indices.contains(existingIndex) {
+                        messages[existingIndex].update(role: .system, content: hardRejectMessage)
+                    } else {
+                        messages.append(ChatMessage(role: .system, content: hardRejectMessage))
+                    }
+                    recordCompletedObservation(
+                        plan: textPromptPlan,
+                        advancePromptPipelineState: false,
+                        preflightHardReject: true
+                    )
+                    finishTurn(context: turnContext)
+                    return
+                }
+
+                trimmedPriorHistory = nextTrimmedHistory
+                if forceImageFollowUpTextPrompt, let imageFollowUpBridgeSummary {
+                    let imageFollowUpTextPrompt = PromptBuilder.buildImageFollowUpTextPrompt(
+                        userMessage: normalizedText,
+                        assistantSummary: imageFollowUpBridgeSummary,
+                        systemPrompt: config.systemPrompt,
+                        enableThinking: effectiveEnableThinking
+                    )
+                    promptBundle = (
+                        lightPrompt: imageFollowUpTextPrompt,
+                        agentPrompt: nil,
+                        plannerInputPrompt: imageFollowUpTextPrompt,
+                        streamingPrompt: imageFollowUpTextPrompt,
+                        canUseDelta: false,
+                        streamingPlanningHistory: []
+                    )
+                } else {
+                    promptBundle = buildTextPromptBundle(
+                        priorHistory: trimmedPriorHistory,
+                        normalizedText: normalizedText,
+                        shouldUsePlanner: shouldUsePlanner,
+                        shouldUseFullAgentPrompt: shouldUseFullAgentPrompt,
+                        includeTimeAnchor: turnRequiresTimeAnchor,
+                        includeImageHistoryMarkers: includeImageHistoryMarkers,
+                        imageFollowUpBridgeSummary: imageFollowUpBridgeSummary,
+                        activeSkillInfos: activeSkillInfos,
+                        matchedSkillIdsForTurn: matchedSkillIdsForTurn,
+                        preloadedSkills: preloadedSkills,
+                        currentUserMessage: currentUserMessage
+                    )
+                }
+                textPromptPlan = makePromptPlan(
+                    prompt: promptBundle.streamingPrompt,
+                    shape: textPromptShape,
+                    history: promptBundle.streamingPlanningHistory,
+                    historyDepth: promptBundle.streamingPlanningHistory.count
+                )
+            }
+        }
+        let lightPrompt = promptBundle.lightPrompt
+        let plannerInputPrompt = promptBundle.plannerInputPrompt
+        let streamingPrompt = promptBundle.streamingPrompt
+        let runtimeToolScope = runtimeToolScope(
+            for: preloadedSkills,
+            shouldUseFullAgentPrompt: shouldUseFullAgentPrompt
+        )
+        lastTurnStreamingPrompt = streamingPrompt
+        let canUseDelta = promptBundle.canUseDelta
+        if canUseDelta {
+            log("[Agent] KV cache delta mode: \(streamingPrompt.count) chars (vs full \(lightPrompt.count) chars)")
+        }
+        await prepareSessionGroupTransitionIfNeeded(for: textPromptPlan)
+        log("[Agent] text prompt mode=\(shouldUseFullAgentPrompt ? "agent" : "light"), planner-input-chars=\(plannerInputPrompt.count), streaming-chars=\(streamingPrompt.count), skills=\(activeSkillInfos.count)")
+        logPromptDiagnostics(
+            label: shouldUseFullAgentPrompt ? "processInput.agent" : "processInput.light",
+            prompt: streamingPrompt
+        )
+
+        let msgIndex: Int
+        if let existingIndex = earlyAssistantPlaceholderIndex,
+           messages.indices.contains(existingIndex) {
+            msgIndex = existingIndex
+        } else {
+            messages.append(ChatMessage(role: .assistant, content: "▍", skillName: stickyEligibleSkillID))
+            msgIndex = messages.count - 1
+        }
+
+        if shouldUsePlanner {
+            log("[Agent] planner path triggered revision=\(plannerRevision)")
+            let plannerHandled = await executePlannedSkillChainIfPossible(
+                prompt: plannerInputPrompt,
+                userQuestion: normalizedText,
+                images: promptImages,
+                turnContext: turnContext
+            )
+
+            if plannerHandled {
+                if messages.indices.contains(msgIndex),
+                   messages[msgIndex].role == .assistant,
+                   messages[msgIndex].content == "▍" {
+                    messages.remove(at: msgIndex)
+                }
+                return
+            }
+
+            // T2 (2026-04-17): planner 未处理 (Selection LLM 判定真单 skill) →
+            // 不显示错误, 沉默地落回单 skill agent 路径 (placeholder ▍ 还在,
+            // 下面 streaming 代码会填充).
+            log("[Agent] planner not handled, falling back to single-skill agent path")
+        }
+
+        var detectedToolCall = false
+        var buffer = ""
+        var bufferFlushed = false
+
+        markStreamingStarted(context: turnContext)
+        inference.generate(
+            prompt: streamingPrompt,
+            runtimeToolScope: runtimeToolScope,
+            onToken: { [weak self] token in
+                guard let self = self,
+                      self.messages.indices.contains(msgIndex) else { return }
+                guard self.isCurrentTurnOwner(turnContext) else {
+                    self.inference.cancel()
+                    return
+                }
+
+                if detectedToolCall {
+                    buffer += token
+                    return
+                }
+
+                buffer += token
+
+                if buffer.contains("<tool_call>") {
+                    detectedToolCall = true
+                    return
+                }
+
+                if forceImageFollowUpTextPrompt {
+                    return
+                }
+
+                if !bufferFlushed {
+                    let trimmed = buffer.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if trimmed.isEmpty { return }
+                    if "<tool_call>".hasPrefix(trimmed) { return }
+                    bufferFlushed = true
+                    self.enqueueStreamingMessageContentUpdate(
+                        at: msgIndex,
+                        content: self.cleanOutputStreaming(buffer)
+                    )
+                    return
+                }
+
+                let cleaned = self.cleanOutputStreaming(buffer)
+                if !cleaned.isEmpty {
+                    self.enqueueStreamingMessageContentUpdate(at: msgIndex, content: cleaned)
+                }
+            },
+            onComplete: { [weak self] result in
+                guard let self = self else { return }
+                guard self.isCurrentTurnOwner(turnContext) else {
+                    self.finishTurn(context: turnContext)
+                    return
+                }
+                guard self.messages.indices.contains(msgIndex) else {
+                    self.finishTurn(context: turnContext)
+                    return
+                }
+                switch result {
+                case .success(let fullText):
+                    self.lastTurnRawModelOutputs.append(fullText)
+
+                    if self.parseToolCall(fullText) != nil {
+                        self.setStreamingMessageContent(at: msgIndex, content: "")
+                        self.recordCompletedObservation(plan: textPromptPlan)
+                        // Tool chain continues the turn — txn stays .streaming,
+                        // finishTurn() will be called when the chain completes.
+                        self.activeTurnTask = Task { [weak self] in
+                            guard let self else { return }
+                            await self.executeToolChain(
+                                prompt: streamingPrompt,
+                                fullText: fullText,
+                                userQuestion: normalizedText,
+                                images: promptImages,
+                                sessionID: turnContext.sessionID,
+                                turnContext: turnContext
+                            )
+                        }
+                        return
+                    }
+
+                    let cleaned = self.cleanOutput(fullText)
+                    if shouldUseFullAgentPrompt,
+                       matchedSkillIdsForTurn.count == 1,
+                       !preloadedSkills.isEmpty,
+                       self.canFallbackToPreloadedSkillTool(
+                           skillIds: matchedSkillIdsForTurn,
+                           preloadedSkills: preloadedSkills
+                       ) {
+                        if allowPreloadedSkillFallbackForTurn {
+                            log("[Agent] preloaded skill fallback triggered after missing tool_call")
+                            self.setStreamingMessageContent(at: msgIndex, content: "")
+                            self.recordCompletedObservation(plan: textPromptPlan)
+                            self.activeTurnTask = Task { [weak self] in
+                                guard let self else { return }
+                                await self.executePreloadedSkillToolFallback(
+                                    extractionPromptBase: lightPrompt,
+                                    toolChainPrompt: streamingPrompt,
+                                    userQuestion: normalizedText,
+                                    skillIds: matchedSkillIdsForTurn,
+                                    preloadedSkills: preloadedSkills,
+                                    images: promptImages,
+                                    msgIndex: msgIndex,
+                                    fallbackText: cleaned,
+                                    turnContext: turnContext
+                                )
+                            }
+                            return
+                        }
+                    }
+
+                    self.recordCompletedObservation(plan: textPromptPlan)
+                    if forceImageFollowUpTextPrompt,
+                       let imageFollowUpBridgeSummary,
+                       !cleaned.isEmpty {
+                        self.activeTurnTask = Task { [weak self] in
+                            guard let self else { return }
+                            let repaired = await self.streamImageFollowUpStableReply(
+                                cleanedDraft: cleaned,
+                                assistantSummary: imageFollowUpBridgeSummary,
+                                userQuestion: normalizedText,
+                                msgIndex: msgIndex
+                            )
+                            if self.messages.indices.contains(msgIndex) {
+                                self.setStreamingMessageContent(
+                                    at: msgIndex,
+                                    content: repaired.isEmpty ? PromptLocale.current.emptyReplyPlaceholder : repaired
+                                )
+                            }
+                            self.finishTurn(context: turnContext)
+                        }
+                        return
+                    }
+                    self.setStreamingMessageContent(
+                        at: msgIndex,
+                        content: cleaned.isEmpty ? PromptLocale.current.emptyReplyPlaceholder : cleaned
+                    )
+                    self.finishTurn(context: turnContext)
+                case .failure(let error):
+                    if self.isUserCancellationError(error) {
+                        log("[Agent] generation cancelled")
+                        self.settleCancelledMessage(at: msgIndex)
+                        self.finishTurn(context: turnContext, userCancelled: true)
+                        return
+                    }
+                    if self.messages.indices.contains(msgIndex) {
+                        self.messages[msgIndex].update(role: .system, content: "❌ \(error.localizedDescription)")
+                    }
+                    self.recordCompletedObservation(
+                        plan: textPromptPlan,
+                        tokenCapHit: self.classifyTokenCapHit(error),
+                        memoryFloorHit: self.classifyMemoryFloorHit(error)
+                    )
+                    self.finishTurn(context: turnContext, error: error.localizedDescription)
+                }
+            }
+        )
+    }
+
+    func runtimeToolScope(
+        for preloadedSkills: [PromptBuilder.PreloadedSkill],
+        shouldUseFullAgentPrompt: Bool
+    ) -> RuntimeToolScope {
+        guard shouldUseFullAgentPrompt else {
+            return RuntimeToolScope()
+        }
+        return RuntimeToolScope(toolNames: preloadedSkills.flatMap(\.allowedTools))
+    }
+
+
+    // MARK: - Skill 结果后的后续推理（支持多轮工具链）
+
+    func streamLLM(
+        prompt: String,
+        images: [CIImage],
+        turnContext: GenerationTurnContext? = nil
+    ) async -> String? {
+        logPromptDiagnostics(label: "streamLLM.headless", prompt: prompt)
+        return await withCheckedContinuation { (continuation: CheckedContinuation<String?, Never>) in
+            inference.generate(
+                prompt: prompt,
+                onToken: { [weak self] _ in
+                    guard let self, let turnContext else { return }
+                    guard self.isCurrentTurnOwner(turnContext) else {
+                        self.inference.cancel()
+                        return
+                    }
+                },
+                onComplete: { result in
+                    if let turnContext, !self.isCurrentTurnOwner(turnContext) {
+                        continuation.resume(returning: nil)
+                        return
+                    }
+                    switch result {
+                    case .success(let text):
+                        self.lastTurnRawModelOutputs.append(text)
+                        log("[Agent] LLM raw: \(text.prefix(300))")
+                        continuation.resume(returning: text)
+                    case .failure(let error):
+                        log("[Agent] LLM failed: \(error.localizedDescription)")
+                        continuation.resume(returning: nil)
+                    }
+                }
+            )
+        }
+    }
+
+    func streamLLM(
+        prompt: String,
+        msgIndex: Int,
+        images: [CIImage],
+        turnContext: GenerationTurnContext? = nil
+    ) async -> String? {
+        logPromptDiagnostics(label: "streamLLM.ui", prompt: prompt)
+        var buffer = ""
+        return await withCheckedContinuation { (continuation: CheckedContinuation<String?, Never>) in
+            var toolCallDetected = false
+            var bufferFlushed = false
+            inference.generate(
+                prompt: prompt,
+                onToken: { [weak self] token in
+                    guard let self = self,
+                          self.messages.indices.contains(msgIndex) else { return }
+                    if let turnContext, !self.isCurrentTurnOwner(turnContext) {
+                        self.inference.cancel()
+                        return
+                    }
+                    buffer += token
+
+                if toolCallDetected { return }
+                if buffer.contains("<tool_call>") {
+                    toolCallDetected = true
+                    if bufferFlushed && self.messages[msgIndex].role == .assistant {
+                        self.setStreamingMessageContent(at: msgIndex, content: "")
+                    }
+                    return
+                }
+
+                if !bufferFlushed {
+                    let trimmed = buffer.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if trimmed.isEmpty { return }
+                    if "<tool_call>".hasPrefix(trimmed) { return }
+                    bufferFlushed = true
+                }
+
+                let cleaned = self.cleanOutputStreaming(buffer)
+                if !cleaned.isEmpty && self.messages[msgIndex].role == .assistant {
+                    self.enqueueStreamingMessageContentUpdate(at: msgIndex, content: cleaned)
+                }
+            },
+            onComplete: { [weak self] result in
+                guard let self = self else {
+                    continuation.resume(returning: nil)
+                    return
+                }
+                if let turnContext, !self.isCurrentTurnOwner(turnContext) {
+                    continuation.resume(returning: nil)
+                    return
+                }
+                switch result {
+                case .success(let text):
+                    self.flushPendingStreamingMessageContentUpdates()
+                    self.lastTurnRawModelOutputs.append(text)
+                    log("[Agent] LLM raw: \(text.prefix(300))")
+                    continuation.resume(returning: text)
+                case .failure(let error):
+                    if self.isUserCancellationError(error) {
+                        log("[Agent] LLM cancelled")
+                        if self.messages.indices.contains(msgIndex) {
+                            self.settleCancelledMessage(at: msgIndex)
+                        }
+                        self.finishTurn(context: turnContext, userCancelled: true)
+                        continuation.resume(returning: nil)
+                        return
+                    }
+                    if self.messages.indices.contains(msgIndex) {
+                        self.messages[msgIndex].update(role: .system, content: "❌ \(error.localizedDescription)")
+                    }
+                    continuation.resume(returning: nil)
+                }
+            }
+            )
+        }
+    }
+
+
+    // MARK: - Generation Tracking (Phase 4)
+
+    /// Begin generation transaction tracking at the start of a user turn.
+    /// Creates a coordinator transaction if the runtime is ready.
+    /// Rejects with a visible message and structured event instead of silently
+    /// dropping the user message when the runtime is loading or a prior
+    /// transaction is stuck.
+    @discardableResult
+    func beginGenerationTracking(
+        turnID: UUID,
+        sessionID: UUID,
+        userMessageID: UUID,
+        isFirstMessage: Bool
+    ) async -> GenerationTurnContext? {
+        if let staleTransaction = coordinator.currentTransaction,
+           !staleTransaction.isTerminal,
+           staleTransaction.elapsed >= 45 {
+            let ageMs = Int(staleTransaction.elapsed * 1000)
+            let recovered = await coordinator.recoverStuckGenerationIfBackendIdle(
+                minimumAge: 45,
+                reason: "backend_idle_timeout"
+            )
+            PCLog.transactionStuck(
+                transactionID: staleTransaction.id,
+                sessionID: sessionID,
+                ageMs: ageMs,
+                runtimeState: String(describing: coordinator.sessionState),
+                backendGenerating: inference.isGenerating,
+                action: recovered == nil ? "observed" : "recovered_backend_idle"
+            )
+        }
+
+        guard let txn = coordinator.beginGenerationIfPossible() else {
+            let reason = generationRejectionReason()
+            recordTurnRejected(
+                turnID: turnID,
+                sessionID: sessionID,
+                reason: reason,
+                isFirstMessage: isFirstMessage
+            )
+            return nil
+        }
+
+        let context = GenerationTurnContext(
+            turnID: turnID,
+            sessionID: sessionID,
+            transactionID: txn.id,
+            userMessageID: userMessageID,
+            createdAt: Date()
+        )
+        activeTurnContext = context
+        activeTurnTask = nil
+        PCLog.event(
+            "turn_started",
+            detail: "turn_id=\(turnID.uuidString) session_id=\(sessionID.uuidString) txn_id=\(txn.id.uuidString) model=\(txn.modelID)"
+        )
+        return context
+        // Don't call txn.begin() yet — that happens when inference actually starts streaming.
+    }
+
+    /// Signal that the inference stream has started for the current transaction.
+    /// Call immediately before `inference.generate()` or `inference.generateMultimodal()`.
+    func markStreamingStarted(context: GenerationTurnContext) {
+        guard isCurrentTurnTransactionOwner(context) else {
+            PCLog.warn("turn_stream_start_ignored", detail: ownerDetail(context))
+            return
+        }
+        coordinator.currentTransaction?.begin()
+    }
+
+    /// Finish the current generation turn.
+    ///
+    /// Commits or terminates the active transaction based on its current state,
+    /// then clears `isProcessing`. Safe to call even if no transaction is active
+    /// (graceful no-op for the migration period).
+    ///
+    /// - Parameter error: If non-nil, the turn failed and the transaction is
+    ///   terminated with an error reason. If nil, the turn succeeded normally.
+    ///   If the transaction is in `.cancelling` state (user pressed stop),
+    ///   it's terminated as cancelled regardless of this parameter.
+    func finishTurn(
+        context: GenerationTurnContext? = nil,
+        error: String? = nil,
+        userCancelled: Bool = false
+    ) {
+        if let context, !isCurrentTurnTransactionOwner(context) {
+            PCLog.warn("finish_turn_ignored_non_owner", detail: ownerDetail(context))
+            return
+        }
+
+        let txn = coordinator.currentTransaction
+        if let txn, !txn.isTerminal {
+            let wasCancelling = txn.state == .cancelling
+            if userCancelled || wasCancelling {
+                txn.markTerminated(reason: .userCancelled)
+                if wasCancelling {
+                    // Split cancel flow: cancelCurrentGeneration() still owns KV reset
+                    // and the final ready transition.
+                } else {
+                    coordinator.completeGeneration()
+                }
+            } else if let error {
+                txn.markTerminated(reason: .error(error))
+                coordinator.completeGeneration()
+            } else {
+                // Normal completion. If txn is still .created (e.g. planner
+                // path where streamLLM() ran but markStreamingStarted() was
+                // never called explicitly), transition through begin→commit.
+                if txn.state == .created {
+                    txn.begin()
+                }
+                txn.commit()
+                coordinator.completeGeneration()
+            }
+        }
+        isProcessing = false
+        if context == nil || activeTurnContext?.transactionID == context?.transactionID {
+            activeTurnTask = nil
+            activeTurnContext = nil
+        }
+    }
+
+    func abandonTurnIfOwner(_ context: GenerationTurnContext?, reason: String) {
+        guard let context else { return }
+        guard isCurrentTurnTransactionOwner(context) else {
+            PCLog.warn("turn_abandon_ignored_non_owner", detail: ownerDetail(context))
+            return
+        }
+        PCLog.event("turn_abandoned", detail: "\(ownerDetail(context)) reason=\(reason)")
+        finishTurn(context: context, error: reason)
+    }
+
+    func isCurrentTurnOwner(_ context: GenerationTurnContext) -> Bool {
+        activeTurnContext?.transactionID == context.transactionID
+            && sessionStore.currentSessionID == context.sessionID
+            && coordinator.currentTransaction?.id == context.transactionID
+    }
+
+    func isCurrentTurnTransactionOwner(_ context: GenerationTurnContext) -> Bool {
+        coordinator.currentTransaction?.id == context.transactionID
+            && (activeTurnContext == nil || activeTurnContext?.transactionID == context.transactionID)
+    }
+
+    func ownerDetail(_ context: GenerationTurnContext) -> String {
+        "turn_id=\(context.turnID.uuidString) session_id=\(context.sessionID.uuidString) txn_id=\(context.transactionID.uuidString) current_session=\(sessionStore.currentSessionID.uuidString) current_txn=\(coordinator.currentTransaction?.id.uuidString ?? "none")"
+    }
+
+    func generationRejectionReason() -> String {
+        if let currentTransaction = coordinator.currentTransaction,
+           !currentTransaction.isTerminal {
+            return "active_transaction"
+        }
+        if !coordinator.sessionState.canGenerate {
+            return "not_ready"
+        }
+        return "unknown"
+    }
+
+    func recordTurnRejected(
+        turnID: UUID,
+        sessionID: UUID,
+        reason: String,
+        isFirstMessage: Bool
+    ) {
+        let txn = coordinator.currentTransaction
+        PCLog.turnRejected(
+            turnID: turnID,
+            sessionID: sessionID,
+            reason: reason,
+            runtimeState: String(describing: coordinator.sessionState),
+            transactionID: txn?.id,
+            transactionAgeMs: txn.map { Int($0.elapsed * 1000) },
+            modelID: coordinator.sessionState.activeModelID,
+            backend: coordinator.sessionState.activeBackend,
+            isFirstMessage: isFirstMessage
+        )
+    }
+
+    func appendGenerationRejectedMessage() {
+        let message: String
+        if let txn = coordinator.currentTransaction, !txn.isTerminal {
+            message = tr(
+                "上一轮还在收尾，请稍后重试。",
+                "The previous turn is still finishing. Please try again shortly.",
+                "前の応答がまだ終了処理中です。少し待ってからもう一度お試しください。"
+            )
+            PCLog.warn(
+                "turn_rejected_active_transaction",
+                detail: "txn_id=\(txn.id.uuidString) age_ms=\(Int(txn.elapsed * 1000))"
+            )
+        } else {
+            message = tr(
+                "模型还在启动，请稍后重试。",
+                "The model is still starting. Please try again shortly.",
+                "モデルを起動中です。少し待ってからもう一度お試しください。"
+            )
+        }
+        messages.append(ChatMessage(role: .system, content: message))
+    }
+
+    func appendGenerationBusyMessage() {
+        let message = tr(
+            "上一轮还在收尾，请稍后重试。",
+            "The previous turn is still finishing. Please try again shortly.",
+            "前の応答がまだ終了処理中です。少し待ってからもう一度お試しください。"
+        )
+        if messages.last?.role == .system,
+           messages.last?.content == message {
+            return
+        }
+        messages.append(ChatMessage(role: .system, content: message))
+    }
+
+    // MARK: - Helpers
+
+    func isUserCancellationError(_ error: Error) -> Bool {
+        if coordinator.currentTransaction?.state == .cancelling {
+            return true
+        }
+        if error is CancellationError {
+            return true
+        }
+
+        let nsError = error as NSError
+        if nsError.domain == NSURLErrorDomain, nsError.code == NSURLErrorCancelled {
+            return true
+        }
+        if nsError.domain == NSCocoaErrorDomain, nsError.code == NSUserCancelledError {
+            return true
+        }
+
+        let message = error.localizedDescription.lowercased()
+        return message.contains("cancelled")
+            || message.contains("canceled")
+            || message.contains("process canceled")
+    }
+
+    func settleCancelledMessage(at index: Int) {
+        guard messages.indices.contains(index) else { return }
+        flushPendingStreamingMessageContentUpdates()
+        guard messages.indices.contains(index) else { return }
+        let content = messages[index].content
+            .replacingOccurrences(of: "▍", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        messages[index].update(role: .assistant, content: content, skillName: messages[index].skillName)
+    }
+
+    func promptImages(
+        historyDepth: Int,
+        currentImages: [ChatImageAttachment]
+    ) -> [CIImage] {
+        _ = historyDepth
+        return Array(currentImages.prefix(1).compactMap(\.ciImage))
+    }
+}

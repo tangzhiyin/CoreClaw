@@ -1,0 +1,58 @@
+name: Deploy site to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Notify IndexNow
+        continue-on-error: true
+        run: |
+          curl -sS -X POST "https://api.indexnow.org/indexnow" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -d '{
+              "host": "tangzhiyin.github.io",
+              "key": "0bf623a9a5805fafd04bad9f20177812",
+              "keyLocation": "https://tangzhiyin.github.io/PhoneClaw_Crisp/0bf623a9a5805fafd04bad9f20177812.txt",
+              "urlList": [
+                "https://tangzhiyin.github.io/PhoneClaw_Crisp/",
+                "https://tangzhiyin.github.io/PhoneClaw_Crisp/zh/",
+                "https://tangzhiyin.github.io/PhoneClaw_Crisp/ja/",
+                "https://tangzhiyin.github.io/PhoneClaw_Crisp/privacy/",
+                "https://tangzhiyin.github.io/PhoneClaw_Crisp/mac-remote/",
+                "https://tangzhiyin.github.io/PhoneClaw_Crisp/mobile-agent-framework/",
+                "https://tangzhiyin.github.io/PhoneClaw_Crisp/on-device-gemma/",
+                "https://tangzhiyin.github.io/PhoneClaw_Crisp/skills/",
+                "https://tangzhiyin.github.io/PhoneClaw_Crisp/liveland/",
+                "https://tangzhiyin.github.io/PhoneClaw_Crisp/faq/",
+                "https://tangzhiyin.github.io/PhoneClaw_Crisp/benchmarks/"
+              ]
+            }'

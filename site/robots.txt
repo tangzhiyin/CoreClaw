@@ -1,0 +1,27 @@
+# PhoneClaw — https://tangzhiyin.github.io/PhoneClaw_Crisp/
+User-agent: *
+Allow: /
+
+# AI answer engines / search crawlers (explicitly welcomed for search visibility)
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+# Model-training and AI-product crawlers are a separate, values-based decision from
+# search visibility. Google Search uses Googlebot through the default rule above.
+# For training/product-use crawler preferences while keeping search visible, edit:
+# User-agent: Google-Extended
+# Disallow: /
+#
+# User-agent: GPTBot
+# Disallow: /
+
+Sitemap: https://tangzhiyin.github.io/PhoneClaw_Crisp/sitemap.xml

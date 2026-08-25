@@ -1,0 +1,3 @@
+# Mark vendored dependencies so GitHub Linguist ignores them in language stats
+Packages/** linguist-vendored
+Pods/** linguist-vendored

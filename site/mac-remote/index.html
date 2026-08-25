@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PhoneClaw Gateway - Mac remote inference with Ollama and CLI models</title>
+<meta name="description" content="PhoneClaw Gateway pairs a phone AI agent with a Mac on the same LAN, using Ollama, Codex CLI, or Antigravity CLI models for remote inference while the phone keeps native Skills and agent flow.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://tangzhiyin.github.io/PhoneClaw_Crisp/mac-remote/">
+
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="PhoneClaw">
+<meta property="og:title" content="PhoneClaw Gateway - Mac remote inference for a phone AI agent">
+<meta property="og:description" content="Pair a phone with a Mac on your LAN and use Mac-side Ollama or CLI models while the phone keeps the native agent experience.">
+<meta property="og:url" content="https://tangzhiyin.github.io/PhoneClaw_Crisp/mac-remote/">
+<meta property="og:image" content="https://tangzhiyin.github.io/PhoneClaw_Crisp/assets/social-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PhoneClaw Gateway - Mac remote inference for phone AI agents">
+<meta name="twitter:description" content="Use Mac-side Ollama or CLI models with a native phone AI agent over LAN.">
+<meta name="twitter:image" content="https://tangzhiyin.github.io/PhoneClaw_Crisp/assets/social-card.png">
+
+<link rel="icon" href="../assets/app-icon.png">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://tangzhiyin.github.io/PhoneClaw_Crisp/mac-remote/#webpage",
+      "url": "https://tangzhiyin.github.io/PhoneClaw_Crisp/mac-remote/",
+      "name": "PhoneClaw Gateway - Mac remote inference for a phone AI agent",
+      "description": "Pair a phone with a Mac on your LAN and use Mac-side Ollama or CLI models while the phone keeps the native agent experience.",
+      "isPartOf": {
+        "@type": "WebSite",
+        "@id": "https://tangzhiyin.github.io/PhoneClaw_Crisp/#website",
+        "name": "PhoneClaw",
+        "url": "https://tangzhiyin.github.io/PhoneClaw_Crisp/"
+      },
+      "about": {
+        "@type": "SoftwareApplication",
+        "@id": "https://tangzhiyin.github.io/PhoneClaw_Crisp/#software",
+        "name": "PhoneClaw"
+      }
+    },
+    {
+      "@type": "HowTo",
+      "@id": "https://tangzhiyin.github.io/PhoneClaw_Crisp/mac-remote/#howto",
+      "name": "Four steps from Mac to phone",
+      "description": "The setup is intentionally explicit. Remote models become active after you pair a Mac and select one.",
+      "step": [
+        {
+          "@type": "HowToStep",
+          "position": 1,
+          "name": "Open Gateway on the Mac",
+          "text": "Download PhoneClawGateway.app, open it, and allow Local Network permission. If macOS blocks first launch, right-click and choose Open.",
+          "url": "https://tangzhiyin.github.io/PhoneClaw_Crisp/mac-remote/#setup"
+        },
+        {
+          "@type": "HowToStep",
+          "position": 2,
+          "name": "Choose a Mac-side model source",
+          "text": "For Ollama, install Ollama and pull a model. Gateway can also expose CLI-backed providers such as Codex CLI or Antigravity CLI.",
+          "url": "https://tangzhiyin.github.io/PhoneClaw_Crisp/mac-remote/#setup"
+        },
+        {
+          "@type": "HowToStep",
+          "position": 3,
+          "name": "Pair from PhoneClaw",
+          "text": "Open PhoneClaw, go to Mac Remote, select your Mac, then approve the pairing on the Mac.",
+          "url": "https://tangzhiyin.github.io/PhoneClaw_Crisp/mac-remote/#setup"
+        },
+        {
+          "@type": "HowToStep",
+          "position": 4,
+          "name": "Select a remote model",
+          "text": "Mac-side models appear in the PhoneClaw model picker. Return to chat and use PhoneClaw normally.",
+          "url": "https://tangzhiyin.github.io/PhoneClaw_Crisp/mac-remote/#setup"
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://tangzhiyin.github.io/PhoneClaw_Crisp/mac-remote/#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "PhoneClaw",
+          "item": "https://tangzhiyin.github.io/PhoneClaw_Crisp/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Mac Remote",
+          "item": "https://tangzhiyin.github.io/PhoneClaw_Crisp/mac-remote/"
+        }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a class="brand" href="../"><img src="../assets/app-icon.png" alt="">PhoneClaw</a>
+    <div class="nav-links">
+      <a href="../mobile-agent-framework/">Framework</a>
+      <a href="../on-device-gemma/">Models</a>
+      <a href="../skills/">Skills</a>
+      <a href="../liveland/">LiveLand</a>
+      <a href="../privacy/">Privacy</a>
+      <a href="../faq/">FAQ</a>
+      <a class="nav-cta" href="https://testflight.apple.com/join/YuUSwq78">TestFlight</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-content">
+      <p class="eyebrow">PhoneClaw Gateway</p>
+      <h1>Mac models, phone agent.</h1>
+      <p class="lede">Pair a Mac on the same Wi-Fi and use its Ollama, Codex CLI, or Antigravity CLI models as an optional inference source. The phone still owns the UI, Skills, permissions, and task flow.</p>
+      <div class="hero-actions">
+        <a class="button primary" href="https://github.com/tangzhiyin/PhoneClaw_Crisp/releases/download/mac-gateway-v0.1.1/PhoneClawGateway-macOS-v0.1.1.zip">Download Gateway</a>
+        <a class="button" href="#setup">Set up</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="band dark">
+    <div class="wrap mac-layout">
+      <div class="device-cluster" aria-hidden="true">
+        <div class="phone-shape"><img src="../assets/app-icon.png" alt=""></div>
+        <div class="signal">LAN</div>
+        <div class="mac-shape"><code>bonjour<br>ollama<br>remote models</code></div>
+      </div>
+      <div>
+        <p class="section-kicker">How it works</p>
+        <h2>The phone discovers your Mac. You approve. Then models appear in PhoneClaw.</h2>
+        <p class="section-copy">Gateway advertises a local service over Bonjour. PhoneClaw discovers it on the same network, asks you to pair, then adds Mac-side models to the model picker under remote models.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band light">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Architecture</p>
+          <h2>Inference moves to the Mac.</h2>
+        </div>
+        <p class="section-copy">The iPhone remains the agent surface and permission boundary. The Mac contributes heavier inference as an optional local edge node.</p>
+      </div>
+      <div class="stack">
+        <article class="panel">
+          <span class="panel-label">Phone</span>
+          <h3>Agent surface</h3>
+          <p>Chat UI, Live / LiveLand, local settings, Skill registry, permissions, and task state stay on the phone.</p>
+        </article>
+        <article class="panel">
+          <span class="panel-label">LAN</span>
+          <h3>Local pairing</h3>
+          <p>Bonjour discovery and explicit approval connect only devices on your local network.</p>
+        </article>
+        <article class="panel">
+          <span class="panel-label">Mac</span>
+          <h3>Inference source</h3>
+          <p>Gateway uses Ollama, Codex CLI, Antigravity CLI, or other supported Mac-side providers.</p>
+        </article>
+        <article class="panel">
+          <span class="panel-label">Boundary</span>
+          <h3>Direct LAN path</h3>
+          <p>The request goes directly to your paired Mac on the local network.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="setup" class="band white">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Setup</p>
+          <h2>Four steps from Mac to phone.</h2>
+        </div>
+        <p class="section-copy">The setup is intentionally explicit. Remote models become active after you pair a Mac and select one.</p>
+      </div>
+      <div class="steps">
+        <article class="step">
+          <div class="step-num">1</div>
+          <div>
+            <h3>Open Gateway on the Mac</h3>
+            <p>Download <code>PhoneClawGateway.app</code>, open it, and allow Local Network permission. If macOS blocks first launch, right-click and choose Open.</p>
+          </div>
+        </article>
+        <article class="step">
+          <div class="step-num">2</div>
+          <div>
+            <h3>Choose a Mac-side model source</h3>
+            <p>For Ollama, install Ollama and pull a model. Gateway can also expose CLI-backed providers such as Codex CLI or Antigravity CLI.</p>
+          </div>
+        </article>
+        <article class="step">
+          <div class="step-num">3</div>
+          <div>
+            <h3>Pair from PhoneClaw</h3>
+            <p>Open PhoneClaw, go to Mac Remote, select your Mac, then approve the pairing on the Mac.</p>
+          </div>
+        </article>
+        <article class="step">
+          <div class="step-num">4</div>
+          <div>
+            <h3>Select a remote model</h3>
+            <p>Mac-side models appear in the PhoneClaw model picker. Return to chat and use PhoneClaw normally.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band light tight">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Requirements &amp; troubleshooting</p>
+          <h2>What Gateway needs to be found.</h2>
+        </div>
+        <p class="section-copy">Gateway listens on port <code>18080</code> by default and advertises the <code>_phoneclaw-llm._tcp</code> Bonjour service. It runs as <code>PhoneClawGateway.app</code> — the release download, or a source build via <code>bash MacGateway/build-app.sh</code> — and needs the macOS Local Network permission on first launch.</p>
+      </div>
+      <div class="flow">
+        <article class="data-row">
+          <h3>Ollama models</h3>
+          <p>If you use Ollama, install and start Ollama first, then pull a model, for example <code>ollama pull gemma3:4b</code>.</p>
+        </article>
+        <article class="data-row warn">
+          <h3>If the phone can't find the Mac</h3>
+          <p>Check that the Mac client is running, Local Network permission is allowed, both devices are on the same Wi-Fi, and the macOS firewall allows <code>PhoneClawGateway.app</code> to accept LAN connections.</p>
+        </article>
+        <article class="data-row">
+          <h3>If discovery still fails</h3>
+          <p>Rebuild the app with <code>bash MacGateway/build-app.sh</code> and open the generated app again.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band light">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Data path</p>
+          <h2>Ollama stays on the Mac. CLI providers follow their own policy.</h2>
+        </div>
+        <p class="section-copy">With Ollama, inference stays on your Mac. With Codex CLI, Antigravity CLI, or another upstream provider, data handling is governed by that provider from the Mac onward. PhoneClaw Gateway uses the local LAN path between phone and Mac.</p>
+      </div>
+      <div class="hero-actions">
+        <a class="button dark" href="../privacy/">Read privacy details</a>
+        <a class="button light" href="https://github.com/tangzhiyin/PhoneClaw_Crisp#7-use-the-mac-client-for-remote-inference">Full README guide</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="band white">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">中文</p>
+          <h2>Mac 只负责更重的推理，手机仍是 Agent 本体。</h2>
+        </div>
+        <p class="section-copy">PhoneClaw Gateway 让同一局域网内的 Mac 成为可选远程推理源。手机仍然保留聊天界面、Skill 路由、权限边界和任务状态。请求通过本地局域网发送到配对 Mac；选 Ollama 留在你的 Mac，选 CLI 或其它上游 provider 则以对应策略为准。</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p class="footer-word" aria-hidden="true">PhoneClaw</p>
+    <div class="footer-row">
+      <a href="../">Home</a>
+      <a href="../mobile-agent-framework/">Framework</a>
+      <a href="../on-device-gemma/">Models</a>
+      <a href="../skills/">Skills</a>
+      <a href="../liveland/">LiveLand</a>
+      <a href="../privacy/">Privacy &amp; Data Flow</a>
+      <a href="../faq/">FAQ</a>
+      <a href="../zh/">中文</a>
+      <a href="../ja/">日本語</a>
+      <a href="https://github.com/tangzhiyin/PhoneClaw_Crisp">GitHub</a>
+      <a href="https://testflight.apple.com/join/YuUSwq78">TestFlight</a>
+    </div>
+    <p>PhoneClaw Gateway keeps the phone native and lets the Mac handle heavier inference.</p>
+  </div>
+</footer>
+
+</body>
+</html>

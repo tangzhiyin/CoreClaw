@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+# PhoneClaw pre-commit hook — harness 守门 + skill i18n sync 守门
+#
+# 两个检查独立:
+#   1. Skill bilingual sync (总是跑, 不吃 HARNESS skip)
+#      跳过: PHONECLAW_SKIP_SKILL_SYNC=1 git commit ...
+#   2. CLI harness (仅当 staged 文件触碰 agent/skill/prompt/router 时跑
+#      E2B + E4B 两个模型全绿)
+#      跳过: PHONECLAW_SKIP_HARNESS=1 git commit ...
+#
+# 任一拒绝就拒 commit。`git commit --no-verify` 跳所有 (慎用).
+#
+# 安装: git config core.hooksPath .githooks
+
+set -e
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+
+# ── 1. Skill bilingual sync 检查 ──────────────────────────────────
+# 总是跑 — 独立于 harness skip. 只看 staged 里的 SKILL.md 改动,
+# 拒绝 zh 改了 en 没改 / en 缺失 / en 缺 anchor / en anchor 过期 这类情况。
+if [[ -f "$REPO_ROOT/scripts/check-skill-sync.sh" ]]; then
+    if ! bash "$REPO_ROOT/scripts/check-skill-sync.sh" --staged-only; then
+        echo ""
+        echo "[pre-commit] ❌ Skill bilingual sync 检查失败 — 见上面的输出"
+        exit 1
+    fi
+fi
+
+# ── 2. Harness 检查 ───────────────────────────────────────────────
+# 快速出口: 手动跳过 harness 只
+if [[ -n "${PHONECLAW_SKIP_HARNESS:-}" ]]; then
+    echo "[pre-commit] PHONECLAW_SKIP_HARNESS set — harness 跳过"
+    exit 0
+fi
+
+# 守门的路径: 这些目录的任何改动都触发 harness
+GUARDED_PATHS=(
+    "Agent/"
+    "LLM/"
+    "Skills/Library/"
+    "Tools/"
+    "PhoneClawCLI/Sources/"
+    "PhoneClawCLI/Scenarios/"
+)
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACMR)
+
+# 没有相关改动, 不跑
+MATCHED=""
+for path in "${GUARDED_PATHS[@]}"; do
+    if echo "$STAGED" | grep -q "^${path}"; then
+        MATCHED+="$path "
+    fi
+done
+
+if [[ -z "$MATCHED" ]]; then
+    echo "[pre-commit] 没有 agent 相关改动, harness 跳过"
+    exit 0
+fi
+
+echo "[pre-commit] 触发 harness (守门路径: $MATCHED)"
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+cd "$REPO_ROOT/PhoneClawCLI"
+
+# 跑两个 .litertlm 模型 — E2B 是默认部署模型, E4B 是升级选项, 任何一个红就拒绝。
+# CLI 守门必须跟 iOS 设备运行时一致走 LiteRT, 不能回落到旧 MLX 目录模型。
+FAILED_MODELS=()
+for M in e2b e4b; do
+    LOG="/tmp/phoneclaw-precommit-${M}.log"
+    echo "[pre-commit] 跑 ${M} (.litertlm/LiteRT) ..."
+    if ! PHONECLAW_LITERT=1 ./run.sh test "${M}" > "${LOG}" 2>&1; then
+        echo "❌ ${M} harness 运行失败 (build 挂了?):"
+        tail -20 "${LOG}"
+        FAILED_MODELS+=("${M}")
+        continue
+    fi
+    if ! grep -q "ALL GREEN" "${LOG}"; then
+        echo "❌ ${M} harness 报红:"
+        grep -E "✗ FAIL|conversation:|routing eval" "${LOG}"
+        FAILED_MODELS+=("${M}")
+    else
+        echo "[pre-commit] ✅ ${M} 全绿"
+    fi
+done
+
+if [[ ${#FAILED_MODELS[@]} -gt 0 ]]; then
+    echo ""
+    echo "❌ 以下模型失败: ${FAILED_MODELS[*]}"
+    echo "日志: /tmp/phoneclaw-precommit-{e2b,e4b}.log"
+    echo "紧急跳过: PHONECLAW_SKIP_HARNESS=1 git commit ..."
+    exit 1
+fi
+
+echo "[pre-commit] ✅ E2B + E4B 全绿, commit 放行"
+exit 0

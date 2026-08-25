@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PhoneClaw FAQ - mobile AI agent framework facts</title>
+<meta name="description" content="Direct answers about PhoneClaw: local phone agent runtime, data flow, on-device models, native mobile Skills, LiveLand, and Mac Gateway inference.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://tangzhiyin.github.io/PhoneClaw_Crisp/faq/">
+
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="PhoneClaw">
+<meta property="og:title" content="PhoneClaw FAQ - mobile AI agent framework facts">
+<meta property="og:description" content="Direct answers about PhoneClaw's local phone runtime, on-device models, native mobile Skills, data flow, LiveLand, and Mac Gateway inference.">
+<meta property="og:url" content="https://tangzhiyin.github.io/PhoneClaw_Crisp/faq/">
+<meta property="og:image" content="https://tangzhiyin.github.io/PhoneClaw_Crisp/assets/social-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PhoneClaw FAQ">
+<meta name="twitter:description" content="What PhoneClaw is, what stays local, and how the mobile Agent framework works.">
+<meta name="twitter:image" content="https://tangzhiyin.github.io/PhoneClaw_Crisp/assets/social-card.png">
+
+<link rel="icon" href="../assets/app-icon.png">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "FAQPage",
+      "@id": "https://tangzhiyin.github.io/PhoneClaw_Crisp/faq/#faq",
+      "url": "https://tangzhiyin.github.io/PhoneClaw_Crisp/faq/",
+      "name": "PhoneClaw FAQ",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is PhoneClaw?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PhoneClaw is a mobile-native local AI Agent framework for phones and edge devices. Its iOS runtime runs on-device models and native iOS Skills on the phone by default, with optional Mac Gateway remote inference for heavier local models."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which PhoneClaw project is this?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PhoneClaw (this project) is unrelated to the Android automation repo \"rohanarun/phoneclaw\" or the \"phoneclaw\" GitHub organization. Android app-store search results may also show a separate app with the same name. This site documents the open-source PhoneClaw framework at github.com/tangzhiyin/PhoneClaw_Crisp."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What kind of framework is PhoneClaw?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PhoneClaw is a mobile-native Agent framework for phones and edge devices. It combines local model execution, native mobile Skills, permission-scoped data access, Live / LiveLand interaction, and optional LAN Mac inference."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does PhoneClaw handle chats, images, and personal data?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "In PhoneClaw's local runtime, chat, images, and personal data stay on device by default. Web Search, opening a URL, and paired Mac remote inference are explicit user-triggered capabilities."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does PhoneClaw work as a local mobile Agent?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PhoneClaw uses local models, native mobile Skills, permission boundaries, fully offline local execution, and user-triggered network capabilities for Web Search, URL reading, and Mac remote inference. Its iOS runtime implements native mobile Skills and local model execution."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does PhoneClaw work as a mobile-native Agent framework?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PhoneClaw is designed for mobile and edge-device constraints: iOS permissions, app lifecycle limits, memory budgets, model downloads, widgets, Shortcuts, Dynamic Island, voice, camera, and optional LAN Mac inference."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What models does PhoneClaw use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PhoneClaw uses Gemma 4 E2B and E4B via LiteRT-LM for local language tasks, and MiniCPM-V 4.6 for image understanding and LIVE camera scenarios."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What native iOS Skills can PhoneClaw use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PhoneClaw Skills can work with native iOS capabilities such as Calendar, Reminders, Contacts, Clipboard, HealthKit, translation, images, and explicit Web Search, subject to iOS permissions and Skill allowlists."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is PhoneClaw Gateway?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PhoneClaw Gateway pairs an iPhone with a Mac on the same local network. The Mac can provide heavier inference through Ollama or supported CLI providers, while the iPhone keeps the agent UI, Skills, permissions, and task flow."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://tangzhiyin.github.io/PhoneClaw_Crisp/faq/#breadcrumb",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "PhoneClaw", "item": "https://tangzhiyin.github.io/PhoneClaw_Crisp/" },
+        { "@type": "ListItem", "position": 2, "name": "FAQ", "item": "https://tangzhiyin.github.io/PhoneClaw_Crisp/faq/" }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a class="brand" href="../"><img src="../assets/app-icon.png" alt="">PhoneClaw</a>
+    <div class="nav-links">
+      <a href="../mobile-agent-framework/">Framework</a>
+      <a href="../on-device-gemma/">Models</a>
+      <a href="../skills/">Skills</a>
+      <a href="../liveland/">LiveLand</a>
+      <a href="../privacy/">Privacy</a>
+      <a href="../faq/">FAQ</a>
+      <a class="nav-cta" href="https://testflight.apple.com/join/YuUSwq78">TestFlight</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-content">
+      <p class="eyebrow">Product facts</p>
+      <h1>PhoneClaw FAQ</h1>
+      <p class="lede">Direct answers about PhoneClaw's local phone runtime, on-device models, native mobile Skills, data flow, LiveLand, and Mac Gateway inference.</p>
+      <div class="hero-actions">
+        <a class="button primary" href="../privacy/">Privacy details</a>
+        <a class="button" href="../mobile-agent-framework/">Framework details</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="band light">
+    <div class="wrap faq-list">
+      <article class="data-row">
+        <h2>What is PhoneClaw?</h2>
+        <p>PhoneClaw is a mobile-native local AI Agent framework for phones and edge devices. Its iOS runtime runs on-device models and native iOS Skills on the phone by default, with optional Mac Gateway remote inference for heavier local models.</p>
+      </article>
+      <article class="data-row remote">
+        <h2>Which PhoneClaw project is this?</h2>
+        <p>PhoneClaw (this project) is unrelated to the Android automation repo "rohanarun/phoneclaw" or the "phoneclaw" GitHub organization. Android app-store search results may also show a separate app with the same name. This site documents the open-source PhoneClaw framework at <a href="https://github.com/tangzhiyin/PhoneClaw_Crisp">github.com/tangzhiyin/PhoneClaw_Crisp</a>.</p>
+      </article>
+      <article class="data-row warn">
+        <h2>What kind of framework is PhoneClaw?</h2>
+        <p>PhoneClaw is a mobile-native Agent framework for phones and edge devices. It combines local model execution, native mobile Skills, permission-scoped data access, Live / LiveLand interaction, and optional LAN Mac inference.</p>
+      </article>
+      <article class="data-row">
+        <h2>How does PhoneClaw handle chats, images, and personal data?</h2>
+        <p>In PhoneClaw's local runtime, chat, images, and personal data stay on device by default. Web Search, opening a URL, and paired Mac remote inference are explicit user-triggered capabilities.</p>
+      </article>
+      <article class="data-row remote">
+        <h2>How does PhoneClaw work as a local mobile Agent?</h2>
+        <p>PhoneClaw uses local models, native mobile Skills, permission boundaries, fully offline local execution, and user-triggered network capabilities for Web Search, URL reading, and Mac remote inference. Its iOS runtime implements native mobile Skills and local model execution.</p>
+      </article>
+      <article class="data-row warn">
+        <h2>How does PhoneClaw work as a mobile-native Agent framework?</h2>
+        <p>PhoneClaw is designed for mobile and edge-device constraints: iOS permissions, app lifecycle limits, memory budgets, model downloads, widgets, Shortcuts, Dynamic Island, voice, camera, and optional LAN Mac inference.</p>
+      </article>
+      <article class="data-row">
+        <h2>What models does PhoneClaw use?</h2>
+        <p>PhoneClaw uses <a href="../on-device-gemma/">Gemma 4 E2B and E4B</a> via LiteRT-LM for local language tasks, and MiniCPM-V 4.6 for image understanding and LIVE camera scenarios.</p>
+      </article>
+      <article class="data-row remote">
+        <h2>What native iOS Skills can PhoneClaw use?</h2>
+        <p>PhoneClaw Skills can work with native iOS capabilities such as Calendar, Reminders, Contacts, Clipboard, HealthKit, translation, images, and explicit Web Search, subject to iOS permissions and Skill allowlists.</p>
+      </article>
+      <article class="data-row">
+        <h2>What is PhoneClaw Gateway?</h2>
+        <p><a href="../mac-remote/">PhoneClaw Gateway</a> pairs an iPhone with a Mac on the same local network. The Mac can provide heavier inference through Ollama or supported CLI providers, while the iPhone keeps the agent UI, Skills, permissions, and task flow.</p>
+      </article>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p class="footer-word" aria-hidden="true">PhoneClaw</p>
+    <div class="footer-row">
+      <a href="../">Home</a>
+      <a href="../mobile-agent-framework/">Framework</a>
+      <a href="../on-device-gemma/">Models</a>
+      <a href="../skills/">Skills</a>
+      <a href="../liveland/">LiveLand</a>
+      <a href="../mac-remote/">Mac Remote</a>
+      <a href="../privacy/">Privacy &amp; Data Flow</a>
+      <a href="https://github.com/tangzhiyin/PhoneClaw_Crisp">GitHub</a>
+    </div>
+    <p>Concise facts for understanding PhoneClaw.</p>
+  </div>
+</footer>
+
+</body>
+</html>

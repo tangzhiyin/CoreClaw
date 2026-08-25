@@ -1,0 +1,574 @@
+import SwiftUI
+#if canImport(AVFoundation)
+import AVFoundation
+#endif
+#if canImport(UIKit)
+import UIKit
+#endif
+
+// MARK: - Live Mode 全屏界面
+
+struct LiveModeView: View {
+    @Binding var isPresented: Bool
+    @Environment(\.colorScheme) private var colorScheme
+
+    let inference: InferenceService
+    let catalog: ModelCatalog
+    /// 用户在 SYSPROMPT.md 编辑的 system prompt（来自 AgentEngine.config.systemPrompt）。
+    /// Phase 1 起 Live 不再读取这份通用 prompt；先保留透传，避免接口层变化。
+    let userSystemPrompt: String?
+
+    @State private var liveEngine = LiveModeEngine()
+    @State private var animatePulse = false
+    @State private var camera = LiveCameraService()
+    @State private var isCameraEnabled = false
+    @State private var isCameraStarting = false
+    /// 摄像头权限被拒后的 alert 开关。iOS 对 `.denied` 不允许 app 再弹原生权限框,
+    /// 只能引导用户去系统设置开。这里弹一个自有 alert 提供 "去设置" 深链。
+    @State private var showCameraPermissionAlert = false
+
+    /// Live 进入前用户的模型 ID. 仅当 Live 内强制切 E2B 时才记下,
+    /// 退出 Live 在 onDisappear 切回, 让 service 恢复用户偏好.
+    /// UserDefaults 全程不动 — 用户在 Configurations 的持久化偏好不被 Live 污染.
+    @State private var preLiveModelID: String? = nil
+
+    private var liveStrings: LiveLocaleConfig.StatusStrings {
+        LiveLocale.zhCN.config.statusStrings
+    }
+
+    private var accentColor: Color {
+        switch liveEngine.state {
+        case .idle: return Theme.textTertiary
+        case .listening: return Theme.accentGreen
+        case .recording: return Theme.accent
+        case .processing: return Theme.accent
+        case .speaking: return Theme.accentGreen
+        }
+    }
+
+    private var isPreparingLive: Bool {
+        liveEngine.statusMessage.hasPrefix(liveStrings.preparingPrefix)
+    }
+
+    private var usesLightVoiceChrome: Bool {
+        colorScheme == .light && !isCameraEnabled
+    }
+
+    private var liveBackground: Color {
+        usesLightVoiceChrome
+            ? Theme.bg
+            : Color(red: 0.08, green: 0.06, blue: 0.10)
+    }
+
+    private var liveForeground: Color {
+        if isCameraEnabled { return .white }
+        return usesLightVoiceChrome ? Theme.textPrimary : .white
+    }
+
+    private var liveSecondaryForeground: Color {
+        if isCameraEnabled { return .white }
+        return usesLightVoiceChrome ? Theme.textSecondary : .white
+    }
+
+    private var liveTertiaryForeground: Color {
+        if isCameraEnabled { return .white }
+        return usesLightVoiceChrome ? Theme.textTertiary : .white
+    }
+
+    private var liveControlFill: Color {
+        usesLightVoiceChrome ? Theme.bgElevated.opacity(0.78) : Color.white.opacity(0.10)
+    }
+
+    private var liveControlBorder: Color {
+        usesLightVoiceChrome ? Theme.border.opacity(0.7) : Color.white.opacity(0.10)
+    }
+
+    private var loadingMask: Color {
+        usesLightVoiceChrome ? Theme.bg : .black
+    }
+
+    private var loadingMaskOpacity: Double {
+        usesLightVoiceChrome ? 0.58 : 0.55
+    }
+
+    /// 基于 engine.state 的状态文字. 对齐原始设计 (6d0b310) ——
+    /// “正在准备”特例放在 switch 之前, 覆盖任何 state 字面;
+    /// 因为 engine.start() 启动瞬间就把 state 设成 .listening, 加载期间
+    /// 这个特例是唯一能显示加载字面的路径.
+    ///
+    /// 相对原始版本两处增量 (都是你明确要求过的):
+    ///   1. .idle 分支不再显示 "LIVE 未启动" (返回 nil)
+    ///   2. "正在准备" 改叫 "正在加载"
+    private var headline: String? {
+        if isPreparingLive {
+            return liveStrings.loadingHeadline
+        }
+        switch liveEngine.state {
+        case .idle:       return nil
+        case .listening:  return liveStrings.listeningHeadline
+        case .recording:  return liveStrings.recordingHeadline
+        case .processing: return liveStrings.processingHeadline
+        case .speaking:   return liveStrings.speakingHeadline
+        }
+    }
+
+    private var liveIconName: String {
+        switch liveEngine.state {
+        case .idle: return "waveform.slash"
+        case .listening: return "ear.fill"
+        case .recording: return "mic.fill"
+        case .processing: return "sparkles"
+        case .speaking: return "speaker.wave.2.fill"
+        }
+    }
+
+    private var realtimeCaption: String? {
+        let trimmed = liveEngine.liveCaption.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        guard liveEngine.state == .recording else { return nil }
+        return trimmed
+    }
+
+    // MARK: - Body
+
+    var body: some View {
+        ZStack {
+            // ── 最底层兜底色 ──
+            // OrbSceneView 的 WKWebView 初始加载 (~100-300ms) 是透明的, 不给底色
+            // 会穿到上一层 view 或系统背景造成白闪. 同时 Orb 在 "准备中" 期间会
+            // 保持暗灰状态 (state == .idle), 这个底色也要和 Orb 暗态视觉连贯.
+            liveBackground
+                .ignoresSafeArea()
+
+            // ── 背景层 ──
+            // OrbSceneView 全程挂载, 切摄像头只改 opacity, 避免 WKWebView 销毁重建
+            // 导致 JS 内的 one-shot reveal 状态 (revealStartTime / maskOpacity) 被
+            // 重置, 关摄像头后再触发一次 .speaking 又重播暗→亮动画 (实测 bug).
+            // CameraPreviewView 仍走条件挂载 — 它需要随开关启停 capture session.
+            #if canImport(UIKit)
+            OrbSceneView(
+                inputAnalyser: liveEngine.inputAnalyser,
+                outputAnalyser: liveEngine.outputAnalyser,
+                state: liveEngine.state,
+                lightBackground: colorScheme == .light
+            )
+            .opacity(isCameraEnabled ? 0 : 1)
+            .allowsHitTesting(false)
+            .ignoresSafeArea()
+            #else
+            OrbBackgroundView()
+                .opacity(isCameraEnabled ? 0 : 1)
+                .ignoresSafeArea()
+            #endif
+
+            if isCameraEnabled {
+                CameraPreviewView(previewLayer: camera.previewLayer)
+                    .ignoresSafeArea()
+            }
+
+            // ── 加载蒙版 (Orb 之上、UI 之下) ──
+            // Orb 本身永远用完整 active 参数渲染金色 (shader 一次编完, 0 race).
+            // 用 SwiftUI 叠一层深黑完全遮住, 加载完 (statusMessage 被 engine 清空)
+            // easeOut 淡出 —— 视觉效果就是 "黑 → 金" 过度, 和 shader 零耦合.
+            // 相机模式下不蒙, 那时 Orb 已经被相机画面替换.
+            if !isCameraEnabled {
+                loadingMask
+                    .opacity(isPreparingLive ? loadingMaskOpacity : 0)
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
+                    .animation(.easeOut(duration: 0.6), value: isPreparingLive)
+            }
+
+            // ── 前景 UI 层 ──
+            VStack(spacing: 0) {
+                // ── 顶栏 ──
+                topBar
+
+                Spacer()
+
+                // ── 状态提示 (Orb 下方, 和文字信息聚在一起, 不干扰 Orb) ──
+                statusCapsule
+                    .padding(.bottom, 10)
+
+                // ── 对话文字区 ──
+                captionArea
+                    .padding(.horizontal, 20)
+                    .frame(maxHeight: 140)
+
+                // ── 底部按钮 ──
+                bottomBar
+            }
+        }
+        .task {
+            // 注: 之前 E4B 在 Live 有 jetsam 风险, 已在 iPhone 17 Pro Max 验证
+            // headroom 充足 (~2.7 GB), 不再强制切 E2B.
+            liveEngine.setup(inference: inference)
+            liveEngine.userSystemPrompt = userSystemPrompt
+            await liveEngine.start()
+        }
+        .onAppear {
+            animatePulse = true
+            #if canImport(UIKit)
+            UIApplication.shared.isIdleTimerDisabled = true
+            #endif
+        }
+        .onDisappear {
+            camera.stop()
+            #if canImport(UIKit)
+            UIApplication.shared.isIdleTimerDisabled = false
+            #endif
+            Task { await liveEngine.stop() }
+        }
+        .alert(
+            tr("需要相机权限", "Camera Access Needed"),
+            isPresented: $showCameraPermissionAlert
+        ) {
+            Button(tr("去设置", "Open Settings")) { openAppSettings() }
+            Button(tr("取消", "Cancel"), role: .cancel) {}
+        } message: {
+            Text(tr(
+                "请到 设置 → 隐私与安全性 → 相机 里允许 PhoneClaw 使用相机。",
+                "Enable camera access for PhoneClaw in Settings → Privacy & Security → Camera."
+            ))
+        }
+    }
+
+    // MARK: - 顶栏
+
+    private var topBar: some View {
+        // 摄像头按钮已移到底部 bottomBar 里, 顶栏只留 X 关闭
+        // (close 和底部"结束"功能等价, 都触发 close() — 给用户右上和左下两个退出入口)
+        HStack {
+            Button(action: close) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(liveSecondaryForeground.opacity(usesLightVoiceChrome ? 0.76 : 1))
+                    .frame(width: 40, height: 40)
+                    .background(
+                        Circle()
+                            .fill(liveControlFill)
+                    )
+                    .overlay(
+                        Circle()
+                            .strokeBorder(liveControlBorder, lineWidth: 1)
+                            .allowsHitTesting(false)
+                    )
+            }
+            .buttonStyle(.plain)
+
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 12)
+    }
+
+    // MARK: - 状态胶囊
+
+    private var statusCapsule: some View {
+        // 极简: 无图标, 极细字体 + condensed + tracking = 冷静的科技感
+        // speaking/processing 时在主文字下方挂一行 "可以直接打断" 提示 (原始行为)
+        Group {
+            if let text = headline {
+                VStack(spacing: 4) {
+                    Text(text)
+                        .font(.system(size: 14, weight: .thin))
+                        .fontWidth(.condensed)
+                        .tracking(2.0)
+                        .foregroundStyle(liveSecondaryForeground.opacity(usesLightVoiceChrome ? 0.72 : 0.55))
+
+                    if liveEngine.state == .speaking || liveEngine.state == .processing {
+                        Text(liveStrings.interruptHint)
+                            .font(.system(size: 10, weight: .light, design: .rounded))
+                            .foregroundStyle(liveTertiaryForeground.opacity(usesLightVoiceChrome ? 0.68 : 0.4))
+                            .transition(.opacity)
+                    }
+                }
+                .transition(.opacity)
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: headline)
+        .animation(.easeInOut(duration: 0.3), value: liveEngine.state)
+    }
+
+    // MARK: - 对话文字区
+
+    /// 合并 realtime partial 和 final transcript 到"同一个 bubble"原地更新。
+    /// 之前的设计在 barge-in 时 realtimeCaption 非空 → 干掉了 final bubble, 待
+    /// realtimeCaption 清空又重新 mount final bubble, 哪怕文本和上一次 identical
+    /// 也会播一次 transition 动画 — 用户感知就是"弹两次"。
+    /// 现在只要有转写内容 (无论 live 还是 final) 都绑同一个 bubble 身份 (user-caption),
+    /// SwiftUI 只会 diff 文本, 不会 unmount/remount. 同文本时视觉零变化.
+    private var currentUserCaption: (label: String, text: String, isLive: Bool)? {
+        if let caption = realtimeCaption {
+            return (label: tr("识别中", "Listening"), text: caption, isLive: true)
+        }
+        let trimmed = liveEngine.lastTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty {
+            return (label: tr("你", "You"), text: trimmed, isLive: false)
+        }
+        return nil
+    }
+
+    private var userCaptionColor: Color {
+        if isCameraEnabled { return .white }
+        return usesLightVoiceChrome ? Theme.textSecondary : Color(white: 0.78)
+    }
+
+    private var aiCaptionColor: Color {
+        if isCameraEnabled { return Theme.accent }
+        return usesLightVoiceChrome ? Theme.accentMuted : Color(red: 1.00, green: 0.72, blue: 0.40)
+    }
+
+    private var captionArea: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            // 用户文字 — 冷灰
+            if let current = currentUserCaption {
+                Text(current.text)
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundStyle(userCaptionColor.opacity(current.isLive ? 0.55 : 0.72))
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentTransition(.interpolate)
+                    .id("user-caption")
+                    .transition(.opacity)
+            }
+
+            // AI 回复 — 暖琥珀, 流式追加不加任何动画 (LLM 40ms/token, 任何 >0 的动画
+            // duration 都会和下一帧更新碰撞; 直接随 lastReply 变化原样刷新, 天然是
+            // "一个字一个字长出来"的打字机效果, 和 TTS 发声进度同步)
+            if realtimeCaption == nil, !liveEngine.lastReply.isEmpty {
+                Text(liveEngine.lastReply)
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundStyle(aiCaptionColor.opacity(usesLightVoiceChrome ? 0.82 : 0.70))
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .id("ai-reply")
+                    .transition(.opacity)
+            }
+        }
+        .padding(.horizontal, 24)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        // 只对 user caption 做短动画 (它只变一次 partial → final);
+        // AI reply 随 token 高频更新, 不加 animation value, 避免动画互相打断.
+        .animation(.easeOut(duration: 0.18), value: currentUserCaption?.text)
+    }
+
+    // MARK: - 用户文字气泡
+
+    @ViewBuilder
+    private func userCaptionBubble(label: String, text: String, isLive: Bool) -> some View {
+        HStack(spacing: 0) {
+            // 左侧装饰竖线
+            RoundedRectangle(cornerRadius: 1.5)
+                .fill(isLive ? Theme.accent : Theme.accent.opacity(0.6))
+                .frame(width: 3)
+                .padding(.vertical, 4)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Theme.accent.opacity(0.8))
+
+                Text(text)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(.white.opacity(0.85))
+                    .lineLimit(2)
+                    .contentTransition(.interpolate)
+            }
+            .padding(.leading, 10)
+            .padding(.trailing, 12)
+            .padding(.vertical, 8)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            (isCameraEnabled ? Color.black.opacity(0.45) : Color.white.opacity(0.08)),
+            in: RoundedRectangle(cornerRadius: 12)
+        )
+    }
+
+    // MARK: - AI 回复气泡
+
+    @ViewBuilder
+    private func replyCaptionBubble(text: String) -> some View {
+        Text(text)
+            .font(.system(size: 15, weight: .regular))
+            .foregroundStyle(.white.opacity(0.92))
+            .lineLimit(3)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(
+                (isCameraEnabled ? Color.black.opacity(0.5) : Color.white.opacity(0.12)),
+                in: RoundedRectangle(cornerRadius: 14)
+            )
+            .contentTransition(.interpolate)
+    }
+
+    // MARK: - 底部按钮
+
+    private var bottomBar: some View {
+        // 双按钮: 左 = 摄像头 toggle, 右 = 结束 Live.
+        // 左按钮承担两个状态 (开/关), 文案随 isCameraEnabled 变化.
+        //
+        // 摄像头按钮可用条件:
+        //   - Engine 已度过 starting (state != .idle): greeting 期 state=.idle,
+        //     不允许提前开摄像头。greeting 一旦开始播放, state 进入 .speaking,
+        //     按钮就放开 — 此时即使助手还在讲, 开摄像头本身不触发推理 (Step 1
+        //     已经把 generateLive 从 notifyCameraStateChanged 里拆掉), 只动
+        //     AVCaptureSession + frameProvider, 安全。
+        //   - 没有正在 starting 的相机会话 (本地 isCameraStarting flag)。
+        //   - 注意: **不读 inference.isGenerating** — 开摄像头跟模型推理已解耦,
+        //     助手讲话时用户依然可以预开摄像头, 这是常见交互, 别误禁用。
+        let cameraButtonDisabled = (liveEngine.state == .idle) || isCameraStarting
+        return HStack(spacing: 12) {
+            // 左: 摄像头开关
+            Button(action: toggleCamera) {
+                HStack(spacing: 8) {
+                    Image(systemName: isCameraEnabled ? "camera.fill" : "camera")
+                        .font(.system(size: 14, weight: .bold))
+                    Text(isCameraEnabled ? tr("关闭摄像头", "Stop Camera") : tr("开摄像头", "Start Camera"))
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                }
+                .foregroundStyle(isCameraEnabled ? Theme.accent : (usesLightVoiceChrome ? Theme.textSecondary : .white))
+                .frame(maxWidth: .infinity)
+                .frame(height: 52)
+                .background(
+                    RoundedRectangle(cornerRadius: 18)
+                        .fill(liveControlFill)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .strokeBorder(liveControlBorder, lineWidth: 1)
+                        .allowsHitTesting(false)
+                )
+                .opacity(cameraButtonDisabled ? 0.5 : 1.0)
+            }
+            .buttonStyle(.plain)
+            .disabled(cameraButtonDisabled)
+
+            // 右: 结束 Live
+            Button(action: close) {
+                HStack(spacing: 8) {
+                    Image(systemName: "phone.down.fill")
+                        .font(.system(size: 14, weight: .bold))
+                    Text(tr("结束", "End"))
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                }
+                .foregroundStyle(usesLightVoiceChrome ? Theme.bg : .white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 52)
+                .background(
+                    RoundedRectangle(cornerRadius: 18)
+                        .fill(usesLightVoiceChrome ? Theme.textPrimary : Color.white.opacity(0.10))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .strokeBorder(liveControlBorder, lineWidth: 1)
+                        .allowsHitTesting(false)
+                )
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 28)
+        .padding(.top, 16)
+    }
+
+    // MARK: - Actions
+
+    private func close() {
+        camera.stop()
+        Task {
+            await liveEngine.stop()
+            isPresented = false
+        }
+    }
+
+    private func toggleCamera() {
+        if isCameraEnabled {
+            camera.stop()
+            liveEngine.frameProvider = nil
+            isCameraEnabled = false
+            liveEngine.notifyCameraStateChanged(isOn: false)
+        } else {
+            guard !isCameraStarting else { return }
+            // 在 LiveCameraService.start() 之前先查一次权限。
+            // iOS 对 .denied / .restricted 不允许 app 再弹原生 OS 权限框 —
+            // requestAccess(for:) 第一次被拒后, 后续调用立即 return false,
+            // 没有任何 UI。silent fail 让用户以为按钮"没反应"。
+            // 解法: 检测到 denied/restricted 时弹自有 alert + "去设置" 深链;
+            // notDetermined / authorized 两种状态走原有路径 (LiveCameraService 内部
+            // 该 requestAccess 还是 requestAccess)。
+            #if canImport(AVFoundation)
+            let status = AVCaptureDevice.authorizationStatus(for: .video)
+            if status == .denied || status == .restricted {
+                showCameraPermissionAlert = true
+                return
+            }
+            #endif
+            isCameraStarting = true
+            Task {
+                defer { isCameraStarting = false }
+                let ok = await camera.start()
+                if ok {
+                    liveEngine.frameProvider = { [camera] in camera.captureLatestFrame() }
+                    isCameraEnabled = true
+                    liveEngine.notifyCameraStateChanged(isOn: true)
+                } else {
+                    // 走到这里通常是 notDetermined 路径下用户在原生权限框点了 "Don't Allow",
+                    // 此时 status 已经变成 .denied。下次再点按钮就会被上面的 pre-check 拦住,
+                    // 弹引导去设置的 alert。
+                    print("[Live] Camera start failed — permission denied or device unavailable")
+                    #if canImport(AVFoundation)
+                    let newStatus = AVCaptureDevice.authorizationStatus(for: .video)
+                    if newStatus == .denied || newStatus == .restricted {
+                        showCameraPermissionAlert = true
+                    }
+                    #endif
+                }
+            }
+        }
+    }
+
+    /// 打开系统 设置 → PhoneClaw 页, 让用户手动开相机权限。
+    /// 仅 UIKit 平台 (iOS) 可用; UIApplication.openSettingsURLString 在 macCatalyst
+    /// 上也有效, 在纯 macOS 不存在 — 整段 #if 兜底。
+    private func openAppSettings() {
+        #if canImport(UIKit)
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
+        #endif
+    }
+}
+
+// MARK: - Camera Preview (UIViewRepresentable)
+
+#if canImport(UIKit)
+private class CameraPreviewUIView: UIView {
+    let previewLayer: AVCaptureVideoPreviewLayer
+
+    init(previewLayer: AVCaptureVideoPreviewLayer) {
+        self.previewLayer = previewLayer
+        super.init(frame: .zero)
+        previewLayer.videoGravity = .resizeAspectFill
+        layer.addSublayer(previewLayer)
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        previewLayer.frame = bounds
+    }
+}
+
+private struct CameraPreviewView: UIViewRepresentable {
+    let previewLayer: AVCaptureVideoPreviewLayer
+
+    func makeUIView(context: Context) -> CameraPreviewUIView {
+        CameraPreviewUIView(previewLayer: previewLayer)
+    }
+
+    func updateUIView(_ uiView: CameraPreviewUIView, context: Context) {}
+}
+#endif

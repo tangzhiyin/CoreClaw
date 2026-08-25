@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PhoneClaw on-device footprints - Gemma 4 on iPhone (LiteRT)</title>
+<meta name="description" content="Measured on-device memory footprints and documented device requirements for running Gemma 4 E2B / E4B via LiteRT and MiniCPM-V 4.6 on iPhone: peak resident memory, image-input overhead, LIVE mode peak, download sizes, and backend caveats.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://tangzhiyin.github.io/PhoneClaw_Crisp/benchmarks/">
+
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="PhoneClaw">
+<meta property="og:title" content="PhoneClaw on-device footprints - Gemma 4 on iPhone (LiteRT)">
+<meta property="og:description" content="Measured memory footprints and documented device requirements for Gemma 4 E2B / E4B via LiteRT and MiniCPM-V 4.6 on iPhone. Every figure lists its source and measurement date.">
+<meta property="og:url" content="https://tangzhiyin.github.io/PhoneClaw_Crisp/benchmarks/">
+<meta property="og:image" content="https://tangzhiyin.github.io/PhoneClaw_Crisp/assets/social-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PhoneClaw on-device footprints - Gemma 4 on iPhone (LiteRT)">
+<meta name="twitter:description" content="Measured memory footprints and documented device requirements for on-device Gemma 4 on iPhone.">
+<meta name="twitter:image" content="https://tangzhiyin.github.io/PhoneClaw_Crisp/assets/social-card.png">
+
+<link rel="icon" href="../assets/app-icon.png">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://tangzhiyin.github.io/PhoneClaw_Crisp/benchmarks/#article",
+      "headline": "PhoneClaw on-device footprints - Gemma 4 on iPhone (LiteRT)",
+      "description": "Measured on-device memory footprints and documented device requirements for running Gemma 4 E2B / E4B via LiteRT and MiniCPM-V 4.6 on iPhone.",
+      "url": "https://tangzhiyin.github.io/PhoneClaw_Crisp/benchmarks/",
+      "image": "https://tangzhiyin.github.io/PhoneClaw_Crisp/assets/social-card.png",
+      "datePublished": "2026-08-06",
+      "dateModified": "2026-08-06",
+      "author": {
+        "@type": "Organization",
+        "@id": "https://tangzhiyin.github.io/PhoneClaw_Crisp/#organization",
+        "name": "PhoneClaw"
+      },
+      "about": {
+        "@type": "SoftwareApplication",
+        "@id": "https://tangzhiyin.github.io/PhoneClaw_Crisp/#software",
+        "name": "PhoneClaw"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://tangzhiyin.github.io/PhoneClaw_Crisp/benchmarks/#breadcrumb",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "PhoneClaw", "item": "https://tangzhiyin.github.io/PhoneClaw_Crisp/" },
+        { "@type": "ListItem", "position": 2, "name": "On-device footprints", "item": "https://tangzhiyin.github.io/PhoneClaw_Crisp/benchmarks/" }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a class="brand" href="../"><img src="../assets/app-icon.png" alt="">PhoneClaw</a>
+    <div class="nav-links">
+      <a href="../mobile-agent-framework/">Framework</a>
+      <a href="../on-device-gemma/">Models</a>
+      <a href="../skills/">Skills</a>
+      <a href="../liveland/">LiveLand</a>
+      <a href="../privacy/">Privacy</a>
+      <a href="../faq/">FAQ</a>
+      <a class="nav-cta" href="https://testflight.apple.com/join/YuUSwq78">TestFlight</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-content">
+      <p class="eyebrow">On-device facts</p>
+      <h1>PhoneClaw on-device footprints - Gemma 4 on iPhone (LiteRT)</h1>
+      <p class="lede">PhoneClaw's on-device runtime is Google LiteRT (running Gemma 4 E2B / E4B) and MiniCPM-V 4.6 — not Apple MLX.</p>
+      <div class="hero-actions">
+        <a class="button primary" href="../on-device-gemma/">Model stack</a>
+        <a class="button" href="../">Home</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="band light">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Measured memory</p>
+          <h2>What the models actually use on iPhone.</h2>
+        </div>
+        <p class="section-copy">All memory figures below were measured during on-device crash forensics on TestFlight build 44, July 2026. Each entry states what the number covers.</p>
+      </div>
+      <div class="flow">
+        <article class="data-row">
+          <h3>Language model peak</h3>
+          <p>3.1 GB is the approximate peak resident memory of the Gemma 4 E2B language model during on-device inference.</p>
+        </article>
+        <article class="data-row">
+          <h3>Image input overhead</h3>
+          <p>0.8 GB is the approximate additional memory consumed when an image input is attached on top of the running language model.</p>
+        </article>
+        <article class="data-row warn">
+          <h3>LIVE mode peak</h3>
+          <p>4.3 GB is the approximate whole-device peak memory in LIVE mode, where the language model, voice pipeline, and camera pipeline run together.</p>
+        </article>
+        <article class="data-row warn">
+          <h3>App memory ceiling</h3>
+          <p>4 GB is the approximate usable app memory ceiling on 6 GB RAM iPhones, which is why PhoneClaw gates local runtimes on available memory headroom.</p>
+        </article>
+        <article class="data-row">
+          <h3>Context window</h3>
+          <p>4096 tokens is the conservative context window PhoneClaw currently favors, leaving room for model weights, KV cache, image or audio input, tool-call state, and iOS memory pressure. Documented in Docs/IOS_MEMORY_LIMITS.md.</p>
+        </article>
+      </div>
+      <table class="privacy-table">
+        <thead>
+          <tr><th>Model</th><th>Min device</th><th>Peak memory</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-label="Model">Gemma 4 E2B (LiteRT)</td>
+            <td data-label="Min device">A16 and above (documented, README)</td>
+            <td data-label="Peak memory">~3.1 GB resident (measured, TestFlight build 44 forensics, 2026-07)</td>
+            <td data-label="Notes">~2.4 GB download; the recommended default model.</td>
+          </tr>
+          <tr>
+            <td data-label="Model">Gemma 4 E4B (LiteRT)</td>
+            <td data-label="Min device">iPhone 15 Pro and above (documented, README)</td>
+            <td data-label="Peak memory">No measured on-device figure published yet.</td>
+            <td data-label="Notes">~3.4 GB download; CPU-only under the sideload-signing memory cap.</td>
+          </tr>
+          <tr>
+            <td data-label="Model">MiniCPM-V 4.6</td>
+            <td data-label="Min device">A17 Pro and above recommended (documented, README)</td>
+            <td data-label="Peak memory">Image input adds ~0.8 GB on top of the language model (measured, TestFlight build 44 forensics, 2026-07)</td>
+            <td data-label="Notes">Image Q&amp;A and LIVE camera understanding.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="band dark">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Documented requirements</p>
+          <h2>Devices and download sizes, straight from the README.</h2>
+        </div>
+        <p class="section-copy">These are the published requirements in the PhoneClaw repository README.</p>
+      </div>
+      <div class="stack">
+        <article class="panel">
+          <span class="panel-label">Gemma 4 E2B</span>
+          <h3>A16 and above</h3>
+          <p>2.4 GB is the approximate download size of the E2B model file (gemma-4-E2B-it.litertlm). Documented in the README model preparation section.</p>
+        </article>
+        <article class="panel">
+          <span class="panel-label">Gemma 4 E4B</span>
+          <h3>iPhone 15 Pro and above</h3>
+          <p>3.4 GB is the approximate download size of the E4B model file (gemma-4-E4B-it.litertlm). Documented in the README model preparation section.</p>
+        </article>
+        <article class="panel">
+          <span class="panel-label">MiniCPM-V 4.6</span>
+          <h3>A17 Pro and above recommended</h3>
+          <p>Documented in the README model recommendation table for image Q&amp;A and real-time camera in LIVE mode.</p>
+        </article>
+        <article class="panel">
+          <span class="panel-label">Mac Gateway</span>
+          <h3>Port 18080</h3>
+          <p>18080 is the default port of the PhoneClaw Mac Gateway, which advertises the _phoneclaw-llm._tcp Bonjour service and must run as PhoneClawGateway.app. Documented in README section 7.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band white">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Backends and throughput</p>
+          <h2>Backend selection, signing caps, and what is not published.</h2>
+        </div>
+        <p class="section-copy">This page only carries numbers that were measured on-device or written in repository documentation.</p>
+      </div>
+      <div class="flow">
+        <article class="data-row">
+          <h3>CPU / GPU backend selection</h3>
+          <p>The inference backend (GPU or CPU) is selectable directly from the settings page; CPU is the default in sideloaded builds to fit within Sideloadly-signed memory limits. Documented in the README v1.2.2 release notes.</p>
+        </article>
+        <article class="data-row warn">
+          <h3>Sideload-signing memory cap</h3>
+          <p>Under the sideload-signing memory cap, the E4B model only works on CPU (GPU will fail), and E2B is the recommended model; Xcode-signed builds are not subject to this cap and can run E2B / E4B with GPU enabled. Documented in the README v1.2.2 release notes.</p>
+        </article>
+        <article class="data-row">
+          <h3>Throughput</h3>
+          <p>No on-iPhone tokens-per-second figure has been published yet. On-device decoding speed varies with device generation, backend (CPU or GPU), and thermal state. When measured on-device figures exist, they will appear here with the exact device and build they were measured on.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p class="footer-word" aria-hidden="true">PhoneClaw</p>
+    <div class="footer-row">
+      <a href="../">Home</a>
+      <a href="../mobile-agent-framework/">Framework</a>
+      <a href="../on-device-gemma/">Models</a>
+      <a href="../skills/">Skills</a>
+      <a href="../liveland/">LiveLand</a>
+      <a href="../privacy/">Privacy &amp; Data Flow</a>
+      <a href="../mac-remote/">Mac Remote</a>
+      <a href="../faq/">FAQ</a>
+      <a href="../zh/">中文</a>
+      <a href="../ja/">日本語</a>
+      <a href="https://github.com/tangzhiyin/PhoneClaw_Crisp">GitHub</a>
+    </div>
+    <p>PhoneClaw is a mobile-native local AI Agent framework for phones and edge devices. Its iOS runtime runs on-device models and native iOS Skills by default, and supports optional Mac Gateway remote inference for heavier local models.</p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,74 @@
+name: Bug report
+description: Report a problem with PhoneClaw on iPhone
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Device details matter a lot for on-device inference issues.
+  - type: input
+    id: device-model
+    attributes:
+      label: Device model
+      description: The iPhone model you were using.
+      placeholder: e.g. iPhone 15 Pro
+    validations:
+      required: true
+  - type: input
+    id: ios-version
+    attributes:
+      label: iOS version
+      placeholder: e.g. iOS 18.5
+    validations:
+      required: true
+  - type: input
+    id: build-number
+    attributes:
+      label: TestFlight build number
+      description: Shown in the TestFlight app next to the version. Write "source build" if you built from Xcode.
+      placeholder: e.g. 46
+    validations:
+      required: true
+  - type: dropdown
+    id: model-in-use
+    attributes:
+      label: Model in use
+      description: Which model was active when the problem happened.
+      options:
+        - Gemma 4 E2B (on-device)
+        - Gemma 4 E4B (on-device)
+        - MiniCPM-V 4.6 (on-device, multimodal)
+        - Remote model via Mac Gateway
+        - Not sure / not model-related
+    validations:
+      required: true
+  - type: dropdown
+    id: live-involved
+    attributes:
+      label: Was LIVE mode or LiveLand involved?
+      options:
+        - "No"
+        - LIVE mode
+        - LiveLand
+        - Both
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: What you did, what you expected, and what happened instead. Include the prompt or Skill involved if relevant.
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Crash logs, screenshots, memory warnings, or anything else that might help.
+    validations:
+      required: false

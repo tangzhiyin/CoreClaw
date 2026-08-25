@@ -1,0 +1,260 @@
+import XCTest
+@testable import PhoneClawCore
+
+// MARK: - PromptTokenEstimator tests
+//
+// Plan §九 Phase 3 — replace the crude `chars / 4.0` estimator with a
+// mixed-script aware one (CJK 1.5 chars/token vs Latin 4.0).
+//
+// Invariants under test:
+//   - Empty string returns 1 (min token floor)
+//   - Pure ASCII follows chars / 4.0
+//   - Pure Chinese follows chars / 1.5
+//   - Mixed content weights linearly between the two
+//   - Result is always an integer >= 1
+//   - Counts character classes correctly (汉字 / 假名 / 韩文 / 全角标点)
+
+final class PromptTokenEstimatorTests: XCTestCase {
+
+    func testEmptyStringReturnsOne() {
+        XCTAssertEqual(PromptTokenEstimator.estimate(""), 1)
+    }
+
+    func testSingleCharFloor() {
+        // 1 char / 4.0 = 0.25 → rounded up = 1 (floor)
+        XCTAssertEqual(PromptTokenEstimator.estimate("a"), 1)
+        // 1 CJK char / 1.5 = 0.67 → rounded up = 1
+        XCTAssertEqual(PromptTokenEstimator.estimate("中"), 1)
+    }
+
+    func testPureAsciiUsesQuarterRatio() {
+        // 100 ascii chars / 4.0 = 25 tokens
+        let prompt = String(repeating: "a", count: 100)
+        XCTAssertEqual(PromptTokenEstimator.estimate(prompt), 25)
+    }
+
+    func testPureChineseUsesOnePointFiveRatio() {
+        // 30 汉字 / 1.5 = 20 tokens
+        let prompt = String(repeating: "中", count: 30)
+        XCTAssertEqual(PromptTokenEstimator.estimate(prompt), 20)
+    }
+
+    func testMixedContentAddsLinearly() {
+        // 60 ascii (60/4=15) + 30 CJK (30/1.5=20) = 35 tokens
+        let prompt = String(repeating: "a", count: 60) + String(repeating: "中", count: 30)
+        XCTAssertEqual(PromptTokenEstimator.estimate(prompt), 35)
+    }
+
+    func testCJKRangeIncludesHiragana() {
+        // ひらがな = 4 hiragana chars / 1.5 = 2.67 → rounded up = 3
+        let prompt = "ひらがな"
+        XCTAssertEqual(PromptTokenEstimator.estimate(prompt), 3)
+    }
+
+    func testCJKRangeIncludesKatakana() {
+        // カタカナ = 4 katakana chars / 1.5 = 2.67 → rounded up = 3
+        let prompt = "カタカナ"
+        XCTAssertEqual(PromptTokenEstimator.estimate(prompt), 3)
+    }
+
+    func testCJKRangeIncludesHangul() {
+        // 안녕하세요 = 5 hangul / 1.5 = 3.33 → rounded up = 4
+        let prompt = "안녕하세요"
+        XCTAssertEqual(PromptTokenEstimator.estimate(prompt), 4)
+    }
+
+    func testCJKRangeIncludesFullwidthPunctuation() {
+        // 3 fullwidth punctuation (in 0xFF00–0xFFEF range)
+        // 3 / 1.5 = 2 → 2 tokens
+        let prompt = "，。！"
+        XCTAssertEqual(PromptTokenEstimator.estimate(prompt), 2)
+    }
+
+    func testHalfwidthPunctuationCountsAsLatin() {
+        // ASCII punctuation: 4 chars / 4.0 = 1 token
+        let prompt = ",.!?"
+        XCTAssertEqual(PromptTokenEstimator.estimate(prompt), 1)
+    }
+
+    func testNewlinesAndWhitespaceCountAsLatin() {
+        // 8 whitespace chars / 4.0 = 2 tokens
+        let prompt = "    \n\n\t\t"
+        XCTAssertEqual(PromptTokenEstimator.estimate(prompt), 2)
+    }
+
+    func testRealisticChinesePromptInsideExpectedRange() {
+        // Realistic 100-char Chinese prompt should estimate roughly 60-70 tokens.
+        // (100/1.5 = 66.7 → 67)
+        let prompt = String(repeating: "你好世界这是一个测试", count: 10)  // exactly 100 chars
+        XCTAssertEqual(prompt.count, 100)
+        let tokens = PromptTokenEstimator.estimate(prompt)
+        XCTAssertEqual(tokens, 67, "100 CJK chars should estimate ~67 tokens (100/1.5)")
+    }
+
+    func testEstimatorIsDeterministic() {
+        // Same input → same output every time.
+        let prompt = "Hello 世界 안녕"
+        let firstRun = PromptTokenEstimator.estimate(prompt)
+        for _ in 0..<10 {
+            XCTAssertEqual(PromptTokenEstimator.estimate(prompt), firstRun)
+        }
+    }
+
+    func testLegacyEstimatorComparison() {
+        // For a Chinese-heavy prompt, new estimator should report MORE tokens
+        // than legacy `chars / 4.0` (which under-counted CJK).
+        // 100 汉字: new = 100/1.5 = 67; legacy = 100/4 = 25
+        let prompt = String(repeating: "中", count: 100)
+        let newEstimate = PromptTokenEstimator.estimate(prompt)
+        let legacyEstimate = max(1, Int((Double(prompt.count) / 4.0).rounded(.up)))
+        XCTAssertGreaterThan(
+            newEstimate,
+            legacyEstimate,
+            "new estimator should report more tokens for Chinese (legacy under-counted)"
+        )
+        XCTAssertEqual(newEstimate, 67)
+        XCTAssertEqual(legacyEstimate, 25)
+    }
+
+    func testPromptTranscriptParsesGemmaTurnsAndSkipsEmptyModelTurn() {
+        let prompt = """
+        <|turn>system
+        You are PhoneClaw.
+        <turn|><|turn>user
+        查今天步数
+        <turn|><|turn>model
+
+        """
+
+        let transcript = PromptTranscript(gemmaPrompt: prompt)
+
+        XCTAssertEqual(transcript.turns.count, 2)
+        XCTAssertEqual(transcript.turns[0].role, .system)
+        XCTAssertEqual(transcript.turns[0].rawRole, "system")
+        XCTAssertEqual(transcript.turns[0].content, "You are PhoneClaw.")
+        XCTAssertEqual(transcript.turns[1].role, .user)
+        XCTAssertEqual(transcript.turns[1].rawRole, "user")
+        XCTAssertEqual(transcript.turns[1].content, "查今天步数")
+    }
+
+    func testPromptTokenBreakdownPreservesLegacyTotalWhileAttributingTurns() {
+        let system = "You are PhoneClaw's on-device assistant runtime."
+        let user = "请查询今天的运动情况。"
+        let assistant = "好的，我正在读取健康数据。"
+        let prompt = """
+        <|turn>system
+        \(system)
+        <turn|><|turn>user
+        \(user)
+        <turn|><|turn>model
+        \(assistant)
+        <turn|><|turn>model
+
+        """
+
+        let breakdown = PromptTokenEstimator.estimateBreakdown(prompt)
+        let contentTokens = PromptTokenEstimator.estimate(system)
+            + PromptTokenEstimator.estimate(user)
+            + PromptTokenEstimator.estimate(assistant)
+
+        XCTAssertEqual(breakdown.turnCount, 3)
+        XCTAssertEqual(breakdown.totalTokens, PromptTokenEstimator.estimate(prompt))
+        XCTAssertEqual(breakdown.systemTokens, PromptTokenEstimator.estimate(system))
+        XCTAssertEqual(breakdown.userTokens, PromptTokenEstimator.estimate(user))
+        XCTAssertEqual(breakdown.assistantTokens, PromptTokenEstimator.estimate(assistant))
+        XCTAssertEqual(breakdown.toolTokens, 0)
+        XCTAssertEqual(breakdown.otherTokens, 0)
+        XCTAssertEqual(breakdown.formatOverheadTokens, max(0, breakdown.totalTokens - contentTokens))
+    }
+
+    func testPromptRuntimeProfileLiftsSystemTurnsIntoInstructions() {
+        let baseInstructions = "Base runtime rules."
+        let system = "Use the active health skill contract."
+        let user = "查今天步数"
+        let assistant = "正在读取健康数据。"
+        let prompt = """
+        <|turn>system
+        \(system)
+        <turn|><|turn>user
+        \(user)
+        <turn|><|turn>model
+        \(assistant)
+        """
+
+        let profile = PromptRuntimeProfile.fromGemmaPrompt(
+            prompt,
+            baseInstructions: baseInstructions,
+            includeSystemTurnsInPrompt: false
+        )
+
+        XCTAssertEqual(profile.instructions, "\(baseInstructions)\n\n\(system)")
+        XCTAssertFalse(profile.prompt.contains("System:"))
+        XCTAssertTrue(profile.prompt.contains("User:\n\(user)"))
+        XCTAssertTrue(profile.prompt.contains("Assistant:\n\(assistant)"))
+        XCTAssertEqual(profile.transcript.turns.count, 3)
+        XCTAssertEqual(profile.tokenBreakdown.totalTokens, PromptTokenEstimator.estimate(prompt))
+    }
+
+    func testPromptRuntimeProfileBuildsChatCompletionMessages() {
+        let prompt = """
+        <|turn>system
+        Follow PhoneClaw rules.
+        <turn|><|turn>user
+        查今天步数
+        <turn|><|turn>model
+        <tool_call>{"name":"health-query","arguments":{}}</tool_call>
+        <turn|><|turn>tool
+        {"steps":1200}
+        <turn|><|turn>model
+
+        """
+
+        let messages = PromptRuntimeProfile
+            .fromGemmaPrompt(prompt, includeSystemTurnsInPrompt: false)
+            .chatCompletionMessages()
+
+        XCTAssertEqual(messages.count, 4)
+        XCTAssertEqual(messages[0], PromptChatMessage(role: "system", content: "Follow PhoneClaw rules."))
+        XCTAssertEqual(messages[1], PromptChatMessage(role: "user", content: "查今天步数"))
+        XCTAssertEqual(
+            messages[2],
+            PromptChatMessage(role: "assistant", content: "<tool_call>{\"name\":\"health-query\",\"arguments\":{}}</tool_call>")
+        )
+        XCTAssertEqual(messages[3], PromptChatMessage(role: "user", content: "{\"steps\":1200}"))
+    }
+
+    func testPromptRuntimeProfileAppliesStructuredTokenBudget() {
+        let baseInstructions = "Base runtime rules."
+        let system = "Use the active PhoneClaw skill contract."
+        let oldUser = "OLD_CONTEXT_SHOULD_DROP " + String(repeating: "previous health query details ", count: 40)
+        let recentUser = "查今天步数"
+        let prompt = """
+        <|turn>system
+        \(system)
+        <turn|><|turn>user
+        \(oldUser)
+        <turn|><|turn>model
+        I found yesterday's health data.
+        <turn|><|turn>tool
+        {"steps":9000,"date":"yesterday"}
+        <turn|><|turn>user
+        \(recentUser)
+        <turn|><|turn>model
+
+        """
+
+        let profile = PromptRuntimeProfile.fromGemmaPrompt(
+            prompt,
+            baseInstructions: baseInstructions,
+            includeSystemTurnsInPrompt: false
+        )
+        let bounded = profile.applyingTokenBudget(maxInputTokens: 32)
+
+        XCTAssertEqual(bounded.instructions, "\(baseInstructions)\n\n\(system)")
+        XCTAssertLessThanOrEqual(bounded.tokenBreakdown.totalTokens, 32)
+        XCTAssertTrue(bounded.prompt.contains("User:\n\(recentUser)"))
+        XCTAssertFalse(bounded.prompt.contains("System:"))
+        XCTAssertFalse(bounded.prompt.contains("OLD_CONTEXT_SHOULD_DROP"))
+        XCTAssertLessThan(bounded.transcript.turns.count, profile.transcript.turns.count)
+    }
+}

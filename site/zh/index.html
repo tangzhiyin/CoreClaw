@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PhoneClaw - 面向手机的移动端本地 AI Agent 框架</title>
+<meta name="description" content="PhoneClaw 是面向手机和端侧设备的移动端本地 AI Agent 框架，支持 Gemma 4 E2B / E4B、MiniCPM-V 4.6 端侧运行、iOS 原生 Skills 和可选 Mac Gateway 远程推理。">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://tangzhiyin.github.io/PhoneClaw_Crisp/zh/">
+<link rel="alternate" hreflang="en" href="https://tangzhiyin.github.io/PhoneClaw_Crisp/">
+<link rel="alternate" hreflang="zh-Hans" href="https://tangzhiyin.github.io/PhoneClaw_Crisp/zh/">
+<link rel="alternate" hreflang="ja" href="https://tangzhiyin.github.io/PhoneClaw_Crisp/ja/">
+<link rel="alternate" hreflang="x-default" href="https://tangzhiyin.github.io/PhoneClaw_Crisp/">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="PhoneClaw">
+<meta property="og:title" content="PhoneClaw - 面向手机的移动端本地 AI Agent 框架">
+<meta property="og:description" content="手机端本地优先 AI Agent 框架：端侧模型、原生 Skills、清晰隐私边界、LiveLand 交互和可选 Mac 远程推理。">
+<meta property="og:url" content="https://tangzhiyin.github.io/PhoneClaw_Crisp/zh/">
+<meta property="og:image" content="https://tangzhiyin.github.io/PhoneClaw_Crisp/assets/social-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PhoneClaw - 移动端本地 AI Agent 框架">
+<meta name="twitter:description" content="端侧模型、iOS Skills、隐私边界、LiveLand 和 Mac Gateway。">
+<meta name="twitter:image" content="https://tangzhiyin.github.io/PhoneClaw_Crisp/assets/social-card.png">
+
+<link rel="icon" href="../assets/app-icon.png">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://tangzhiyin.github.io/PhoneClaw_Crisp/zh/#webpage",
+      "url": "https://tangzhiyin.github.io/PhoneClaw_Crisp/zh/",
+      "name": "PhoneClaw - 面向手机的移动端本地 AI Agent 框架",
+      "inLanguage": "zh-Hans",
+      "description": "PhoneClaw 是面向手机和端侧设备的移动端本地 AI Agent 框架，提供 iOS runtime 和原生移动端 Skills。",
+      "about": {
+        "@type": "SoftwareApplication",
+        "@id": "https://tangzhiyin.github.io/PhoneClaw_Crisp/#software",
+        "name": "PhoneClaw"
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="wrap">
+    <a class="brand" href="../"><img src="../assets/app-icon.png" alt="">PhoneClaw</a>
+    <div class="nav-links">
+      <a href="../mobile-agent-framework/">Framework</a>
+      <a href="../on-device-gemma/">Models</a>
+      <a href="../skills/">Skills</a>
+      <a href="../privacy/">Privacy</a>
+      <a href="../ja/">JA</a>
+      <a class="nav-cta" href="https://testflight.apple.com/join/YuUSwq78">TestFlight</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-content">
+      <p class="eyebrow">手机端本地 AI Agent 框架</p>
+      <h1>PhoneClaw</h1>
+      <p class="lede">PhoneClaw 是面向手机和端侧设备的移动端本地 AI Agent 框架，提供端侧模型、iOS 原生 Skills、权限边界、Live / LiveLand 交互，以及可选的局域网 Mac 远程推理。</p>
+      <div class="hero-actions">
+        <a class="button primary" href="https://testflight.apple.com/join/YuUSwq78">加入 TestFlight</a>
+        <a class="button" href="https://github.com/tangzhiyin/PhoneClaw_Crisp">查看源码</a>
+      </div>
+      <p class="disamb">PhoneClaw 框架面向手机、移动端设备、端侧设备、原生移动端 Skills 和手机端本地 Agent 工作流。</p>
+      <p class="disamb">本项目与 Android 自动化仓库 rohanarun/phoneclaw、GitHub 上的 phoneclaw 组织无关；Android 应用商店搜索结果中的同名 App 也是另一个产品。</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="band white">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">核心事实</p>
+          <h2>PhoneClaw 是什么、能做什么、数据怎样流动。</h2>
+        </div>
+        <p class="section-copy">PhoneClaw 最容易理解为一个手机运行时：本地模型、原生 Skills、权限边界和可选局域网推理都围绕同一套任务流组织。</p>
+      </div>
+      <div class="fact-grid">
+        <article class="fact-card">
+          <span class="card-mark">01</span>
+          <h3>PhoneClaw 是什么？</h3>
+          <p>PhoneClaw 是面向手机和端侧设备的移动端本地 AI Agent 框架，提供 iOS runtime、端侧模型和原生移动端 Skills。</p>
+        </article>
+        <article class="fact-card">
+          <span class="card-mark">02</span>
+          <h3>能做什么？</h3>
+          <p>用自然语言处理日历、提醒事项、通讯录、剪贴板、健康数据摘要、图片理解、语音与 LIVE、LiveLand、翻译、联网搜索和 Mac Gateway。</p>
+        </article>
+        <article class="fact-card">
+          <span class="card-mark">03</span>
+          <h3>数据怎样处理？</h3>
+          <p>聊天、图片和个人数据默认留在设备端。联网搜索、打开网页和 Mac 远程推理是用户显式触发的能力。</p>
+        </article>
+        <article class="fact-card">
+          <span class="card-mark">04</span>
+          <h3>为什么是移动端框架？</h3>
+          <p>框架围绕移动端内存预算、模型下载、权限边界、Skill 路由、手机入口、Live 交互和局域网边缘推理设计。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band light">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">移动端运行时</p>
+          <h2>围绕手机真实工作流设计。</h2>
+        </div>
+        <p class="section-copy">PhoneClaw 把本地模型、原生移动端能力、权限边界、Live 入口和可选局域网推理组织成同一个手机 Agent 运行时。</p>
+      </div>
+      <div class="flow">
+        <article class="data-row">
+          <h3>手机运行时</h3>
+          <p>文字、语音、图片、快捷入口、灵动岛和 LiveLand 都回到同一套本地任务流，由手机承载 Agent 体验。</p>
+        </article>
+        <article class="data-row warn">
+          <h3>原生能力层</h3>
+          <p>Skills 把自然语言连接到日历、提醒事项、通讯录、剪贴板、健康数据、翻译、图片和显式联网搜索，并遵循移动端权限。</p>
+        </article>
+        <article class="data-row remote">
+          <h3>边缘推理扩展</h3>
+          <p>配对 Mac 可以在同一局域网内承担更重推理，手机继续保留交互、Skill 路由、权限和任务状态。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band white">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">运行时</p>
+          <h2>面向手机运行时设计的 Agent stack。</h2>
+        </div>
+        <p class="section-copy">PhoneClaw 把手机当成 Agent 运行时。模型加载、Skill 路由、权限确认、内存预算、模型下载、Live 入口和任务状态都围绕移动端约束设计。</p>
+      </div>
+      <div class="flow">
+        <article class="data-row">
+          <h3>端侧模型</h3>
+          <p>Gemma 4 E2B / E4B 通过 LiteRT-LM 在手机端运行，MiniCPM-V 4.6 用于图片和 LIVE 相机场景。</p>
+        </article>
+        <article class="data-row warn">
+          <h3>原生 iOS Skills</h3>
+          <p>Calendar、Reminders、Contacts、Clipboard、HealthKit、翻译、图片和显式 Web Search 都在权限边界内执行。</p>
+        </article>
+        <article class="data-row remote">
+          <h3>Mac Gateway</h3>
+          <p>需要更重推理时，可以把同一局域网内的 Mac 作为可选推理节点，iPhone 仍保留 Agent 体验和权限边界。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band light">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">隐私</p>
+          <h2>数据留在设备端，联网能力显式触发。</h2>
+        </div>
+        <p class="section-copy">聊天、图片和个人数据默认留在设备端。联网搜索、打开网页和配对 Mac 远程推理是用户显式触发的能力。PhoneClaw 的本地路径支持完全离线运行。在这条本地路径上，它可以作为本地私人 AI 助手使用。默认路径让 PhoneClaw 作为端侧 AI 助手在手机上完成任务。</p>
+      </div>
+      <div class="flow">
+        <article class="data-row">
+          <h3>留在设备端</h3>
+          <p>默认推理、原生 Skill 调用、日历、提醒事项、通讯录、剪贴板、健康数据摘要、图片和聊天。</p>
+        </article>
+        <article class="data-row warn">
+          <h3>显式联网动作</h3>
+          <p>实时联网搜索和打开公开网页会把请求发给搜索服务商或目标网站。</p>
+        </article>
+        <article class="data-row remote">
+          <h3>可选 Mac 推理</h3>
+          <p>配对后，请求经同一局域网发送到你的 Mac。使用本地 Ollama 模型时请求留在那台 Mac 上；Ollama 云端模型（-cloud 标签）和其他 CLI 提供方会把请求转发到各自的服务。</p>
+        </article>
+      </div>
+      <div class="hero-actions">
+        <a class="button dark" href="../privacy/">查看 Privacy &amp; Data Flow</a>
+        <a class="button light" href="../faq/">查看 FAQ</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p class="footer-word" aria-hidden="true">PhoneClaw</p>
+    <div class="footer-row">
+      <a href="../">English</a>
+      <a href="../ja/">日本語</a>
+      <a href="../mobile-agent-framework/">Framework</a>
+      <a href="../on-device-gemma/">Models</a>
+      <a href="../skills/">Skills</a>
+      <a href="../privacy/">Privacy</a>
+      <a href="https://github.com/tangzhiyin/PhoneClaw_Crisp">GitHub</a>
+    </div>
+    <p>面向手机和端侧设备的本地优先 AI Agent 框架。</p>
+  </div>
+</footer>
+
+</body>
+</html>

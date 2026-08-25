@@ -1,0 +1,606 @@
+import CoreImage
+import Foundation
+import Observation
+#if canImport(UIKit)
+import UIKit
+// 跨平台 image 类型别名 —— iOS 真编 UIKit 路径, macOS CLI 自动走 CIImage.
+// AgentEngine 的 processInput(images:) 签名用这个别名, 调用端在各自平台用
+// 自己的自然类型; iOS 二进制行为零改变 (UIImage == PlatformImage).
+typealias PlatformImage = UIImage
+#else
+// macOS CLI: 不测图像输入场景, PlatformImage 只是签名占位.
+typealias PlatformImage = CIImage
+#endif
+
+/// Agent 层的 free-form 日志入口。
+/// 转发到 PCLog.debug(走 os.Logger),不再用裸 print。
+/// 想细分级别的调用点可以直接换成 PCLog.warn/event/error。
+/// 见 Docs/RUNTIME_ARCHITECTURE_PLAN.md §3.2 DiagnosticsLogger。
+func log(_ message: String) {
+    PCLog.debug(message)
+}
+
+struct AgentActivityEvent: Sendable, Equatable {
+    enum Phase: String, Sendable {
+        case accepted
+        case searching
+        case executing
+        case processing
+        case summarizing
+    }
+
+    let phase: Phase
+    let headline: String
+    let detail: String
+    let skillID: String?
+    let skillName: String?
+    let toolName: String?
+}
+
+struct GenerationTurnContext: Sendable, Equatable {
+    let turnID: UUID
+    let sessionID: UUID
+    let transactionID: UUID
+    let userMessageID: UUID
+    let createdAt: Date
+}
+
+// MARK: - Agent Engine
+//
+// 核心类: 持有所有运行时依赖 (inference / catalog / coordinator / sessionStore),
+// 声明 @Observable 属性供 SwiftUI 绑定。
+//
+// 实际逻辑分布在多个 extension 文件中:
+//   - EngineLifecycle.swift:         setup / config / session / cancel / retry
+//   - ProcessInput.swift:            processInput / streamLLM / generation tracking
+//   - PromptPipelineHelpers.swift:   prompt shape / plan / budget / observation
+//   - ImageFollowUp.swift:           image follow-up routing + repair
+//   - ToolChain.swift:               tool call execution chain
+//   - Planner.swift:                 multi-skill planning
+//   - Router.swift:                  skill matching / routing
+//   - OutputCleaner.swift:           streaming output cleanup
+//   - ToolCallParser.swift:          tool_call XML parsing
+//   - ChatAttachments.swift:         attachment encoding helpers
+
+@Observable
+@MainActor
+class AgentEngine {
+
+    // MARK: - Core Dependencies
+
+    let inference: InferenceService
+    let catalog: ModelCatalog
+    let installer: ModelInstaller
+    let coordinator: ModelRuntimeCoordinator
+    let sessionStore: ChatSessionStore
+    /// 局域网发现 + 绑定 (远程 Mac 推理)。UI 用它发现/配对;dispatcher 的 remote backend 用它解析 endpoint。
+    let lan: LANConnectionManager
+
+    // MARK: - Observable State
+
+    var messages: [ChatMessage] = [] {
+        didSet {
+            messagesRevision &+= 1
+            if isSessionPersistenceEnabled {
+                sessionStore.scheduleSave { [weak self] in
+                    self?.messagesForPersistence() ?? []
+                }
+            }
+        }
+    }
+    var messagesRevision = 0
+    var isProcessing = false
+    var didSetup = false
+    var config = ModelConfig()
+
+    @ObservationIgnored private var pendingStreamingContentByMessageID: [UUID: String] = [:]
+    @ObservationIgnored private var streamingUIFlushTask: Task<Void, Never>?
+    @ObservationIgnored private var isSessionPersistenceEnabled = true
+    @ObservationIgnored var activeTurnContext: GenerationTurnContext?
+    @ObservationIgnored var activeTurnTask: Task<Void, Never>?
+    @ObservationIgnored var isLiveLandTurnActive = false
+    @ObservationIgnored var activityEventSink: ((AgentActivityEvent) async -> Void)?
+    @ObservationIgnored var toolCallTraceSink: ((RuntimeToolCall) async -> Void)?
+
+    // MARK: - Skill System
+
+    let skillRegistry = SkillRegistry()
+    let toolRegistry = ToolRegistry.shared
+    let toolResultCanonicalizer: ToolResultCanonicalizer
+    var skillEntries: [SkillEntry] = []
+
+    // MARK: - Prompt Pipeline State
+
+    let plannerRevision = "planner-v3-local-selection"
+    var lastTurnMatchedSkillIds: [String] = []
+    var lastTurnRawModelOutputs: [String] = []
+    var lastTurnPromptDiagnostics: [String] = []
+    var lastTurnStreamingPrompt: String?
+    let legacyContextBudgetPlanner: ContextBudgetPlanner
+    let hotfixContextBudgetPlanner: ContextBudgetPlanner
+    var promptObservationBuffer = HotfixTurnObservationRingBuffer()
+    var previousPromptShape: PromptShape?
+    var previousSessionGroup: SessionGroup?
+    var recentImageFollowUpContexts: [RecentImageFollowUpContext] = []
+
+    // MARK: - Computed Properties
+
+    var enabledSkillInfos: [SkillInfo] {
+        skillEntries.filter(\.isEnabled).map {
+            SkillInfo(name: $0.id, description: $0.description,
+                     displayName: $0.name, icon: $0.icon,
+                     type: $0.type,
+                     activationMode: $0.activationMode,
+                     history: $0.history,
+                     sideEffects: $0.sideEffects,
+                     requiresTimeAnchor: $0.requiresTimeAnchor,
+                     samplePrompt: $0.samplePrompt,
+                     chipPrompt: $0.chipPrompt,
+                     chipLabel: $0.chipLabel)
+        }
+    }
+
+    // MARK: - Streaming UI Commit
+    //
+    // LLM token streams can arrive much faster than the display refresh budget.
+    // Updating `messages` on every token forces SwiftUI to diff/layout the chat list
+    // and reschedule session persistence for every tiny text append. Keep generation
+    // lossless, but commit visible text to the observable array at a bounded cadence.
+
+    func enqueueStreamingMessageContentUpdate(at index: Int, content: String) {
+        guard messages.indices.contains(index),
+              messages[index].role == .assistant else { return }
+
+        let messageID = messages[index].id
+        pendingStreamingContentByMessageID[messageID] = content
+
+        guard streamingUIFlushTask == nil else { return }
+        streamingUIFlushTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .milliseconds(42))
+            self?.flushPendingStreamingMessageContentUpdates()
+        }
+    }
+
+    func setStreamingMessageContent(at index: Int, content: String) {
+        guard messages.indices.contains(index) else { return }
+
+        let messageID = messages[index].id
+        pendingStreamingContentByMessageID.removeValue(forKey: messageID)
+        messages[index].update(content: content)
+    }
+
+    func flushPendingStreamingMessageContentUpdates() {
+        streamingUIFlushTask?.cancel()
+        streamingUIFlushTask = nil
+
+        guard !pendingStreamingContentByMessageID.isEmpty else { return }
+        let pending = pendingStreamingContentByMessageID
+        pendingStreamingContentByMessageID.removeAll(keepingCapacity: true)
+
+        for (messageID, content) in pending {
+            guard let index = messages.firstIndex(where: { $0.id == messageID }),
+                  messages[index].role == .assistant else { continue }
+            messages[index].update(content: content)
+        }
+    }
+
+    func messagesForPersistence() -> [ChatMessage] {
+        messages.map { message in
+            guard message.role == .assistant,
+                  message.content.hasSuffix("▍") else {
+                return message
+            }
+            var cleaned = message
+            cleaned.update(content: String(cleaned.content.dropLast()))
+            return cleaned
+        }
+    }
+
+    func setSessionPersistenceEnabled(_ enabled: Bool) {
+        isSessionPersistenceEnabled = enabled
+        if !enabled {
+            sessionStore.cancelPendingSave()
+        }
+    }
+
+    func processLiveLandCommand(_ text: String) async -> [ChatMessage] {
+        guard !isProcessing else {
+            return liveLandSystemMessages("LiveLand 正在处理上一条指令，请稍后再试。")
+        }
+
+        if let modelIssue = await ensureLiveLandModelReady() {
+            return liveLandSystemMessages(modelIssue)
+        }
+
+        let startIndex = messages.count
+
+        isLiveLandTurnActive = true
+        defer {
+            flushPendingStreamingMessageContentUpdates()
+            isLiveLandTurnActive = false
+        }
+
+        await processInput(text)
+        await waitForLiveLandCommandCompletion()
+        flushPendingStreamingMessageContentUpdates()
+        let safeStart = min(startIndex, messages.count)
+        return Array(messages.dropFirst(safeStart))
+    }
+
+    private func liveLandSystemMessages(_ content: String) -> [ChatMessage] {
+        [ChatMessage(role: .system, content: content)]
+    }
+
+    private func ensureLiveLandModelReady() async -> String? {
+        if coordinator.sessionState.canGenerate { return nil }
+
+        installer.refreshInstallStates()
+        _ = reconcileSelectedModelIfUnavailable()
+        _ = applyModelSelection()
+
+        if !config.selectedModelID.hasPrefix("remote::") {
+            let state = installer.installState(for: config.selectedModelID)
+            guard state == .downloaded || state == .bundled else {
+                log("[LiveLand] model unavailable: \(config.selectedModelID) state=\(state)")
+                return "请先在设置里下载模型，LiveLand 需要模型才能调用技能。"
+            }
+        }
+
+        if await waitForLiveLandModelReadyIfLoading() {
+            return nil
+        }
+
+        guard coordinator.sessionState.isStable else {
+            log("[LiveLand] model runtime busy: \(coordinator.sessionState)")
+            return "模型正在切换或加载，请稍后再试。"
+        }
+
+        do {
+            try await coordinator.load(
+                modelID: config.selectedModelID,
+                backend: config.preferredBackend
+            )
+            return nil
+        } catch {
+            log("[LiveLand] model load failed: \(error.localizedDescription)")
+            return "模型启动失败：\(error.localizedDescription)"
+        }
+    }
+
+    private func waitForLiveLandModelReadyIfLoading(timeout: TimeInterval = 20) async -> Bool {
+        guard !coordinator.sessionState.canGenerate,
+              !coordinator.sessionState.isStable else {
+            return coordinator.sessionState.canGenerate
+        }
+
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if coordinator.sessionState.canGenerate {
+                return true
+            }
+            if coordinator.sessionState.isStable {
+                return false
+            }
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+        return coordinator.sessionState.canGenerate
+    }
+
+    private func waitForLiveLandCommandCompletion(timeout: TimeInterval = 180) async {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            guard isProcessing || isModelGenerating || inference.isGenerating else {
+                return
+            }
+            try? await Task.sleep(for: .milliseconds(100))
+        }
+
+        log("[LiveLand] main Agent turn timed out after \(Int(timeout))s")
+        cancelActiveGeneration()
+    }
+
+    func publishSkillActivityEvent(
+        skillID: String?,
+        skillName: String?,
+        toolName: String?,
+        phase: AgentActivityEvent.Phase
+    ) async {
+        guard let activityEventSink else { return }
+
+        let normalizedToolName = toolName?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedSkillID = skillID?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedSkillName = skillName?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let detail = skillActivityDetail(
+            skillID: normalizedSkillID,
+            skillName: normalizedSkillName,
+            toolName: normalizedToolName,
+            phase: phase
+        )
+
+        await activityEventSink(
+            AgentActivityEvent(
+                phase: phase,
+                headline: "正在执行",
+                detail: detail,
+                skillID: normalizedSkillID?.isEmpty == false ? normalizedSkillID : nil,
+                skillName: normalizedSkillName?.isEmpty == false ? normalizedSkillName : nil,
+                toolName: normalizedToolName?.isEmpty == false ? normalizedToolName : nil
+            )
+        )
+    }
+
+    private func skillActivityDetail(
+        skillID: String?,
+        skillName: String?,
+        toolName: String?,
+        phase: AgentActivityEvent.Phase
+    ) -> String {
+        switch phase {
+        case .accepted:
+            return "已收到，正在理解"
+        case .searching:
+            return "正在查询"
+        case .processing:
+            return "正在处理"
+        case .summarizing:
+            return "正在整理结果"
+        case .executing:
+            return executingSkillActivityDetail(
+                skillID: skillID,
+                skillName: skillName,
+                toolName: toolName
+            )
+        }
+    }
+
+    private func executingSkillActivityDetail(
+        skillID: String?,
+        skillName: String?,
+        toolName: String?
+    ) -> String {
+        if let toolName,
+           let contract = toolRegistry.phoneGroundContract(for: toolName),
+           let evidenceType = contract.evidenceTypes.first {
+            switch evidenceType {
+            case .web:
+                return "正在查询网页"
+            case .health:
+                return "正在读取健康数据"
+            case .calendar:
+                return "正在处理日历"
+            case .contacts:
+                return "正在处理联系人"
+            case .reminders:
+                return "正在处理提醒事项"
+            case .clipboard:
+                return "正在处理剪贴板"
+            case .file:
+                return "正在处理文件"
+            case .system:
+                return "正在处理系统数据"
+            }
+        }
+
+        if let skillID,
+           let definition = skillRegistry.getDefinition(skillID) {
+            switch definition.metadata.type {
+            case .network:
+                return "正在查询"
+            case .content:
+                return "正在处理内容"
+            case .device:
+                let displayName = (skillName?.isEmpty == false ? skillName : nil)
+                    ?? definition.metadata.displayName
+                return displayName.isEmpty ? "正在执行" : "正在执行\(displayName)"
+            }
+        }
+
+        return "正在执行"
+    }
+
+    var availableModels: [ModelDescriptor] {
+        catalog.availableModels
+    }
+
+    // MARK: - Coordinator Convenience (Phase 3c)
+
+    /// Model is loaded and ready to accept generation requests.
+    /// Replaces UI reads of `inference.isLoaded` — driven by coordinator's
+    /// validated state machine rather than raw inference-layer booleans.
+    var isModelReady: Bool {
+        coordinator.sessionState.canGenerate
+    }
+
+    /// Model weights/session are loaded. This remains true while a generation
+    /// is running, unlike `isModelReady` which means "can accept a new request".
+    var isModelLoaded: Bool {
+        switch coordinator.sessionState {
+        case .ready, .generating:
+            return true
+        default:
+            return false
+        }
+    }
+
+    /// A generation is in progress (coordinator has an active transaction).
+    /// Replaces UI reads of `inference.isGenerating`.
+    var isModelGenerating: Bool {
+        coordinator.sessionState.isGenerating
+    }
+
+    // MARK: - UI Status Bridge
+    //
+    // UI 通过这几个 wrapper 读/写状态消息和触发 KV reset, 不再直接碰 inference
+    // 协议. Plan §3.1 想要的"单向数据流"在这里兑现 —— UI 只透过 AgentEngine
+    // 接口操作运行时, AgentEngine 自己路由到 inference/coordinator。
+
+    /// 当前底层后端的状态消息 (用于 UI 显示 "加载中" / "推理中" 之类的提示文案)。
+    var statusMessage: String {
+        inference.statusMessage
+    }
+
+    /// 设置状态消息文案。供 UI 在用户操作 (e.g. 取消下载) 时给出即时反馈。
+    func setStatusMessage(_ message: String) {
+        inference.statusMessage = message
+    }
+
+    /// 重置 KV session — 用户主动 (e.g. ContentView 长按重置) 触发的清理入口。
+    /// 内部转发到 inference。
+    func resetKVSession() async {
+        await inference.resetKVSession()
+    }
+
+    // MARK: - Init
+
+    init(
+        inference: InferenceService? = nil,
+        catalog: ModelCatalog? = nil,
+        installer: ModelInstaller? = nil
+    ) {
+        // LiteRT 是 iOS-only (xcframework 没有 macOS slice)。Mac harness / CLI
+        // 编译时 LiteRTLMSwift 不在作用域, 相应的 LiteRTCatalog / LiteRTBackend /
+        // LiteRTModelStore 也被 SwiftPM target 配置 exclude。
+        //
+        // iOS 分支: 默认 fallback 创建 LiteRT 实例 (历史行为不变)。
+        // 非 iOS 分支: 要求调用方必须显式注入 catalog/installer/inference,
+        //              CLI 本来就总是注入, 不受影响。
+        #if canImport(PhoneClawEngine)
+        let resolvedCatalog: ModelCatalog = catalog ?? LiteRTCatalog()
+        let resolvedInstaller: ModelInstaller = installer ?? LiteRTModelStore()
+        #else
+        guard let resolvedCatalog = catalog,
+              let resolvedInstaller = installer else {
+            fatalError("AgentEngine: non-LiteRT build requires explicit catalog + installer injection")
+        }
+        #endif
+        self.catalog = resolvedCatalog
+        self.installer = resolvedInstaller
+        self.legacyContextBudgetPlanner = LegacyBudgetPlanner()
+        self.hotfixContextBudgetPlanner = HotfixBudgetPlanner()
+        self.toolResultCanonicalizer = LegacyToolCanonicalizer()
+        let lan = LANConnectionManager()
+        self.lan = lan
+
+        if let inference {
+            self.inference = inference
+        } else {
+            #if canImport(PhoneClawEngine)
+            let liteRT = LiteRTBackend(
+                modelPathResolver: { modelID in
+                    guard let desc = resolvedCatalog.availableModels.first(where: { $0.id == modelID }) else { return nil }
+                    return resolvedInstaller.artifactPath(for: desc)
+                },
+                onModelLoaded: { [weak resolvedCatalog] modelID in
+                    if let cat = resolvedCatalog,
+                       let desc = cat.availableModels.first(where: { $0.id == modelID }) {
+                        cat.markLoaded(desc)
+                    }
+                },
+                onModelUnloaded: { [weak resolvedCatalog] in
+                    resolvedCatalog?.markUnloaded()
+                }
+            )
+
+            // MiniCPM-V backend: bundleResolver 从 descriptor.companionFiles 找
+            // 真实文件名 (按 CompanionRole 查), 不再硬编码命名约定。
+            let miniCPMV = MiniCPMVBackend(
+                bundleResolver: { modelID in
+                    guard let desc = resolvedCatalog.availableModels.first(where: { $0.id == modelID }),
+                          desc.artifactKind == .ggufBundle,
+                          let llmPath = resolvedInstaller.artifactPath(for: desc) else {
+                        return nil
+                    }
+                    let baseDir = llmPath.deletingLastPathComponent()
+
+                    guard let mmprojCompanion = desc.companionFiles.first(where: { $0.role == .multimodalProjector }) else {
+                        return nil
+                    }
+                    let mmprojCanonicalPath = baseDir.appendingPathComponent(mmprojCompanion.localResourceName)
+
+                    // Backward compat: legacy sideload name vs canonical OBS name.
+                    let mmprojLegacyPath = baseDir.appendingPathComponent("MiniCPM-V-4_6-mmproj-f16.gguf")
+                    let mmprojPath: URL
+                    if FileManager.default.fileExists(atPath: mmprojCanonicalPath.path) {
+                        mmprojPath = mmprojCanonicalPath
+                    } else if FileManager.default.fileExists(atPath: mmprojLegacyPath.path) {
+                        mmprojPath = mmprojLegacyPath
+                    } else {
+                        return nil
+                    }
+
+                    let resolvedCoreml: URL? = desc.companionFiles
+                        .first(where: { $0.role == .coreMLVisionEncoder })
+                        .map { baseDir.appendingPathComponent($0.localResourceName) }
+                        .flatMap { FileManager.default.fileExists(atPath: $0.path) ? $0 : nil }
+
+                    return MTMDPathBundle(
+                        modelPath: llmPath,
+                        mmprojPath: mmprojPath,
+                        coremlPath: resolvedCoreml
+                    )
+                },
+                onModelLoaded: { [weak resolvedCatalog] modelID in
+                    if let cat = resolvedCatalog,
+                       let desc = cat.availableModels.first(where: { $0.id == modelID }) {
+                        cat.markLoaded(desc)
+                    }
+                },
+                onModelUnloaded: { [weak resolvedCatalog] in
+                    resolvedCatalog?.markUnloaded()
+                }
+            )
+
+            let remote = RemoteInferenceService()
+            remote.endpointResolver = { [lan] modelID in await lan.resolveRemoteModel(modelID) }
+            let foundationModels: (any InferenceService)?
+            #if canImport(FoundationModels)
+            if #available(iOS 27.0, macOS 27.0, *) {
+                foundationModels = FoundationModelsInferenceService()
+            } else {
+                foundationModels = nil
+            }
+            #else
+            foundationModels = nil
+            #endif
+            self.inference = BackendDispatcher(
+                liteRT: liteRT,
+                miniCPMV: miniCPMV,
+                remote: remote,
+                foundationModels: foundationModels,
+                modelLookup: { modelID in
+                    resolvedCatalog.availableModels.first(where: { $0.id == modelID })
+                }
+            )
+            #else
+            fatalError("AgentEngine: non-LiteRT build requires explicit inference injection")
+            #endif
+        }
+
+        self.coordinator = ModelRuntimeCoordinator(
+            inference: self.inference,
+            installer: resolvedInstaller,
+            requiresLocalArtifact: { modelID in
+                resolvedCatalog.availableModels.first(where: { $0.id == modelID })?.requiresLocalArtifact
+                    ?? !modelID.hasPrefix("remote::")
+            }
+        )
+        self.sessionStore = ChatSessionStore()
+
+        loadSkillEntries()
+    }
+
+    /// 把所有已绑定 Mac 的远程模型刷进 catalog (UI 配对后 / 启动后调用)。
+    func refreshRemoteModels() async {
+        var all: [ModelDescriptor] = []
+        for binding in lan.bindings.all() {
+            all += await lan.remoteModels(for: binding)
+        }
+        catalog.setRemoteModels(all)
+        if config.selectedModelID.hasPrefix("remote::"),
+           !all.contains(where: { $0.id == config.selectedModelID }),
+           let replacement = all.first {
+            config.selectedModelID = replacement.id
+            reloadModel()
+        }
+    }
+}

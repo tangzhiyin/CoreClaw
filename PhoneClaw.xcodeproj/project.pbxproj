@@ -1,0 +1,1696 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		06A562E919007CEE36406DCA /* (null) in Sources */ = {isa = PBXBuildFile; };
+		06D9CC213F5773BCAF9376C9 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		07D3C1FB6D5F4849F2E8136B /* (null) in Sources */ = {isa = PBXBuildFile; };
+		084BAD9BD1E8ED10B59ACADB /* (null) in Sources */ = {isa = PBXBuildFile; };
+		08876D35D59ECC4A9406DFAE /* (null) in Sources */ = {isa = PBXBuildFile; };
+		0B263C823B20AE04F227B187 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		0C5EBE615C219F104D6D9C8D /* (null) in Sources */ = {isa = PBXBuildFile; };
+		0D58F93BFFFFE778CD8A34D1 /* LiveModeEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C5B0E5FD420CCB6BD8D1A4 /* LiveModeEngine.swift */; };
+		0F13CB63EFD6EB20B60C013B /* ASRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C500DE8A47482D5DA7DA6D3 /* ASRService.swift */; };
+		10405212EEF000AA04B72748 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		137C43C64332571D07B4D532 /* ModelConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F0E463E3C7A27CA8DBEE333 /* ModelConfig.swift */; };
+		1A2B3C4D5E6F7A8B9C0D1E2F /* PorcelainOrbView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F7A8B9C0D1E30 /* PorcelainOrbView.swift */; };
+		1D6B9BBA44F194BB9B33BD65 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		20B8C55E032BA07B3E640E80 /* Skills.swift in Sources */ = {isa = PBXBuildFile; fileRef = 571908036E6DCED1D58C1E9E /* Skills.swift */; };
+		211F188F31CA459159D0E80B /* (null) in Sources */ = {isa = PBXBuildFile; };
+		21A376D4F0444A74A8F6D2EE /* IOS27FoundationModelsInferenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD57EFED3F6A41FC8B154FC9 /* IOS27FoundationModelsInferenceService.swift */; };
+		23D41FD1E095FCDDC5BE04EF /* LiveOutputParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1933DF0A8083223AD681A973 /* LiveOutputParser.swift */; };
+		255B2D20006BDC90DD271C86 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		262A3E0B099DCF52616B3F0C /* (null) in Sources */ = {isa = PBXBuildFile; };
+		26929A1E3A3435B723DD604D /* (null) in Sources */ = {isa = PBXBuildFile; };
+		273143E1D4CADB93BB87D208 /* VoiceTurnController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D672ACC5EAC3A11F9A0735C /* VoiceTurnController.swift */; };
+		27C2E4D0940F10256C1A86FC /* (null) in Sources */ = {isa = PBXBuildFile; };
+		2B3C4D5E6F7A8B9C0D1E2F30 /* UIScale.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3C4D5E6F7A8B9C0D1E2F31 /* UIScale.swift */; };
+		2BC8AF77F212FBB4A0A0F28B /* (null) in Sources */ = {isa = PBXBuildFile; };
+		2C6F8756897F4C01D3E190B0 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		2CADFF678567A2ECB88CE265 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		2F4A6C8E0A1B2C3D4E5F6071 /* AudioCaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F4A6C8E0A1B2C3D4E5F6070 /* AudioCaptureService.swift */; };
+		32D9B612A8A28256BD2CCA55 /* LiveAudioIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8D921B323B9D6342A22A29E /* LiveAudioIO.swift */; };
+		41A4AE7307B1AEB76793BDC9 /* ASRBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5F58AC37EA816ED739551D /* ASRBackend.swift */; };
+		41D5F6BA01C2365F10D7C4EA /* LiveSkillCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C97FEEC133F40BDEFBD9AE /* LiveSkillCall.swift */; };
+		42C98281CDF93BA47D0FC59D /* (null) in Sources */ = {isa = PBXBuildFile; };
+		43DD7FAECE6EEBA9D504D3D5 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		44E858BC1F79BDD31F923BBC /* (null) in Sources */ = {isa = PBXBuildFile; };
+		45B7FEC6C4D055F44A87BFA9 /* PhoneClawApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD9808FE93325C3CE4CFA00 /* PhoneClawApp.swift */; };
+		45B7FEC6C4D055F44A87BFAA /* LiveLaunchRouting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD9808FE93325C3CE4CFAA1 /* LiveLaunchRouting.swift */; };
+		45B7FEC6C4D055F44A87BFAB /* LiveLandShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD9808FE93325C3CE4CFAA2 /* LiveLandShortcuts.swift */; };
+		4A99F468A0CDF3F577738F6C /* (null) in Sources */ = {isa = PBXBuildFile; };
+		4C01A62B1E57D91C45FFEEA8 /* LiveTurnProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BCB3AA5590B964AC46945D5 /* LiveTurnProcessor.swift */; };
+		5084E1CD2E831BC05F5E4374 /* PromptBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E7C06DA449D1395217A42D5 /* PromptBuilder.swift */; };
+		542491EC62E3A48A32792C5D /* (null) in Sources */ = {isa = PBXBuildFile; };
+		583517394D45962A75274774 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		5C01BF2FA8161562894FFD97 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		5D1A2B3C4E5F607180905678 /* HotfixFeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1A2B3C4E5F607180901234 /* HotfixFeatureFlags.swift */; };
+		5E3245AC20D4A5365C4A84E8 /* LiveLocale.swift in Sources */ = {isa = PBXBuildFile; fileRef = A263EC6C9ED96F37CF99E49E /* LiveLocale.swift */; };
+		623A278B9408C9BE8FDE61D1 /* SharedUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DBABEB8C21E7B67E5C2516D /* SharedUI.swift */; };
+		64C85AE4FF9AA2C865C799E9 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		6E2B3C4D5F607182A0B56789 /* ConversationMemoryPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E2B3C4D5F607182A0B12345 /* ConversationMemoryPolicy.swift */; };
+		6ED70A065D44870C4B10BC01 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		70A9AFA85FC91F00D3E00387 /* OrbBackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA48303BA25916A3A431EDE6 /* OrbBackgroundView.swift */; };
+		77CE684DABF6C69ECF54AB3F /* (null) in Sources */ = {isa = PBXBuildFile; };
+		7BB3AC9437469CCB6929F015 /* LiveCameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 357644EE0B2A47696762E171 /* LiveCameraService.swift */; };
+		7CE29873DCE243E48125BD3F /* IOS27FoundationModelsCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ABCEF146EDF405D95524F33 /* IOS27FoundationModelsCatalog.swift */; };
+		7EB3859798F050565F8C28B9 /* OrbShaderSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = C70EDE41C438263F820D0FCC /* OrbShaderSource.swift */; };
+		7F3C4D5E6071839BC5678901 /* PromptObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F3C4D5E6071839BC1234567 /* PromptObservation.swift */; };
+		839929FB52DF6A121DCEE82C /* LiveComponentTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C503EC6B19AD0CF5515B98E /* LiveComponentTest.swift */; };
+		84DEDE5EA80ABE1575ECD383 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		8A4D5E6F7182940CD6789012 /* ImageFollowUp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4D5E6F7182940CD2345678 /* ImageFollowUp.swift */; };
+		8B0B3BC2CF9E5C58519C11C2 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		8D92BA73222C507ADD63ED33 /* OrbSceneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73C9FFB0EEDE520F2885102 /* OrbSceneView.swift */; };
+		8E9B8E06D2729659B52A95C1 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		911E4634041EBFC4AAA48EFA /* (null) in Sources */ = {isa = PBXBuildFile; };
+		916086085ECE53782F3654D2 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		93BD549B99F4F88D0BEB9B2A /* (null) in Sources */ = {isa = PBXBuildFile; };
+		9412304167DACB86E5D60D49 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5ED928BF14864713A9A9D16 /* ContentView.swift */; };
+		95444CF962023FF31BA49D06 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		97E96A2FBFFAF609F276A896 /* ConfigurationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E62C3CEFC7AE63873D751E75 /* ConfigurationsView.swift */; };
+		9B17236E9D51367662BBED4C /* VADService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F18C7A5D1474A06400BE423D /* VADService.swift */; };
+		9B5E6F708293A51DE7890123 /* PromptPipelineHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B5E6F708293A51DE3456789 /* PromptPipelineHelpers.swift */; };
+		9EA6D4B6C15083B5F9C96F04 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		9FA8E14BB1B226526B8BD782 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		A1B2C3D4E5F607182930D001 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F607182930D002 /* PrivacyInfo.xcprivacy */; };
+		A1B2C3D4E5F607182930D003 /* OrbWebAssets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F607182930D004 /* OrbWebAssets */; };
+		A24D34F106E9869C8DA166DE /* OrbAudioAnalyser.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF684F9A04FAEE76440F69C /* OrbAudioAnalyser.swift */; };
+		A27C0DEF0000000000000001 /* GuardedSkillRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27C0DEF0000000000000002 /* GuardedSkillRouter.swift */; };
+		A27C0DEF0000000000000003 /* IOS27FoundationSkillRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27C0DEF0000000000000004 /* IOS27FoundationSkillRouter.swift */; };
+		A31476EA2F856FD700318978 /* ChatAttachments.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31476E82F856FD700318978 /* ChatAttachments.swift */; };
+		A31476EB2F856FD700318978 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31476E92F856FD700318978 /* ChatMessage.swift */; };
+		A31476F62F85741500318978 /* Planner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31476F02F85741500318978 /* Planner.swift */; };
+		A31476F82F85741500318978 /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31476F12F85741500318978 /* Router.swift */; };
+		A31476F92F85741500318978 /* ChatSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31476F22F85741500318978 /* ChatSessionStore.swift */; };
+		A31476FA2F85741500318978 /* ToolChain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31476F42F85741500318978 /* ToolChain.swift */; };
+		A31476FB2F85741500318978 /* OutputCleaner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31476EF2F85741500318978 /* OutputCleaner.swift */; };
+		A31476FC2F85741500318978 /* ToolCallParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31476F32F85741500318978 /* ToolCallParser.swift */; };
+		A340D947F4D1C7DE26F7F978 /* LiveMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 094A760C8A6DFD5E317AF5B8 /* LiveMetrics.swift */; };
+		A784E79067D36E56702AC300 /* AudioUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22A3E6DE14D68AD9C9ABF0E8 /* AudioUI.swift */; };
+		A7C100000000000000000003 /* PhoneClawLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7C200000000000000000003 /* PhoneClawLiveActivityWidget.swift */; };
+		A7C100000000000000000005 /* PhoneClawLiveActivityWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = A7C200000000000000000005 /* PhoneClawLiveActivityWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		AA1000000000000000000001 /* LLMEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000001 /* LLMEngine.swift */; };
+		AA1000000000000000000002 /* MLXLocalLLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000002 /* MLXLocalLLMService.swift */; };
+		AA1000000000000000000003 /* Gemma4Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000003 /* Gemma4Config.swift */; };
+		AA1000000000000000000004 /* Gemma4LanguageModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000004 /* Gemma4LanguageModel.swift */; };
+		AA1000000000000000000005 /* Gemma4Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000005 /* Gemma4Model.swift */; };
+		AA1000000000000000000006 /* Gemma4Registration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000006 /* Gemma4Registration.swift */; };
+		AA1000000000000000000007 /* Gemma4RoPE.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000007 /* Gemma4RoPE.swift */; };
+		AA1000000000000000000008 /* Gemma4TextModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000008 /* Gemma4TextModel.swift */; };
+		AA1000000000000000000009 /* MLXTokenizersLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000009 /* MLXTokenizersLoader.swift */; };
+		AA1000000000000000000011 /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = AA5000000000000000000001 /* MLX */; };
+		AA1000000000000000000012 /* MLXFast in Frameworks */ = {isa = PBXBuildFile; productRef = AA5000000000000000000002 /* MLXFast */; };
+		AA1000000000000000000013 /* MLXNN in Frameworks */ = {isa = PBXBuildFile; productRef = AA5000000000000000000003 /* MLXNN */; };
+		AA1000000000000000000014 /* MLXLMCommon in Frameworks */ = {isa = PBXBuildFile; productRef = AA5000000000000000000004 /* MLXLMCommon */; };
+		AA1000000000000000000015 /* MLXVLM in Frameworks */ = {isa = PBXBuildFile; productRef = AA5000000000000000000005 /* MLXVLM */; };
+		AA1000000000000000000016 /* Tokenizers in Frameworks */ = {isa = PBXBuildFile; productRef = AA5000000000000000000006 /* Tokenizers */; };
+		AA1000000000000000000017 /* MLXLLM in Frameworks */ = {isa = PBXBuildFile; productRef = AA5000000000000000000007 /* MLXLLM */; };
+		AA1000000000000000000018 /* Gemma4VisionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000018 /* Gemma4VisionModel.swift */; };
+		AA1000000000000000000019 /* Gemma4Processor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000019 /* Gemma4Processor.swift */; };
+		AA1000000000000000000020 /* Gemma4AudioFeatureExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000020 /* Gemma4AudioFeatureExtractor.swift */; };
+		AA1000000000000000000021 /* Gemma4AudioModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000021 /* Gemma4AudioModel.swift */; };
+		AA1000000000000000000022 /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = AA5000000000000000000008 /* FluidAudio */; };
+		AA1000000000000000000023 /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = AA5000000000000000000009 /* MarkdownUI */; };
+		AA1000000000000000000030 /* PhoneClawEngine in Frameworks */ = {isa = PBXBuildFile; productRef = AA5000000000000000000010 /* PhoneClawEngine */; };
+		AA1000000000000000000031 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = AA5000000000000000000011 /* WhisperKit */; };
+		AA1000000000000000000100 /* BundledModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000100 /* BundledModel.swift */; };
+		AA1000000000000000000101 /* RuntimeBudgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000101 /* RuntimeBudgets.swift */; };
+		AA1000000000000000000103 /* ModelInstallState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000103 /* ModelInstallState.swift */; };
+		AA1000000000000000000104 /* ModelPaths.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000104 /* ModelPaths.swift */; };
+		AA1000000000000000000105 /* MemoryStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000105 /* MemoryStats.swift */; };
+		AA1000000000000000000106 /* ModelDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000106 /* ModelDownloader.swift */; };
+		AA1000000000000000000107 /* ModelInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000107 /* ModelInstaller.swift */; };
+		AA1000000000000000000108 /* GPULifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000108 /* GPULifecycle.swift */; };
+		AA1000000000000000000109 /* LiveModelDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000109 /* LiveModelDefinition.swift */; };
+		AA1000000000000000000110 /* LiveModelDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000110 /* LiveModelDownloader.swift */; };
+		AA1000000000000000000111 /* LiveDownloadPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000111 /* LiveDownloadPlanner.swift */; };
+		AA1000000000000000000112 /* LiveModelStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000112 /* LiveModelStore.swift */; };
+		AA1000000000000000000113 /* LiveModelInstallFinalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000113 /* LiveModelInstallFinalizer.swift */; };
+		AA1000000000000000000202 /* MLXLocalLLMService+KVReuse.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000202 /* MLXLocalLLMService+KVReuse.swift */; };
+		AB877F6AD9467C63509E499F /* ResponseUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4628E2A5FD49247E1D6BE283 /* ResponseUI.swift */; };
+		AC6F708293B62EF01234AAAA /* ProcessInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC6F708293B62EF01234BBBB /* ProcessInput.swift */; };
+		B0FB758750EA8CEBC4DBF08A /* (null) in Sources */ = {isa = PBXBuildFile; };
+		B1A2C3D4E5F607182930B100 /* Library in Resources */ = {isa = PBXBuildFile; fileRef = B1A2C3D4E5F607182930B101 /* Library */; };
+		B1A2C3D4E5F607182930B107 /* piz_compressed.exr in Resources */ = {isa = PBXBuildFile; fileRef = D5E6F7081A2B3C4D5E6F7094 /* piz_compressed.exr */; };
+		B1A2C3D4E5F607182930B108 /* studio_env.hdr in Resources */ = {isa = PBXBuildFile; fileRef = D5E6F7081A2B3C4D5E6F7096 /* studio_env.hdr */; };
+		B1A2C3D4E5F607182930C002 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = B1A2C3D4E5F607182930C000 /* InfoPlist.strings */; };
+		B4BDA4D032800AFB9764956A /* LiveHistoryMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1E383F793CD103FF368037A /* LiveHistoryMessage.swift */; };
+		B85F211303561796B93E9575 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		B881A2E7F9483D5ED2AC206B /* SkillsManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D269F8BFCAB68D82440F704B /* SkillsManagerView.swift */; };
+		B8A84E4D0DDDE011B5929DA2 /* AgentEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18A47114A10132E25E220F8 /* AgentEngine.swift */; };
+		BB2000000000000000000001 /* LLMTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000001 /* LLMTypes.swift */; };
+		BB2000000000000000000002 /* InferenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000002 /* InferenceService.swift */; };
+		BB2000000000000000000003 /* ModelCatalogProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000003 /* ModelCatalogProtocol.swift */; };
+		BB2000000000000000000004 /* ModelInstallerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000004 /* ModelInstallerProtocol.swift */; };
+		BB2000000000000000000005 /* RuntimePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000005 /* RuntimePolicy.swift */; };
+		BB2000000000000000000006 /* PredefinedModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000006 /* PredefinedModels.swift */; };
+		BB2000000000000000000007 /* LiteRTBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000007 /* LiteRTBackend.swift */; };
+		BB2000000000000000000008 /* LiteRTCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000008 /* LiteRTCatalog.swift */; };
+		BB2000000000000000000009 /* LiteRTModelStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000009 /* LiteRTModelStore.swift */; };
+		BB2000000000000000000012 /* PCLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000012 /* PCLog.swift */; };
+		BB2000000000000000000099 /* AudioBypassTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000099 /* AudioBypassTest.swift */; };
+		BB2000000000000000000100 /* LanguageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000100 /* LanguageService.swift */; };
+		BB2000000000000000000101 /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000101 /* L10n.swift */; };
+		BB2000000000000000000102 /* PromptLocale.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000102 /* PromptLocale.swift */; };
+		BB2000000000000000000103 /* LiteRTBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000103 /* LiteRTBootstrap.swift */; };
+		BB2000000000000000000104 /* RuntimeSessionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000104 /* RuntimeSessionState.swift */; };
+		BB2000000000000000000105 /* InstallState.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000105 /* InstallState.swift */; };
+		BB2000000000000000000106 /* GenerationTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000106 /* GenerationTransaction.swift */; };
+		BB2000000000000000000107 /* ModelRuntimeCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000107 /* ModelRuntimeCoordinator.swift */; };
+		BB2000000000000000000A99 /* ZipExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1000000000000000000A99 /* ZipExtractor.swift */; };
+		BB7100000000000000000002 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BB7100000000000000000001 /* Assets.xcassets */; };
+		BD708293B62EF01234CCCCCC /* EngineLifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD708293B62EF01234DDDDDD /* EngineLifecycle.swift */; };
+		BD75E7E5620A8FF0A868E9F0 /* libPods-PhoneClaw.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F4ACB3F4531FF61E0AADA07 /* libPods-PhoneClaw.a */; };
+		BE6E6C928537BCC4DBC975E9 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		C05906F882C28E546FC97B26 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		C1A2B3D4E5F607182930A1B2 /* SkillLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A2B3D4E5F607182930A1B3 /* SkillLoader.swift */; };
+		C1A2B3D4E5F607182930A1C2 /* SkillRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A2B3D4E5F607182930A1C3 /* SkillRegistry.swift */; };
+		C3C4D5E6F7081A2B3C52D3E4 /* ChatModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3C4D5E6F7081A2B3C52D3E5 /* ChatModels.swift */; };
+		C4D5E6F70819A2B3C463E4F5 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4D5E6F70819A2B3C463E4F6 /* Theme.swift */; };
+		C6C41C306E9D307AAB4F3284 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		CCBAD6C96F8385EACB195E06 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		CE2D5BD7F3C310C8CE319A6D /* LiveModeUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840B21562E52B6B93D4410D0 /* LiveModeUI.swift */; };
+		D0B100000000000000000001 /* DownloadModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0A100000000000000000001 /* DownloadModels.swift */; };
+		D0B100000000000000000002 /* DownloadProgressSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0A100000000000000000002 /* DownloadProgressSnapshot.swift */; };
+		D0B100000000000000000003 /* DownloadFailure.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0A100000000000000000003 /* DownloadFailure.swift */; };
+		D0B100000000000000000004 /* DownloadManifestStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0A100000000000000000004 /* DownloadManifestStore.swift */; };
+		D0B100000000000000000005 /* DownloadPreflight.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0A100000000000000000005 /* DownloadPreflight.swift */; };
+		D0B100000000000000000006 /* DownloadObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0A100000000000000000006 /* DownloadObserver.swift */; };
+		D0B100000000000000000007 /* ResumableAssetDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0A100000000000000000007 /* ResumableAssetDownloader.swift */; };
+		D3A1B2C3D4E5F60718290001 /* ToolRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A1B2C3D4E5F60718290101 /* ToolRegistry.swift */; };
+		D3A1B2C3D4E5F60718290002 /* AppPermissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A1B2C3D4E5F60718290102 /* AppPermissions.swift */; };
+		D3A1B2C3D4E5F60718290003 /* Stores.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A1B2C3D4E5F60718290103 /* Stores.swift */; };
+		D3A1B2C3D4E5F60718290004 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A1B2C3D4E5F60718290104 /* Helpers.swift */; };
+		D3A1B2C3D4E5F60718290005 /* Clipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A1B2C3D4E5F60718290105 /* Clipboard.swift */; };
+		D3A1B2C3D4E5F60718290008 /* Calendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A1B2C3D4E5F60718290108 /* Calendar.swift */; };
+		D3A1B2C3D4E5F60718290009 /* Reminders.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A1B2C3D4E5F60718290109 /* Reminders.swift */; };
+		D3A1B2C3D4E5F60718290010 /* Contacts.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A1B2C3D4E5F60718290110 /* Contacts.swift */; };
+		D3A1B2C3D4E5F60718290011 /* Health.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A1B2C3D4E5F60718290111 /* Health.swift */; };
+		D3A1B2C3D4E5F60718290012 /* Web.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A1B2C3D4E5F60718290112 /* Web.swift */; };
+		D56B8094D6B249DC038FAF8F /* TTSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F06A8F86444AB26C7373919B /* TTSService.swift */; };
+		D69250E717959D2D59D57ABD /* (null) in Sources */ = {isa = PBXBuildFile; };
+		D7B5B8D3378DF49369C7F306 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		DA25510B6177007641B5978D /* SherpaOnnx.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEA10A9D8F9AB4A2764A1A13 /* SherpaOnnx.swift */; };
+		DCB2FB741B3A2162725430FC /* (null) in Sources */ = {isa = PBXBuildFile; };
+		DE49DFCF4DF4FBABCBCC20DC /* (null) in Sources */ = {isa = PBXBuildFile; };
+		DISPATCHER000000000001 /* BackendDispatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = DISPATCHER000000000101 /* BackendDispatcher.swift */; };
+		E04567890ABCDEF012345555 /* PromptTokenEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E04567890ABCDEF012346666 /* PromptTokenEstimator.swift */; };
+		E3848EFFD200BB2BCB325939 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		E9D6E75B5D98FAD1F17265D7 /* LiveOutputEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05853E0317CAA5E4BBEDD865 /* LiveOutputEvent.swift */; };
+		F1AF2D7AAB111966A35AB32E /* (null) in Sources */ = {isa = PBXBuildFile; };
+		F3B736266E38252D03E6C354 /* LiveVoiceConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6B2CA800EABEF23C3821C51 /* LiveVoiceConstants.swift */; };
+		F471632F6068D441199F62BF /* LiveMarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1CB1BD09C4BB76362ADC97 /* LiveMarker.swift */; };
+		F4B1F913A5419D9F98865B73 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		F6507553CBC1D3D0BCAFF1C9 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		F84BD7F445E2D383551198FB /* OutputSanitizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D80CB631331A0CA07699BDE /* OutputSanitizer.swift */; };
+		F88825F9E29B5D7893A32873 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		F9E7622C7772C61D277B0571 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		FC40218C648A06512F52E7C8 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		FD845BA1DB428F45EDEE9000 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		FE54FE54FE54FE54FE540001 /* WebFreshness.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE54FE54FE54FE54FE540002 /* WebFreshness.swift */; };
+		FEFA2136332FF2B38F71C999 /* PromptBuilder+LiveVoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3E547AAB840AEB6F57C71A4 /* PromptBuilder+LiveVoice.swift */; };
+		ICONASSETS0000000000002 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ICONASSETS0000000000001 /* Assets.xcassets */; };
+		LANBINDING0000000000001 /* LANBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = LANBINDING0000000000101 /* LANBinding.swift */; };
+		LANDISCOVERY00000000001 /* LANDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = LANDISCOVERY00000000101 /* LANDiscovery.swift */; };
+		LLBUILD000000000000000003 /* LiveLandAgentResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = LLREF000000000000000003 /* LiveLandAgentResult.swift */; };
+		LLBUILD000000000000000004 /* LiveLandSkillPromptHaptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = LLREF000000000000000004 /* LiveLandSkillPromptHaptics.swift */; };
+		LLBUILD000000000000000005 /* LiveLandVoiceRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = LLREF000000000000000005 /* LiveLandVoiceRuntime.swift */; };
+		LLBUILD000000000000000006 /* LiveLandAudioIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = LLREF000000000000000006 /* LiveLandAudioIO.swift */; };
+		LLBUILD000000000000000007 /* LiveLandVADService.swift in Sources */ = {isa = PBXBuildFile; fileRef = LLREF000000000000000007 /* LiveLandVADService.swift */; };
+		LLBUILD000000000000000008 /* LiveLandTurnController.swift in Sources */ = {isa = PBXBuildFile; fileRef = LLREF000000000000000008 /* LiveLandTurnController.swift */; };
+		LLBUILD000000000000000009 /* LiveLandBackgroundContinuation.swift in Sources */ = {isa = PBXBuildFile; fileRef = LLREF000000000000000009 /* LiveLandBackgroundContinuation.swift */; };
+		LLBUILD000000000000000010 /* LiveLandActivityBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = LLREF000000000000000010 /* LiveLandActivityBridge.swift */; };
+		LLBUILD000000000000000011 /* LiveLandActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = LLREF000000000000000011 /* LiveLandActivityAttributes.swift */; };
+		LLBUILD000000000000000012 /* LiveLandActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = LLREF000000000000000011 /* LiveLandActivityAttributes.swift */; };
+		LLBUILD000000000000000013 /* LiveLandLauncherWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = LLREF000000000000000012 /* LiveLandLauncherWidgets.swift */; };
+		MINICPMV0000000000001 /* MiniCPMVBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = MINICPMV0000000000101 /* MiniCPMVBackend.swift */; };
+		REMOTEINFERENCE00000001 /* RemoteInferenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = REMOTEINFERENCE00000101 /* RemoteInferenceService.swift */; };
+		RMVIEW00000000000001 /* RemoteMacSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = RMVIEW00000000000101 /* RemoteMacSettingsView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A7C600000000000000000002 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3FB79357A07D44E17582311F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A7C500000000000000000001;
+			remoteInfo = PhoneClawLiveActivityWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A7C400000000000000000004 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A7C100000000000000000005 /* PhoneClawLiveActivityWidget.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		05853E0317CAA5E4BBEDD865 /* LiveOutputEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveOutputEvent.swift; path = Live/Turn/Types/LiveOutputEvent.swift; sourceTree = SOURCE_ROOT; };
+		094A760C8A6DFD5E317AF5B8 /* LiveMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveMetrics.swift; path = Live/Debug/LiveMetrics.swift; sourceTree = SOURCE_ROOT; };
+		098B30935B91CD0BEF3A5056 /* Pods-PhoneClaw.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PhoneClaw.release.xcconfig"; path = "Target Support Files/Pods-PhoneClaw/Pods-PhoneClaw.release.xcconfig"; sourceTree = "<group>"; };
+		1933DF0A8083223AD681A973 /* LiveOutputParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveOutputParser.swift; path = Live/Turn/LiveOutputParser.swift; sourceTree = SOURCE_ROOT; };
+		1A2B3C4D5E6F7A8B9C0D1E30 /* PorcelainOrbView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PorcelainOrbView.swift; path = UI/PorcelainOrbView.swift; sourceTree = SOURCE_ROOT; };
+		22A3E6DE14D68AD9C9ABF0E8 /* AudioUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AudioUI.swift; path = UI/AudioUI.swift; sourceTree = SOURCE_ROOT; };
+		2A1CB1BD09C4BB76362ADC97 /* LiveMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveMarker.swift; path = Live/Turn/Types/LiveMarker.swift; sourceTree = SOURCE_ROOT; };
+		2B3C4D5E6F7A8B9C0D1E2F31 /* UIScale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UIScale.swift; path = UI/UIScale.swift; sourceTree = SOURCE_ROOT; };
+		2D672ACC5EAC3A11F9A0735C /* VoiceTurnController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VoiceTurnController.swift; path = Live/Core/VoiceTurnController.swift; sourceTree = SOURCE_ROOT; };
+		2E7C06DA449D1395217A42D5 /* PromptBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptBuilder.swift; sourceTree = "<group>"; };
+		2F4A6C8E0A1B2C3D4E5F6070 /* AudioCaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCaptureService.swift; sourceTree = "<group>"; };
+		357644EE0B2A47696762E171 /* LiveCameraService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveCameraService.swift; path = Live/Camera/LiveCameraService.swift; sourceTree = SOURCE_ROOT; };
+		38FC1001EB728212335AC141 /* PhoneClaw.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PhoneClaw.entitlements; sourceTree = "<group>"; };
+		408F2AE98EA54717A74FA4B1 /* PhoneClaw.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhoneClaw.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4628E2A5FD49247E1D6BE283 /* ResponseUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ResponseUI.swift; path = UI/ResponseUI.swift; sourceTree = SOURCE_ROOT; };
+		4DD9808FE93325C3CE4CFA00 /* PhoneClawApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneClawApp.swift; sourceTree = "<group>"; };
+		4DD9808FE93325C3CE4CFAA1 /* LiveLaunchRouting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveLaunchRouting.swift; path = LiveLand/App/LiveLaunchRouting.swift; sourceTree = SOURCE_ROOT; };
+		4DD9808FE93325C3CE4CFAA2 /* LiveLandShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveLandShortcuts.swift; path = LiveLand/App/LiveLandShortcuts.swift; sourceTree = SOURCE_ROOT; };
+		4F4ACB3F4531FF61E0AADA07 /* libPods-PhoneClaw.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-PhoneClaw.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		52F30C6348B834E5D157205F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		571908036E6DCED1D58C1E9E /* Skills.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Skills.swift; sourceTree = "<group>"; };
+		5D1A2B3C4E5F607180901234 /* HotfixFeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotfixFeatureFlags.swift; sourceTree = "<group>"; };
+		6E2B3C4D5F607182A0B12345 /* ConversationMemoryPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationMemoryPolicy.swift; sourceTree = "<group>"; };
+		7C500DE8A47482D5DA7DA6D3 /* ASRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ASRService.swift; path = Shared/Audio/ASRService.swift; sourceTree = SOURCE_ROOT; };
+		7F3C4D5E6071839BC1234567 /* PromptObservation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptObservation.swift; sourceTree = "<group>"; };
+		83C5B0E5FD420CCB6BD8D1A4 /* LiveModeEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveModeEngine.swift; path = Live/Core/LiveModeEngine.swift; sourceTree = SOURCE_ROOT; };
+		83C97FEEC133F40BDEFBD9AE /* LiveSkillCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveSkillCall.swift; path = Live/Turn/Types/LiveSkillCall.swift; sourceTree = SOURCE_ROOT; };
+		840B21562E52B6B93D4410D0 /* LiveModeUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveModeUI.swift; path = Live/UI/LiveModeUI.swift; sourceTree = SOURCE_ROOT; };
+		8A4D5E6F7182940CD2345678 /* ImageFollowUp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageFollowUp.swift; sourceTree = "<group>"; };
+		8A5F58AC37EA816ED739551D /* ASRBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ASRBackend.swift; path = Shared/Audio/ASRBackend.swift; sourceTree = SOURCE_ROOT; };
+		9ABCEF146EDF405D95524F33 /* IOS27FoundationModelsCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = IOS27FoundationModelsCatalog.swift; path = LLM/Backends/FoundationModels/IOS27FoundationModelsCatalog.swift; sourceTree = SOURCE_ROOT; };
+		9B5E6F708293A51DE3456789 /* PromptPipelineHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptPipelineHelpers.swift; sourceTree = "<group>"; };
+		9BCB3AA5590B964AC46945D5 /* LiveTurnProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveTurnProcessor.swift; path = Live/Turn/LiveTurnProcessor.swift; sourceTree = SOURCE_ROOT; };
+		9C503EC6B19AD0CF5515B98E /* LiveComponentTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveComponentTest.swift; path = Live/Debug/LiveComponentTest.swift; sourceTree = SOURCE_ROOT; };
+		9D80CB631331A0CA07699BDE /* OutputSanitizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OutputSanitizer.swift; path = Shared/Audio/OutputSanitizer.swift; sourceTree = SOURCE_ROOT; };
+		9DBABEB8C21E7B67E5C2516D /* SharedUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SharedUI.swift; path = UI/SharedUI.swift; sourceTree = SOURCE_ROOT; };
+		9F0E463E3C7A27CA8DBEE333 /* ModelConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelConfig.swift; sourceTree = "<group>"; };
+		A1AB7F250BEEFF938318AA75 /* Pods-PhoneClaw.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PhoneClaw.debug.xcconfig"; path = "Target Support Files/Pods-PhoneClaw/Pods-PhoneClaw.debug.xcconfig"; sourceTree = "<group>"; };
+		A1B2C3D4E5F607182930D002 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = SOURCE_ROOT; };
+		A1B2C3D4E5F607182930D004 /* OrbWebAssets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = OrbWebAssets; path = App/OrbWebAssets; sourceTree = SOURCE_ROOT; };
+		A263EC6C9ED96F37CF99E49E /* LiveLocale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveLocale.swift; path = LLM/LiveVoice/LiveLocale.swift; sourceTree = SOURCE_ROOT; };
+		A27C0DEF0000000000000002 /* GuardedSkillRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuardedSkillRouter.swift; sourceTree = "<group>"; };
+		A27C0DEF0000000000000004 /* IOS27FoundationSkillRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOS27FoundationSkillRouter.swift; sourceTree = "<group>"; };
+		A31476E82F856FD700318978 /* ChatAttachments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatAttachments.swift; sourceTree = "<group>"; };
+		A31476E92F856FD700318978 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
+		A31476EF2F85741500318978 /* OutputCleaner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputCleaner.swift; sourceTree = "<group>"; };
+		A31476F02F85741500318978 /* Planner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Planner.swift; sourceTree = "<group>"; };
+		A31476F12F85741500318978 /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
+		A31476F22F85741500318978 /* ChatSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatSessionStore.swift; sourceTree = "<group>"; };
+		A31476F32F85741500318978 /* ToolCallParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolCallParser.swift; sourceTree = "<group>"; };
+		A31476F42F85741500318978 /* ToolChain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolChain.swift; sourceTree = "<group>"; };
+		A7C200000000000000000003 /* PhoneClawLiveActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneClawLiveActivityWidget.swift; sourceTree = "<group>"; };
+		A7C200000000000000000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A7C200000000000000000005 /* PhoneClawLiveActivityWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PhoneClawLiveActivityWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA2000000000000000000001 /* LLMEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMEngine.swift; sourceTree = "<group>"; };
+		AA2000000000000000000002 /* MLXLocalLLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLXLocalLLMService.swift; sourceTree = "<group>"; };
+		AA2000000000000000000003 /* Gemma4Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gemma4Config.swift; sourceTree = "<group>"; };
+		AA2000000000000000000004 /* Gemma4LanguageModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gemma4LanguageModel.swift; sourceTree = "<group>"; };
+		AA2000000000000000000005 /* Gemma4Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gemma4Model.swift; sourceTree = "<group>"; };
+		AA2000000000000000000006 /* Gemma4Registration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gemma4Registration.swift; sourceTree = "<group>"; };
+		AA2000000000000000000007 /* Gemma4RoPE.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gemma4RoPE.swift; sourceTree = "<group>"; };
+		AA2000000000000000000008 /* Gemma4TextModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gemma4TextModel.swift; sourceTree = "<group>"; };
+		AA2000000000000000000009 /* MLXTokenizersLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLXTokenizersLoader.swift; sourceTree = "<group>"; };
+		AA2000000000000000000018 /* Gemma4VisionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gemma4VisionModel.swift; sourceTree = "<group>"; };
+		AA2000000000000000000019 /* Gemma4Processor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gemma4Processor.swift; sourceTree = "<group>"; };
+		AA2000000000000000000020 /* Gemma4AudioFeatureExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gemma4AudioFeatureExtractor.swift; sourceTree = "<group>"; };
+		AA2000000000000000000021 /* Gemma4AudioModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gemma4AudioModel.swift; sourceTree = "<group>"; };
+		AA2000000000000000000024 /* onnxruntime.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = onnxruntime.xcframework; path = Frameworks/onnxruntime.xcframework; sourceTree = SOURCE_ROOT; };
+		AA2000000000000000000025 /* sherpa-onnx.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = "sherpa-onnx.xcframework"; path = "Frameworks/sherpa-onnx.xcframework"; sourceTree = SOURCE_ROOT; };
+		AA2000000000000000000026 /* piper_plus.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = piper_plus.xcframework; path = Frameworks/piper_plus.xcframework; sourceTree = SOURCE_ROOT; };
+		AA2000000000000000000100 /* BundledModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundledModel.swift; sourceTree = "<group>"; };
+		AA2000000000000000000101 /* RuntimeBudgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeBudgets.swift; sourceTree = "<group>"; };
+		AA2000000000000000000103 /* ModelInstallState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelInstallState.swift; sourceTree = "<group>"; };
+		AA2000000000000000000104 /* ModelPaths.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelPaths.swift; sourceTree = "<group>"; };
+		AA2000000000000000000105 /* MemoryStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryStats.swift; sourceTree = "<group>"; };
+		AA2000000000000000000106 /* ModelDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloader.swift; sourceTree = "<group>"; };
+		AA2000000000000000000107 /* ModelInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelInstaller.swift; sourceTree = "<group>"; };
+		AA2000000000000000000108 /* GPULifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPULifecycle.swift; sourceTree = "<group>"; };
+		AA2000000000000000000109 /* LiveModelDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveModelDefinition.swift; sourceTree = "<group>"; };
+		AA2000000000000000000110 /* LiveModelDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveModelDownloader.swift; sourceTree = "<group>"; };
+		AA2000000000000000000111 /* LiveDownloadPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveDownloadPlanner.swift; sourceTree = "<group>"; };
+		AA2000000000000000000112 /* LiveModelStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveModelStore.swift; sourceTree = "<group>"; };
+		AA2000000000000000000113 /* LiveModelInstallFinalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveModelInstallFinalizer.swift; sourceTree = "<group>"; };
+		AA2000000000000000000202 /* MLXLocalLLMService+KVReuse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MLXLocalLLMService+KVReuse.swift"; sourceTree = "<group>"; };
+		AC6F708293B62EF01234BBBB /* ProcessInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessInput.swift; sourceTree = "<group>"; };
+		B1A2C3D4E5F607182930B101 /* Library */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Library; sourceTree = "<group>"; };
+		B1A2C3D4E5F607182930C001 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		B1A2C3D4E5F607182930CA01 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		BA48303BA25916A3A431EDE6 /* OrbBackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OrbBackgroundView.swift; path = Live/UI/LiveOrb/OrbBackgroundView.swift; sourceTree = SOURCE_ROOT; };
+		BB1000000000000000000001 /* LLMTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMTypes.swift; sourceTree = "<group>"; };
+		BB1000000000000000000002 /* InferenceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InferenceService.swift; sourceTree = "<group>"; };
+		BB1000000000000000000003 /* ModelCatalogProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelCatalogProtocol.swift; sourceTree = "<group>"; };
+		BB1000000000000000000004 /* ModelInstallerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelInstallerProtocol.swift; sourceTree = "<group>"; };
+		BB1000000000000000000005 /* RuntimePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimePolicy.swift; sourceTree = "<group>"; };
+		BB1000000000000000000006 /* PredefinedModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredefinedModels.swift; sourceTree = "<group>"; };
+		BB1000000000000000000007 /* LiteRTBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiteRTBackend.swift; sourceTree = "<group>"; };
+		BB1000000000000000000008 /* LiteRTCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiteRTCatalog.swift; sourceTree = "<group>"; };
+		BB1000000000000000000009 /* LiteRTModelStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiteRTModelStore.swift; sourceTree = "<group>"; };
+		BB1000000000000000000012 /* PCLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PCLog.swift; path = Shared/PCLog.swift; sourceTree = SOURCE_ROOT; };
+		BB1000000000000000000099 /* AudioBypassTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioBypassTest.swift; sourceTree = "<group>"; };
+		BB1000000000000000000100 /* LanguageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LanguageService.swift; path = Shared/LanguageService.swift; sourceTree = SOURCE_ROOT; };
+		BB1000000000000000000101 /* L10n.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = L10n.swift; path = Shared/L10n.swift; sourceTree = SOURCE_ROOT; };
+		BB1000000000000000000102 /* PromptLocale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PromptLocale.swift; path = LLM/PromptLocale.swift; sourceTree = SOURCE_ROOT; };
+		BB1000000000000000000103 /* LiteRTBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiteRTBootstrap.swift; sourceTree = "<group>"; };
+		BB1000000000000000000104 /* RuntimeSessionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeSessionState.swift; sourceTree = "<group>"; };
+		BB1000000000000000000105 /* InstallState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstallState.swift; sourceTree = "<group>"; };
+		BB1000000000000000000106 /* GenerationTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerationTransaction.swift; sourceTree = "<group>"; };
+		BB1000000000000000000107 /* ModelRuntimeCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelRuntimeCoordinator.swift; sourceTree = "<group>"; };
+		BB1000000000000000000A99 /* ZipExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZipExtractor.swift; sourceTree = "<group>"; };
+		BB7100000000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BD57EFED3F6A41FC8B154FC9 /* IOS27FoundationModelsInferenceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = IOS27FoundationModelsInferenceService.swift; path = LLM/Backends/FoundationModels/IOS27FoundationModelsInferenceService.swift; sourceTree = SOURCE_ROOT; };
+		BD708293B62EF01234DDDDDD /* EngineLifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EngineLifecycle.swift; sourceTree = "<group>"; };
+		C1A2B3D4E5F607182930A1B3 /* SkillLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillLoader.swift; sourceTree = "<group>"; };
+		C1A2B3D4E5F607182930A1C3 /* SkillRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillRegistry.swift; sourceTree = "<group>"; };
+		C3C4D5E6F7081A2B3C52D3E5 /* ChatModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatModels.swift; sourceTree = "<group>"; };
+		C4D5E6F70819A2B3C463E4F6 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		C6B2CA800EABEF23C3821C51 /* LiveVoiceConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveVoiceConstants.swift; path = LLM/LiveVoice/LiveVoiceConstants.swift; sourceTree = SOURCE_ROOT; };
+		C70EDE41C438263F820D0FCC /* OrbShaderSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OrbShaderSource.swift; path = Live/UI/LiveOrb/OrbShaderSource.swift; sourceTree = SOURCE_ROOT; };
+		CEA10A9D8F9AB4A2764A1A13 /* SherpaOnnx.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SherpaOnnx.swift; path = Shared/Audio/SherpaOnnx.swift; sourceTree = SOURCE_ROOT; };
+		D0A100000000000000000001 /* DownloadModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadModels.swift; sourceTree = "<group>"; };
+		D0A100000000000000000002 /* DownloadProgressSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadProgressSnapshot.swift; sourceTree = "<group>"; };
+		D0A100000000000000000003 /* DownloadFailure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadFailure.swift; sourceTree = "<group>"; };
+		D0A100000000000000000004 /* DownloadManifestStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadManifestStore.swift; sourceTree = "<group>"; };
+		D0A100000000000000000005 /* DownloadPreflight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadPreflight.swift; sourceTree = "<group>"; };
+		D0A100000000000000000006 /* DownloadObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadObserver.swift; sourceTree = "<group>"; };
+		D0A100000000000000000007 /* ResumableAssetDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResumableAssetDownloader.swift; sourceTree = "<group>"; };
+		D269F8BFCAB68D82440F704B /* SkillsManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillsManagerView.swift; sourceTree = "<group>"; };
+		D3A1B2C3D4E5F60718290101 /* ToolRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolRegistry.swift; sourceTree = "<group>"; };
+		D3A1B2C3D4E5F60718290102 /* AppPermissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPermissions.swift; sourceTree = "<group>"; };
+		D3A1B2C3D4E5F60718290103 /* Stores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stores.swift; sourceTree = "<group>"; };
+		D3A1B2C3D4E5F60718290104 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
+		D3A1B2C3D4E5F60718290105 /* Clipboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clipboard.swift; sourceTree = "<group>"; };
+		D3A1B2C3D4E5F60718290108 /* Calendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Calendar.swift; sourceTree = "<group>"; };
+		D3A1B2C3D4E5F60718290109 /* Reminders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reminders.swift; sourceTree = "<group>"; };
+		D3A1B2C3D4E5F60718290110 /* Contacts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contacts.swift; sourceTree = "<group>"; };
+		D3A1B2C3D4E5F60718290111 /* Health.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Health.swift; sourceTree = "<group>"; };
+		D3A1B2C3D4E5F60718290112 /* Web.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Web.swift; sourceTree = "<group>"; };
+		D5E6F7081A2B3C4D5E6F7094 /* piz_compressed.exr */ = {isa = PBXFileReference; lastKnownFileType = file; name = piz_compressed.exr; path = App/piz_compressed.exr; sourceTree = SOURCE_ROOT; };
+		D5E6F7081A2B3C4D5E6F7096 /* studio_env.hdr */ = {isa = PBXFileReference; lastKnownFileType = text; name = studio_env.hdr; path = App/studio_env.hdr; sourceTree = SOURCE_ROOT; };
+		DAF684F9A04FAEE76440F69C /* OrbAudioAnalyser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OrbAudioAnalyser.swift; path = Live/Audio/OrbAudioAnalyser.swift; sourceTree = SOURCE_ROOT; };
+		DISPATCHER000000000101 /* BackendDispatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendDispatcher.swift; sourceTree = "<group>"; };
+		E04567890ABCDEF012346666 /* PromptTokenEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptTokenEstimator.swift; sourceTree = "<group>"; };
+		E18A47114A10132E25E220F8 /* AgentEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentEngine.swift; sourceTree = "<group>"; };
+		E1E383F793CD103FF368037A /* LiveHistoryMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveHistoryMessage.swift; path = Live/Turn/Types/LiveHistoryMessage.swift; sourceTree = SOURCE_ROOT; };
+		E62C3CEFC7AE63873D751E75 /* ConfigurationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationsView.swift; sourceTree = "<group>"; };
+		F06A8F86444AB26C7373919B /* TTSService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TTSService.swift; path = Live/TTS/TTSService.swift; sourceTree = SOURCE_ROOT; };
+		F18C7A5D1474A06400BE423D /* VADService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = VADService.swift; path = Live/VAD/VADService.swift; sourceTree = SOURCE_ROOT; };
+		F3E547AAB840AEB6F57C71A4 /* PromptBuilder+LiveVoice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "PromptBuilder+LiveVoice.swift"; path = "LLM/LiveVoice/PromptBuilder+LiveVoice.swift"; sourceTree = SOURCE_ROOT; };
+		F5ED928BF14864713A9A9D16 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		F73C9FFB0EEDE520F2885102 /* OrbSceneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OrbSceneView.swift; path = Live/UI/LiveOrb/OrbSceneView.swift; sourceTree = SOURCE_ROOT; };
+		F8D921B323B9D6342A22A29E /* LiveAudioIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveAudioIO.swift; path = Live/Audio/LiveAudioIO.swift; sourceTree = SOURCE_ROOT; };
+		FE54FE54FE54FE54FE540002 /* WebFreshness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFreshness.swift; sourceTree = "<group>"; };
+		ICONASSETS0000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		LANBINDING0000000000101 /* LANBinding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LANBinding.swift; path = LLM/Backends/Remote/LANBinding.swift; sourceTree = SOURCE_ROOT; };
+		LANDISCOVERY00000000101 /* LANDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LANDiscovery.swift; path = LLM/Backends/Remote/LANDiscovery.swift; sourceTree = SOURCE_ROOT; };
+		LLREF000000000000000003 /* LiveLandAgentResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveLandAgentResult.swift; path = LiveLand/Runtime/LiveLandAgentResult.swift; sourceTree = SOURCE_ROOT; };
+		LLREF000000000000000004 /* LiveLandSkillPromptHaptics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveLandSkillPromptHaptics.swift; path = LiveLand/Runtime/LiveLandSkillPromptHaptics.swift; sourceTree = SOURCE_ROOT; };
+		LLREF000000000000000005 /* LiveLandVoiceRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveLandVoiceRuntime.swift; path = LiveLand/Runtime/LiveLandVoiceRuntime.swift; sourceTree = SOURCE_ROOT; };
+		LLREF000000000000000006 /* LiveLandAudioIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveLandAudioIO.swift; path = LiveLand/Audio/LiveLandAudioIO.swift; sourceTree = SOURCE_ROOT; };
+		LLREF000000000000000007 /* LiveLandVADService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveLandVADService.swift; path = LiveLand/VAD/LiveLandVADService.swift; sourceTree = SOURCE_ROOT; };
+		LLREF000000000000000008 /* LiveLandTurnController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveLandTurnController.swift; path = LiveLand/Core/LiveLandTurnController.swift; sourceTree = SOURCE_ROOT; };
+		LLREF000000000000000009 /* LiveLandBackgroundContinuation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveLandBackgroundContinuation.swift; path = LiveLand/Core/LiveLandBackgroundContinuation.swift; sourceTree = SOURCE_ROOT; };
+		LLREF000000000000000010 /* LiveLandActivityBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveLandActivityBridge.swift; path = LiveLand/Activity/LiveLandActivityBridge.swift; sourceTree = SOURCE_ROOT; };
+		LLREF000000000000000011 /* LiveLandActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveLandActivityAttributes.swift; path = LiveLand/Activity/LiveLandActivityAttributes.swift; sourceTree = SOURCE_ROOT; };
+		LLREF000000000000000012 /* LiveLandLauncherWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveLandLauncherWidgets.swift; path = LiveLand/Widget/LiveLandLauncherWidgets.swift; sourceTree = SOURCE_ROOT; };
+		MINICPMV0000000000101 /* MiniCPMVBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniCPMVBackend.swift; sourceTree = "<group>"; };
+		REMOTEINFERENCE00000101 /* RemoteInferenceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RemoteInferenceService.swift; path = LLM/Backends/Remote/RemoteInferenceService.swift; sourceTree = SOURCE_ROOT; };
+		RMVIEW00000000000101 /* RemoteMacSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RemoteMacSettingsView.swift; path = UI/RemoteMacSettingsView.swift; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4B243621551C86F4B6922A8F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA1000000000000000000011 /* MLX in Frameworks */,
+				AA1000000000000000000012 /* MLXFast in Frameworks */,
+				AA1000000000000000000013 /* MLXNN in Frameworks */,
+				AA1000000000000000000014 /* MLXLMCommon in Frameworks */,
+				AA1000000000000000000017 /* MLXLLM in Frameworks */,
+				AA1000000000000000000015 /* MLXVLM in Frameworks */,
+				AA1000000000000000000016 /* Tokenizers in Frameworks */,
+				AA1000000000000000000022 /* FluidAudio in Frameworks */,
+				AA1000000000000000000023 /* MarkdownUI in Frameworks */,
+				AA1000000000000000000030 /* PhoneClawEngine in Frameworks */,
+				AA1000000000000000000031 /* WhisperKit in Frameworks */,
+				BD75E7E5620A8FF0A868E9F0 /* libPods-PhoneClaw.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A7C400000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		03C67BBB35FEB376174D7420 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				A1AB7F250BEEFF938318AA75 /* Pods-PhoneClaw.debug.xcconfig */,
+				098B30935B91CD0BEF3A5056 /* Pods-PhoneClaw.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		0F8ABECF69424C19830E92AD /* FoundationModels */ = {
+			isa = PBXGroup;
+			children = (
+				BD57EFED3F6A41FC8B154FC9 /* IOS27FoundationModelsInferenceService.swift */,
+				9ABCEF146EDF405D95524F33 /* IOS27FoundationModelsCatalog.swift */,
+			);
+			path = FoundationModels;
+			sourceTree = "<group>";
+		};
+		4A876E909BCB4E1CAF5C50F5 = {
+			isa = PBXGroup;
+			children = (
+				D21E6B56B839A63857912FE0 /* PhoneClaw */,
+				A7C300000000000000000002 /* LiveLand/Widget */,
+				D5E6F7081A2B3C4D5E6F7094 /* piz_compressed.exr */,
+				D5E6F7081A2B3C4D5E6F7096 /* studio_env.hdr */,
+				A1B2C3D4E5F607182930D004 /* OrbWebAssets */,
+				A1B2C3D4E5F607182930D002 /* PrivacyInfo.xcprivacy */,
+				AC5E0AA2711EA01E891DE3A7 /* Products */,
+				03C67BBB35FEB376174D7420 /* Pods */,
+				E1D6A9BAE368B2FB909A7774 /* Frameworks */,
+				A34ECDFC2F9C76C1007D0FB8 /* Bundled Models */,
+			);
+			sourceTree = "<group>";
+		};
+		6FA4C5AFA3123551D8F8F2F2 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				4DD9808FE93325C3CE4CFA00 /* PhoneClawApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		98EFD7CCA7E78715F07BABE3 /* Skills */ = {
+			isa = PBXGroup;
+			children = (
+				B1A2C3D4E5F607182930B101 /* Library */,
+				571908036E6DCED1D58C1E9E /* Skills.swift */,
+				C1A2B3D4E5F607182930A1B3 /* SkillLoader.swift */,
+				C1A2B3D4E5F607182930A1C3 /* SkillRegistry.swift */,
+			);
+			path = Skills;
+			sourceTree = "<group>";
+		};
+		A31476ED2F85741500318978 /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				A31476EF2F85741500318978 /* OutputCleaner.swift */,
+				A31476F02F85741500318978 /* Planner.swift */,
+				A31476F12F85741500318978 /* Router.swift */,
+				A27C0DEF0000000000000002 /* GuardedSkillRouter.swift */,
+				A27C0DEF0000000000000004 /* IOS27FoundationSkillRouter.swift */,
+				A31476F22F85741500318978 /* ChatSessionStore.swift */,
+				6E2B3C4D5F607182A0B12345 /* ConversationMemoryPolicy.swift */,
+				7F3C4D5E6071839BC1234567 /* PromptObservation.swift */,
+				8A4D5E6F7182940CD2345678 /* ImageFollowUp.swift */,
+				9B5E6F708293A51DE3456789 /* PromptPipelineHelpers.swift */,
+				AC6F708293B62EF01234BBBB /* ProcessInput.swift */,
+				BD708293B62EF01234DDDDDD /* EngineLifecycle.swift */,
+				A31476F32F85741500318978 /* ToolCallParser.swift */,
+				A31476F42F85741500318978 /* ToolChain.swift */,
+				A31476E82F856FD700318978 /* ChatAttachments.swift */,
+				A31476E92F856FD700318978 /* ChatMessage.swift */,
+			);
+			path = Engine;
+			sourceTree = "<group>";
+		};
+		A34ECDFC2F9C76C1007D0FB8 /* Bundled Models */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "Bundled Models";
+			sourceTree = "<group>";
+		};
+		A7C300000000000000000002 /* LiveLand/Widget */ = {
+			isa = PBXGroup;
+			children = (
+				A7C200000000000000000003 /* PhoneClawLiveActivityWidget.swift */,
+				A7C200000000000000000004 /* Info.plist */,
+				BB7100000000000000000001 /* Assets.xcassets */,
+			);
+			path = LiveLand/Widget;
+			sourceTree = "<group>";
+		};
+		AA3000000000000000000001 /* MLX */ = {
+			isa = PBXGroup;
+			children = (
+				AA3000000000000000000010 /* Core */,
+				AA3000000000000000000011 /* Installation */,
+				AA3000000000000000000012 /* Gemma4 */,
+				AA2000000000000000000002 /* MLXLocalLLMService.swift */,
+				AA2000000000000000000202 /* MLXLocalLLMService+KVReuse.swift */,
+			);
+			path = MLX;
+			sourceTree = "<group>";
+		};
+		AA3000000000000000000010 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				AA2000000000000000000100 /* BundledModel.swift */,
+				AA2000000000000000000101 /* RuntimeBudgets.swift */,
+				AA2000000000000000000105 /* MemoryStats.swift */,
+				AA2000000000000000000108 /* GPULifecycle.swift */,
+				AA2000000000000000000009 /* MLXTokenizersLoader.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		AA3000000000000000000011 /* Installation */ = {
+			isa = PBXGroup;
+			children = (
+				AA2000000000000000000104 /* ModelPaths.swift */,
+				AA2000000000000000000103 /* ModelInstallState.swift */,
+				AA2000000000000000000107 /* ModelInstaller.swift */,
+				AA2000000000000000000106 /* ModelDownloader.swift */,
+				AA2000000000000000000109 /* LiveModelDefinition.swift */,
+				AA2000000000000000000111 /* LiveDownloadPlanner.swift */,
+				AA2000000000000000000112 /* LiveModelStore.swift */,
+				AA2000000000000000000113 /* LiveModelInstallFinalizer.swift */,
+				AA2000000000000000000110 /* LiveModelDownloader.swift */,
+			);
+			path = Installation;
+			sourceTree = "<group>";
+		};
+		AA3000000000000000000012 /* Gemma4 */ = {
+			isa = PBXGroup;
+			children = (
+				AA2000000000000000000003 /* Gemma4Config.swift */,
+				AA2000000000000000000005 /* Gemma4Model.swift */,
+				AA2000000000000000000004 /* Gemma4LanguageModel.swift */,
+				AA2000000000000000000008 /* Gemma4TextModel.swift */,
+				AA2000000000000000000018 /* Gemma4VisionModel.swift */,
+				AA2000000000000000000021 /* Gemma4AudioModel.swift */,
+				AA2000000000000000000020 /* Gemma4AudioFeatureExtractor.swift */,
+				AA2000000000000000000007 /* Gemma4RoPE.swift */,
+				AA2000000000000000000019 /* Gemma4Processor.swift */,
+				AA2000000000000000000006 /* Gemma4Registration.swift */,
+			);
+			path = Gemma4;
+			sourceTree = "<group>";
+		};
+		AC5E0AA2711EA01E891DE3A7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				408F2AE98EA54717A74FA4B1 /* PhoneClaw.app */,
+				A7C200000000000000000005 /* PhoneClawLiveActivityWidget.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AE5FF3067EFF33D507435528 /* LLM */ = {
+			isa = PBXGroup;
+			children = (
+				AA2000000000000000000001 /* LLMEngine.swift */,
+				AA3000000000000000000001 /* MLX */,
+				BB3000000000000000000001 /* Core */,
+				BB3000000000000000000002 /* Models */,
+				BB3000000000000000000003 /* Backends */,
+				BB3000000000000000000004 /* Installation */,
+				2E7C06DA449D1395217A42D5 /* PromptBuilder.swift */,
+			);
+			path = LLM;
+			sourceTree = "<group>";
+		};
+		BB3000000000000000000001 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				BB1000000000000000000001 /* LLMTypes.swift */,
+				BB1000000000000000000002 /* InferenceService.swift */,
+				BB1000000000000000000003 /* ModelCatalogProtocol.swift */,
+				BB1000000000000000000004 /* ModelInstallerProtocol.swift */,
+				BB1000000000000000000005 /* RuntimePolicy.swift */,
+				BB1000000000000000000103 /* LiteRTBootstrap.swift */,
+				BB1000000000000000000104 /* RuntimeSessionState.swift */,
+				BB1000000000000000000105 /* InstallState.swift */,
+				BB1000000000000000000106 /* GenerationTransaction.swift */,
+				E04567890ABCDEF012346666 /* PromptTokenEstimator.swift */,
+				FE54FE54FE54FE54FE540002 /* WebFreshness.swift */,
+				BB1000000000000000000107 /* ModelRuntimeCoordinator.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		BB3000000000000000000002 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				BB1000000000000000000006 /* PredefinedModels.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		BB3000000000000000000003 /* Backends */ = {
+			isa = PBXGroup;
+			children = (
+				DISPATCHER000000000101 /* BackendDispatcher.swift */,
+				BB3000000000000000000005 /* LiteRT */,
+				MINICPMV0000000000201 /* MiniCPMV */,
+				0F8ABECF69424C19830E92AD /* FoundationModels */,
+			);
+			path = Backends;
+			sourceTree = "<group>";
+		};
+		BB3000000000000000000004 /* Installation */ = {
+			isa = PBXGroup;
+			children = (
+				D0C100000000000000000001 /* Download */,
+				BB1000000000000000000009 /* LiteRTModelStore.swift */,
+				BB1000000000000000000A99 /* ZipExtractor.swift */,
+			);
+			path = Installation;
+			sourceTree = "<group>";
+		};
+		BB3000000000000000000005 /* LiteRT */ = {
+			isa = PBXGroup;
+			children = (
+				BB1000000000000000000007 /* LiteRTBackend.swift */,
+				BB1000000000000000000008 /* LiteRTCatalog.swift */,
+				BB1000000000000000000099 /* AudioBypassTest.swift */,
+			);
+			path = LiteRT;
+			sourceTree = "<group>";
+		};
+		D0C100000000000000000001 /* Download */ = {
+			isa = PBXGroup;
+			children = (
+				D0A100000000000000000001 /* DownloadModels.swift */,
+				D0A100000000000000000002 /* DownloadProgressSnapshot.swift */,
+				D0A100000000000000000003 /* DownloadFailure.swift */,
+				D0A100000000000000000004 /* DownloadManifestStore.swift */,
+				D0A100000000000000000005 /* DownloadPreflight.swift */,
+				D0A100000000000000000006 /* DownloadObserver.swift */,
+				D0A100000000000000000007 /* ResumableAssetDownloader.swift */,
+			);
+			path = Download;
+			sourceTree = "<group>";
+		};
+		D21E6B56B839A63857912FE0 /* PhoneClaw */ = {
+			isa = PBXGroup;
+			children = (
+				A263EC6C9ED96F37CF99E49E /* LiveLocale.swift */,
+				2A1CB1BD09C4BB76362ADC97 /* LiveMarker.swift */,
+				E1E383F793CD103FF368037A /* LiveHistoryMessage.swift */,
+				83C97FEEC133F40BDEFBD9AE /* LiveSkillCall.swift */,
+				05853E0317CAA5E4BBEDD865 /* LiveOutputEvent.swift */,
+				1933DF0A8083223AD681A973 /* LiveOutputParser.swift */,
+				9BCB3AA5590B964AC46945D5 /* LiveTurnProcessor.swift */,
+				C6B2CA800EABEF23C3821C51 /* LiveVoiceConstants.swift */,
+				F3E547AAB840AEB6F57C71A4 /* PromptBuilder+LiveVoice.swift */,
+				7C500DE8A47482D5DA7DA6D3 /* ASRService.swift */,
+				8A5F58AC37EA816ED739551D /* ASRBackend.swift */,
+				357644EE0B2A47696762E171 /* LiveCameraService.swift */,
+				9C503EC6B19AD0CF5515B98E /* LiveComponentTest.swift */,
+				094A760C8A6DFD5E317AF5B8 /* LiveMetrics.swift */,
+				BB1000000000000000000012 /* PCLog.swift */,
+				BB1000000000000000000100 /* LanguageService.swift */,
+				BB1000000000000000000101 /* L10n.swift */,
+				BB1000000000000000000102 /* PromptLocale.swift */,
+				DAF684F9A04FAEE76440F69C /* OrbAudioAnalyser.swift */,
+				CEA10A9D8F9AB4A2764A1A13 /* SherpaOnnx.swift */,
+				F06A8F86444AB26C7373919B /* TTSService.swift */,
+				F18C7A5D1474A06400BE423D /* VADService.swift */,
+				2D672ACC5EAC3A11F9A0735C /* VoiceTurnController.swift */,
+				22A3E6DE14D68AD9C9ABF0E8 /* AudioUI.swift */,
+				BA48303BA25916A3A431EDE6 /* OrbBackgroundView.swift */,
+				F73C9FFB0EEDE520F2885102 /* OrbSceneView.swift */,
+				C70EDE41C438263F820D0FCC /* OrbShaderSource.swift */,
+				4628E2A5FD49247E1D6BE283 /* ResponseUI.swift */,
+				9DBABEB8C21E7B67E5C2516D /* SharedUI.swift */,
+				1A2B3C4D5E6F7A8B9C0D1E30 /* PorcelainOrbView.swift */,
+				2B3C4D5E6F7A8B9C0D1E2F31 /* UIScale.swift */,
+				9D80CB631331A0CA07699BDE /* OutputSanitizer.swift */,
+				F8D921B323B9D6342A22A29E /* LiveAudioIO.swift */,
+				83C5B0E5FD420CCB6BD8D1A4 /* LiveModeEngine.swift */,
+				840B21562E52B6B93D4410D0 /* LiveModeUI.swift */,
+				52F30C6348B834E5D157205F /* Info.plist */,
+				B1A2C3D4E5F607182930C000 /* InfoPlist.strings */,
+				38FC1001EB728212335AC141 /* PhoneClaw.entitlements */,
+				ICONASSETS0000000000001 /* Assets.xcassets */,
+				E0660A5AE3C683B7B20600EE /* Agent */,
+				6FA4C5AFA3123551D8F8F2F2 /* App */,
+				LIVELANDGROUP0000000001 /* LiveLand */,
+				AE5FF3067EFF33D507435528 /* LLM */,
+				98EFD7CCA7E78715F07BABE3 /* Skills */,
+				D3A1B2C3D4E5F60718290200 /* Tools */,
+				EF4D07A808616D6F13771DBE /* UI */,
+			);
+			name = PhoneClaw;
+			sourceTree = "<group>";
+		};
+		D3A1B2C3D4E5F60718290200 /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+				D3A1B2C3D4E5F60718290101 /* ToolRegistry.swift */,
+				D3A1B2C3D4E5F60718290102 /* AppPermissions.swift */,
+				D3A1B2C3D4E5F60718290103 /* Stores.swift */,
+				D3A1B2C3D4E5F60718290104 /* Helpers.swift */,
+				D3A1B2C3D4E5F60718290300 /* Handlers */,
+			);
+			path = Tools;
+			sourceTree = "<group>";
+		};
+		D3A1B2C3D4E5F60718290300 /* Handlers */ = {
+			isa = PBXGroup;
+			children = (
+				D3A1B2C3D4E5F60718290105 /* Clipboard.swift */,
+				D3A1B2C3D4E5F60718290108 /* Calendar.swift */,
+				D3A1B2C3D4E5F60718290109 /* Reminders.swift */,
+				D3A1B2C3D4E5F60718290110 /* Contacts.swift */,
+				D3A1B2C3D4E5F60718290111 /* Health.swift */,
+				D3A1B2C3D4E5F60718290112 /* Web.swift */,
+			);
+			path = Handlers;
+			sourceTree = "<group>";
+		};
+		E0660A5AE3C683B7B20600EE /* Agent */ = {
+			isa = PBXGroup;
+			children = (
+				A31476ED2F85741500318978 /* Engine */,
+				2F4A6C8E0A1B2C3D4E5F6070 /* AudioCaptureService.swift */,
+				E18A47114A10132E25E220F8 /* AgentEngine.swift */,
+				9F0E463E3C7A27CA8DBEE333 /* ModelConfig.swift */,
+				5D1A2B3C4E5F607180901234 /* HotfixFeatureFlags.swift */,
+			);
+			path = Agent;
+			sourceTree = "<group>";
+		};
+		E1D6A9BAE368B2FB909A7774 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				AA2000000000000000000024 /* onnxruntime.xcframework */,
+				AA2000000000000000000025 /* sherpa-onnx.xcframework */,
+				AA2000000000000000000026 /* piper_plus.xcframework */,
+				4F4ACB3F4531FF61E0AADA07 /* libPods-PhoneClaw.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		EF4D07A808616D6F13771DBE /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				C3C4D5E6F7081A2B3C52D3E5 /* ChatModels.swift */,
+				E62C3CEFC7AE63873D751E75 /* ConfigurationsView.swift */,
+				F5ED928BF14864713A9A9D16 /* ContentView.swift */,
+				D269F8BFCAB68D82440F704B /* SkillsManagerView.swift */,
+				C4D5E6F70819A2B3C463E4F6 /* Theme.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		LIVELANDGROUP0000000001 /* LiveLand */ = {
+			isa = PBXGroup;
+			children = (
+				4DD9808FE93325C3CE4CFAA1 /* LiveLaunchRouting.swift */,
+				4DD9808FE93325C3CE4CFAA2 /* LiveLandShortcuts.swift */,
+				LLREF000000000000000003 /* LiveLandAgentResult.swift */,
+				LLREF000000000000000004 /* LiveLandSkillPromptHaptics.swift */,
+				LLREF000000000000000005 /* LiveLandVoiceRuntime.swift */,
+				LLREF000000000000000006 /* LiveLandAudioIO.swift */,
+				LLREF000000000000000007 /* LiveLandVADService.swift */,
+				LLREF000000000000000008 /* LiveLandTurnController.swift */,
+				LLREF000000000000000009 /* LiveLandBackgroundContinuation.swift */,
+				LLREF000000000000000011 /* LiveLandActivityAttributes.swift */,
+				LLREF000000000000000010 /* LiveLandActivityBridge.swift */,
+				LLREF000000000000000012 /* LiveLandLauncherWidgets.swift */,
+			);
+			path = LiveLand;
+			sourceTree = "<group>";
+		};
+		MINICPMV0000000000201 /* MiniCPMV */ = {
+			isa = PBXGroup;
+			children = (
+				MINICPMV0000000000101 /* MiniCPMVBackend.swift */,
+				REMOTEINFERENCE00000101 /* RemoteInferenceService.swift */,
+				LANDISCOVERY00000000101 /* LANDiscovery.swift */,
+				LANBINDING0000000000101 /* LANBinding.swift */,
+				RMVIEW00000000000101 /* RemoteMacSettingsView.swift */,
+			);
+			path = MiniCPMV;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A7C500000000000000000001 /* PhoneClawLiveActivityWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A7C700000000000000000003 /* Build configuration list for PBXNativeTarget "PhoneClawLiveActivityWidget" */;
+			buildPhases = (
+				A7C400000000000000000003 /* Sources */,
+				A7C400000000000000000001 /* Frameworks */,
+				A7C400000000000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PhoneClawLiveActivityWidget;
+			packageProductDependencies = (
+			);
+			productName = PhoneClawLiveActivityWidget;
+			productReference = A7C200000000000000000005 /* PhoneClawLiveActivityWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		DC4DB8CD35E6335C6F8AC3D7 /* PhoneClaw */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B11AD88A6CD732D24531EE34 /* Build configuration list for PBXNativeTarget "PhoneClaw" */;
+			buildPhases = (
+				B75792C14D3A81FBCD50329B /* [CP] Check Pods Manifest.lock */,
+				479C4F7A038F48E691B8652F /* Sources */,
+				4B243621551C86F4B6922A8F /* Frameworks */,
+				E6F7081A2B3C4D5E6F708100 /* Resources */,
+				A7C400000000000000000004 /* Embed App Extensions */,
+				BB2000000000000000000021 /* Copy LiteRT runtime plugin frameworks */,
+				BB2000000000000000000020 /* Re-sign embedded dylibs */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A7C600000000000000000001 /* PBXTargetDependency */,
+			);
+			name = PhoneClaw;
+			packageProductDependencies = (
+				AA5000000000000000000001 /* MLX */,
+				AA5000000000000000000002 /* MLXFast */,
+				AA5000000000000000000003 /* MLXNN */,
+				AA5000000000000000000004 /* MLXLMCommon */,
+				AA5000000000000000000007 /* MLXLLM */,
+				AA5000000000000000000005 /* MLXVLM */,
+				AA5000000000000000000006 /* Tokenizers */,
+				AA5000000000000000000008 /* FluidAudio */,
+				AA5000000000000000000009 /* MarkdownUI */,
+				AA5000000000000000000010 /* PhoneClawEngine */,
+				AA5000000000000000000011 /* WhisperKit */,
+			);
+			productName = PhoneClaw;
+			productReference = 408F2AE98EA54717A74FA4B1 /* PhoneClaw.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3FB79357A07D44E17582311F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					A7C500000000000000000001 = {
+						CreatedOnToolsVersion = 16.0;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = D08DE168688EBAEF987138AB /* Build configuration list for PBXProject "PhoneClaw" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+				"zh-Hans",
+				ja,
+			);
+			mainGroup = 4A876E909BCB4E1CAF5C50F5;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AA4000000000000000000001 /* XCLocalSwiftPackageReference "Packages/InferenceKit" */,
+				AA4000000000000000000002 /* XCRemoteSwiftPackageReference "mlx-swift" */,
+				AA4000000000000000000003 /* XCRemoteSwiftPackageReference "swift-transformers" */,
+				AA4000000000000000000004 /* XCLocalSwiftPackageReference "Packages/FluidAudio" */,
+				AA4000000000000000000005 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */,
+				AA4000000000000000000006 /* XCLocalSwiftPackageReference "LocalPackages/PhoneClawEngine" */,
+				AA4000000000000000000007 /* XCRemoteSwiftPackageReference "argmax-oss-swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = AC5E0AA2711EA01E891DE3A7 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DC4DB8CD35E6335C6F8AC3D7 /* PhoneClaw */,
+				A7C500000000000000000001 /* PhoneClawLiveActivityWidget */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A7C400000000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BB7100000000000000000002 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E6F7081A2B3C4D5E6F708100 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ICONASSETS0000000000002 /* Assets.xcassets in Resources */,
+				A1B2C3D4E5F607182930D001 /* PrivacyInfo.xcprivacy in Resources */,
+				A1B2C3D4E5F607182930D003 /* OrbWebAssets in Resources */,
+				B1A2C3D4E5F607182930B100 /* Library in Resources */,
+				B1A2C3D4E5F607182930B107 /* piz_compressed.exr in Resources */,
+				B1A2C3D4E5F607182930B108 /* studio_env.hdr in Resources */,
+				B1A2C3D4E5F607182930C002 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		B75792C14D3A81FBCD50329B /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-PhoneClaw-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		BB2000000000000000000020 /* Re-sign embedded dylibs */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Re-sign embedded dylibs";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"${CODE_SIGNING_ALLOWED}\" != \"YES\" ]; then\n  exit 0\nfi\n\nFRAMEWORKS_DIR=\"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}\"\nif [ ! -d \"${FRAMEWORKS_DIR}\" ]; then\n  exit 0\nfi\n\nfind \"${FRAMEWORKS_DIR}\" -name '*.dylib' ! -name 'libswift*.dylib' -exec codesign --force --sign \"${EXPANDED_CODE_SIGN_IDENTITY}\" --timestamp=none --preserve-metadata=identifier,entitlements {} \\;\n";
+			showEnvVarsInLog = 0;
+		};
+		BB2000000000000000000021 /* Copy LiteRT runtime plugin frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Copy LiteRT runtime plugin frameworks";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -euo pipefail\n\nSRC_ROOT=\"${SRCROOT}/LocalPackages/PhoneClawEngine/Frameworks\"\nFRAMEWORKS_DIR=\"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}\"\nmkdir -p \"${FRAMEWORKS_DIR}\"\n\ncase \"${PLATFORM_NAME:-}\" in\n  iphoneos)\n    SLICE=\"ios-arm64\"\n    ;;\n  iphonesimulator)\n    SLICE=\"ios-arm64-simulator\"\n    ;;\n  *)\n    echo \"warning: Unknown platform '${PLATFORM_NAME:-}', skipping LiteRT runtime plugin frameworks\"\n    exit 0\n    ;;\nesac\n\ncopy_companion_framework() {\n  name=\"$1\"\n  src=\"${SRC_ROOT}/${name}.xcframework/${SLICE}/${name}.framework\"\n  dst=\"${FRAMEWORKS_DIR}/${name}.framework\"\n\n  if [ ! -d \"${src}\" ]; then\n    echo \"warning: LiteRT companion framework slice missing: ${src}; skipping\"\n    return 0\n  fi\n\n  rm -rf \"${dst}\"\n  ditto \"${src}\" \"${dst}\"\n\n  if [ \"${CODE_SIGNING_ALLOWED:-}\" = \"YES\" ]; then\n    sign_identity=\"${EXPANDED_CODE_SIGN_IDENTITY:-}\"\n    if [ -z \"${sign_identity}\" ]; then\n      sign_identity=\"-\"\n    fi\n    codesign --force --sign \"${sign_identity}\" --timestamp=none --preserve-metadata=identifier,entitlements \"${dst}\"\n  fi\n}\n\ncopy_companion_framework \"LiteRtMetalAccelerator\"\ncopy_companion_framework \"LiteRtTopKMetalSampler\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		479C4F7A038F48E691B8652F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2F4A6C8E0A1B2C3D4E5F6071 /* AudioCaptureService.swift in Sources */,
+				B8A84E4D0DDDE011B5929DA2 /* AgentEngine.swift in Sources */,
+				137C43C64332571D07B4D532 /* ModelConfig.swift in Sources */,
+				5D1A2B3C4E5F607180905678 /* HotfixFeatureFlags.swift in Sources */,
+				6E2B3C4D5F607182A0B56789 /* ConversationMemoryPolicy.swift in Sources */,
+				7F3C4D5E6071839BC5678901 /* PromptObservation.swift in Sources */,
+				8A4D5E6F7182940CD6789012 /* ImageFollowUp.swift in Sources */,
+				9B5E6F708293A51DE7890123 /* PromptPipelineHelpers.swift in Sources */,
+				AC6F708293B62EF01234AAAA /* ProcessInput.swift in Sources */,
+				BD708293B62EF01234CCCCCC /* EngineLifecycle.swift in Sources */,
+				C3C4D5E6F7081A2B3C52D3E4 /* ChatModels.swift in Sources */,
+				97E96A2FBFFAF609F276A896 /* ConfigurationsView.swift in Sources */,
+				9412304167DACB86E5D60D49 /* ContentView.swift in Sources */,
+				21A376D4F0444A74A8F6D2EE /* IOS27FoundationModelsInferenceService.swift in Sources */,
+				7CE29873DCE243E48125BD3F /* IOS27FoundationModelsCatalog.swift in Sources */,
+				AA1000000000000000000003 /* Gemma4Config.swift in Sources */,
+				AA1000000000000000000004 /* Gemma4LanguageModel.swift in Sources */,
+				AA1000000000000000000020 /* Gemma4AudioFeatureExtractor.swift in Sources */,
+				AA1000000000000000000021 /* Gemma4AudioModel.swift in Sources */,
+				A31476F62F85741500318978 /* Planner.swift in Sources */,
+				A31476F82F85741500318978 /* Router.swift in Sources */,
+				A27C0DEF0000000000000001 /* GuardedSkillRouter.swift in Sources */,
+				A27C0DEF0000000000000003 /* IOS27FoundationSkillRouter.swift in Sources */,
+				A31476F92F85741500318978 /* ChatSessionStore.swift in Sources */,
+				A31476FA2F85741500318978 /* ToolChain.swift in Sources */,
+				A31476FB2F85741500318978 /* OutputCleaner.swift in Sources */,
+				5E3245AC20D4A5365C4A84E8 /* LiveLocale.swift in Sources */,
+				F471632F6068D441199F62BF /* LiveMarker.swift in Sources */,
+				B4BDA4D032800AFB9764956A /* LiveHistoryMessage.swift in Sources */,
+				41D5F6BA01C2365F10D7C4EA /* LiveSkillCall.swift in Sources */,
+				E9D6E75B5D98FAD1F17265D7 /* LiveOutputEvent.swift in Sources */,
+				23D41FD1E095FCDDC5BE04EF /* LiveOutputParser.swift in Sources */,
+				4C01A62B1E57D91C45FFEEA8 /* LiveTurnProcessor.swift in Sources */,
+				LLBUILD000000000000000011 /* LiveLandActivityAttributes.swift in Sources */,
+				F3B736266E38252D03E6C354 /* LiveVoiceConstants.swift in Sources */,
+				FEFA2136332FF2B38F71C999 /* PromptBuilder+LiveVoice.swift in Sources */,
+				0F13CB63EFD6EB20B60C013B /* ASRService.swift in Sources */,
+				41A4AE7307B1AEB76793BDC9 /* ASRBackend.swift in Sources */,
+				7BB3AC9437469CCB6929F015 /* LiveCameraService.swift in Sources */,
+				839929FB52DF6A121DCEE82C /* LiveComponentTest.swift in Sources */,
+				A340D947F4D1C7DE26F7F978 /* LiveMetrics.swift in Sources */,
+				A24D34F106E9869C8DA166DE /* OrbAudioAnalyser.swift in Sources */,
+				DA25510B6177007641B5978D /* SherpaOnnx.swift in Sources */,
+				D56B8094D6B249DC038FAF8F /* TTSService.swift in Sources */,
+				9B17236E9D51367662BBED4C /* VADService.swift in Sources */,
+				273143E1D4CADB93BB87D208 /* VoiceTurnController.swift in Sources */,
+				A784E79067D36E56702AC300 /* AudioUI.swift in Sources */,
+				70A9AFA85FC91F00D3E00387 /* OrbBackgroundView.swift in Sources */,
+				8D92BA73222C507ADD63ED33 /* OrbSceneView.swift in Sources */,
+				7EB3859798F050565F8C28B9 /* OrbShaderSource.swift in Sources */,
+				AB877F6AD9467C63509E499F /* ResponseUI.swift in Sources */,
+				623A278B9408C9BE8FDE61D1 /* SharedUI.swift in Sources */,
+				1A2B3C4D5E6F7A8B9C0D1E2F /* PorcelainOrbView.swift in Sources */,
+				2B3C4D5E6F7A8B9C0D1E2F30 /* UIScale.swift in Sources */,
+				07D3C1FB6D5F4849F2E8136B /* (null) in Sources */,
+				44E858BC1F79BDD31F923BBC /* (null) in Sources */,
+				084BAD9BD1E8ED10B59ACADB /* (null) in Sources */,
+				95444CF962023FF31BA49D06 /* (null) in Sources */,
+				2BC8AF77F212FBB4A0A0F28B /* (null) in Sources */,
+				FC40218C648A06512F52E7C8 /* (null) in Sources */,
+				43DD7FAECE6EEBA9D504D3D5 /* (null) in Sources */,
+				2C6F8756897F4C01D3E190B0 /* (null) in Sources */,
+				0C5EBE615C219F104D6D9C8D /* (null) in Sources */,
+				2CADFF678567A2ECB88CE265 /* (null) in Sources */,
+				E3848EFFD200BB2BCB325939 /* (null) in Sources */,
+				BE6E6C928537BCC4DBC975E9 /* (null) in Sources */,
+				8B0B3BC2CF9E5C58519C11C2 /* (null) in Sources */,
+				4A99F468A0CDF3F577738F6C /* (null) in Sources */,
+				64C85AE4FF9AA2C865C799E9 /* (null) in Sources */,
+				542491EC62E3A48A32792C5D /* (null) in Sources */,
+				DCB2FB741B3A2162725430FC /* (null) in Sources */,
+				F9E7622C7772C61D277B0571 /* (null) in Sources */,
+				911E4634041EBFC4AAA48EFA /* (null) in Sources */,
+				27C2E4D0940F10256C1A86FC /* (null) in Sources */,
+				42C98281CDF93BA47D0FC59D /* (null) in Sources */,
+				84DEDE5EA80ABE1575ECD383 /* (null) in Sources */,
+				DE49DFCF4DF4FBABCBCC20DC /* (null) in Sources */,
+				08876D35D59ECC4A9406DFAE /* (null) in Sources */,
+				CCBAD6C96F8385EACB195E06 /* (null) in Sources */,
+				06D9CC213F5773BCAF9376C9 /* (null) in Sources */,
+				211F188F31CA459159D0E80B /* (null) in Sources */,
+				10405212EEF000AA04B72748 /* (null) in Sources */,
+				D69250E717959D2D59D57ABD /* (null) in Sources */,
+				583517394D45962A75274774 /* (null) in Sources */,
+				6ED70A065D44870C4B10BC01 /* (null) in Sources */,
+				06A562E919007CEE36406DCA /* (null) in Sources */,
+				F88825F9E29B5D7893A32873 /* (null) in Sources */,
+				B0FB758750EA8CEBC4DBF08A /* (null) in Sources */,
+				9EA6D4B6C15083B5F9C96F04 /* (null) in Sources */,
+				F6507553CBC1D3D0BCAFF1C9 /* (null) in Sources */,
+				D7B5B8D3378DF49369C7F306 /* (null) in Sources */,
+				255B2D20006BDC90DD271C86 /* (null) in Sources */,
+				C05906F882C28E546FC97B26 /* (null) in Sources */,
+				F1AF2D7AAB111966A35AB32E /* (null) in Sources */,
+				F4B1F913A5419D9F98865B73 /* (null) in Sources */,
+				916086085ECE53782F3654D2 /* (null) in Sources */,
+				B85F211303561796B93E9575 /* (null) in Sources */,
+				93BD549B99F4F88D0BEB9B2A /* (null) in Sources */,
+				9FA8E14BB1B226526B8BD782 /* (null) in Sources */,
+				5C01BF2FA8161562894FFD97 /* (null) in Sources */,
+				77CE684DABF6C69ECF54AB3F /* (null) in Sources */,
+				26929A1E3A3435B723DD604D /* (null) in Sources */,
+				8E9B8E06D2729659B52A95C1 /* (null) in Sources */,
+				262A3E0B099DCF52616B3F0C /* (null) in Sources */,
+				FD845BA1DB428F45EDEE9000 /* (null) in Sources */,
+				0B263C823B20AE04F227B187 /* (null) in Sources */,
+				C6C41C306E9D307AAB4F3284 /* (null) in Sources */,
+				1D6B9BBA44F194BB9B33BD65 /* (null) in Sources */,
+				F84BD7F445E2D383551198FB /* OutputSanitizer.swift in Sources */,
+				32D9B612A8A28256BD2CCA55 /* LiveAudioIO.swift in Sources */,
+				0D58F93BFFFFE778CD8A34D1 /* LiveModeEngine.swift in Sources */,
+				CE2D5BD7F3C310C8CE319A6D /* LiveModeUI.swift in Sources */,
+				A31476FC2F85741500318978 /* ToolCallParser.swift in Sources */,
+				AA1000000000000000000005 /* Gemma4Model.swift in Sources */,
+				AA1000000000000000000100 /* BundledModel.swift in Sources */,
+				AA1000000000000000000101 /* RuntimeBudgets.swift in Sources */,
+				AA1000000000000000000103 /* ModelInstallState.swift in Sources */,
+				AA1000000000000000000104 /* ModelPaths.swift in Sources */,
+				AA1000000000000000000105 /* MemoryStats.swift in Sources */,
+				AA1000000000000000000106 /* ModelDownloader.swift in Sources */,
+				AA1000000000000000000107 /* ModelInstaller.swift in Sources */,
+				AA1000000000000000000108 /* GPULifecycle.swift in Sources */,
+				AA1000000000000000000109 /* LiveModelDefinition.swift in Sources */,
+				AA1000000000000000000111 /* LiveDownloadPlanner.swift in Sources */,
+				AA1000000000000000000112 /* LiveModelStore.swift in Sources */,
+				AA1000000000000000000113 /* LiveModelInstallFinalizer.swift in Sources */,
+				AA1000000000000000000110 /* LiveModelDownloader.swift in Sources */,
+				AA1000000000000000000006 /* Gemma4Registration.swift in Sources */,
+				AA1000000000000000000018 /* Gemma4VisionModel.swift in Sources */,
+				AA1000000000000000000019 /* Gemma4Processor.swift in Sources */,
+				AA1000000000000000000007 /* Gemma4RoPE.swift in Sources */,
+				AA1000000000000000000008 /* Gemma4TextModel.swift in Sources */,
+				AA1000000000000000000009 /* MLXTokenizersLoader.swift in Sources */,
+				AA1000000000000000000001 /* LLMEngine.swift in Sources */,
+				AA1000000000000000000002 /* MLXLocalLLMService.swift in Sources */,
+				AA1000000000000000000202 /* MLXLocalLLMService+KVReuse.swift in Sources */,
+				45B7FEC6C4D055F44A87BFA9 /* PhoneClawApp.swift in Sources */,
+				45B7FEC6C4D055F44A87BFAA /* LiveLaunchRouting.swift in Sources */,
+				45B7FEC6C4D055F44A87BFAB /* LiveLandShortcuts.swift in Sources */,
+				LLBUILD000000000000000003 /* LiveLandAgentResult.swift in Sources */,
+				LLBUILD000000000000000004 /* LiveLandSkillPromptHaptics.swift in Sources */,
+				LLBUILD000000000000000005 /* LiveLandVoiceRuntime.swift in Sources */,
+				LLBUILD000000000000000006 /* LiveLandAudioIO.swift in Sources */,
+				LLBUILD000000000000000007 /* LiveLandVADService.swift in Sources */,
+				LLBUILD000000000000000008 /* LiveLandTurnController.swift in Sources */,
+				LLBUILD000000000000000009 /* LiveLandBackgroundContinuation.swift in Sources */,
+				LLBUILD000000000000000010 /* LiveLandActivityBridge.swift in Sources */,
+				5084E1CD2E831BC05F5E4374 /* PromptBuilder.swift in Sources */,
+				C1A2B3D4E5F607182930A1B2 /* SkillLoader.swift in Sources */,
+				C1A2B3D4E5F607182930A1C2 /* SkillRegistry.swift in Sources */,
+				20B8C55E032BA07B3E640E80 /* Skills.swift in Sources */,
+				B881A2E7F9483D5ED2AC206B /* SkillsManagerView.swift in Sources */,
+				A31476EA2F856FD700318978 /* ChatAttachments.swift in Sources */,
+				A31476EB2F856FD700318978 /* ChatMessage.swift in Sources */,
+				C4D5E6F70819A2B3C463E4F5 /* Theme.swift in Sources */,
+				D3A1B2C3D4E5F60718290001 /* ToolRegistry.swift in Sources */,
+				D3A1B2C3D4E5F60718290002 /* AppPermissions.swift in Sources */,
+				D3A1B2C3D4E5F60718290003 /* Stores.swift in Sources */,
+				D3A1B2C3D4E5F60718290004 /* Helpers.swift in Sources */,
+				D3A1B2C3D4E5F60718290005 /* Clipboard.swift in Sources */,
+				D3A1B2C3D4E5F60718290008 /* Calendar.swift in Sources */,
+				D3A1B2C3D4E5F60718290009 /* Reminders.swift in Sources */,
+				D3A1B2C3D4E5F60718290010 /* Contacts.swift in Sources */,
+				D3A1B2C3D4E5F60718290011 /* Health.swift in Sources */,
+				D3A1B2C3D4E5F60718290012 /* Web.swift in Sources */,
+				BB2000000000000000000001 /* LLMTypes.swift in Sources */,
+				BB2000000000000000000002 /* InferenceService.swift in Sources */,
+				BB2000000000000000000003 /* ModelCatalogProtocol.swift in Sources */,
+				BB2000000000000000000004 /* ModelInstallerProtocol.swift in Sources */,
+				BB2000000000000000000005 /* RuntimePolicy.swift in Sources */,
+				BB2000000000000000000103 /* LiteRTBootstrap.swift in Sources */,
+				BB2000000000000000000104 /* RuntimeSessionState.swift in Sources */,
+				BB2000000000000000000105 /* InstallState.swift in Sources */,
+				BB2000000000000000000106 /* GenerationTransaction.swift in Sources */,
+				E04567890ABCDEF012345555 /* PromptTokenEstimator.swift in Sources */,
+				FE54FE54FE54FE54FE540001 /* WebFreshness.swift in Sources */,
+				BB2000000000000000000107 /* ModelRuntimeCoordinator.swift in Sources */,
+				BB2000000000000000000006 /* PredefinedModels.swift in Sources */,
+				BB2000000000000000000007 /* LiteRTBackend.swift in Sources */,
+				MINICPMV0000000000001 /* MiniCPMVBackend.swift in Sources */,
+				REMOTEINFERENCE00000001 /* RemoteInferenceService.swift in Sources */,
+				LANDISCOVERY00000000001 /* LANDiscovery.swift in Sources */,
+				LANBINDING0000000000001 /* LANBinding.swift in Sources */,
+				RMVIEW00000000000001 /* RemoteMacSettingsView.swift in Sources */,
+				DISPATCHER000000000001 /* BackendDispatcher.swift in Sources */,
+				BB2000000000000000000099 /* AudioBypassTest.swift in Sources */,
+				BB2000000000000000000008 /* LiteRTCatalog.swift in Sources */,
+				BB2000000000000000000009 /* LiteRTModelStore.swift in Sources */,
+				BB2000000000000000000A99 /* ZipExtractor.swift in Sources */,
+				D0B100000000000000000001 /* DownloadModels.swift in Sources */,
+				D0B100000000000000000002 /* DownloadProgressSnapshot.swift in Sources */,
+				D0B100000000000000000003 /* DownloadFailure.swift in Sources */,
+				D0B100000000000000000004 /* DownloadManifestStore.swift in Sources */,
+				D0B100000000000000000005 /* DownloadPreflight.swift in Sources */,
+				D0B100000000000000000006 /* DownloadObserver.swift in Sources */,
+				D0B100000000000000000007 /* ResumableAssetDownloader.swift in Sources */,
+				BB2000000000000000000012 /* PCLog.swift in Sources */,
+				BB2000000000000000000100 /* LanguageService.swift in Sources */,
+				BB2000000000000000000101 /* L10n.swift in Sources */,
+				BB2000000000000000000102 /* PromptLocale.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A7C400000000000000000003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A7C100000000000000000003 /* PhoneClawLiveActivityWidget.swift in Sources */,
+				LLBUILD000000000000000012 /* LiveLandActivityAttributes.swift in Sources */,
+				LLBUILD000000000000000013 /* LiveLandLauncherWidgets.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A7C600000000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A7C500000000000000000001 /* PhoneClawLiveActivityWidget */;
+			targetProxy = A7C600000000000000000002 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		B1A2C3D4E5F607182930C000 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B1A2C3D4E5F607182930C001 /* zh-Hans */,
+				B1A2C3D4E5F607182930CA01 /* ja */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		173FD5E3042F677AC8EEF557 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		359B222D24D31B6A31BB84F7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		428228F932F50032A2F8F13C /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 098B30935B91CD0BEF3A5056 /* Pods-PhoneClaw.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = PhoneClaw.entitlements;
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
+				CURRENT_PROJECT_VERSION = 44;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Frameworks/sherpa-onnx.xcframework/ios-arm64/Headers",
+				);
+				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(inherited)",
+					"$(SRCROOT)/Frameworks/piper_plus.xcframework/ios-arm64/Headers",
+				);
+				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(inherited)",
+					"$(SRCROOT)/Frameworks/onnxruntime.xcframework/ios-arm64",
+					"$(SRCROOT)/Frameworks/piper_plus.xcframework/ios-arm64",
+					"$(SRCROOT)/Frameworks/sherpa-onnx.xcframework/ios-arm64",
+				);
+				MARKETING_VERSION = 1.4.0;
+				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
+					"$(inherited)",
+					"-lonnxruntime",
+					"-lpiper_plus",
+					"-lsherpa-onnx",
+					"-lc++",
+				);
+				PHONECLAW_APP_BUNDLE_ID = com.crisp.phoneclaw;
+				PRODUCT_BUNDLE_IDENTIFIER = com.crisp.phoneclaw;
+				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/PhoneClaw-Bridging-Header.h";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		A7C700000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 44;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LiveLand/Widget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.4.0;
+				PHONECLAW_WIDGET_BUNDLE_ID = com.crisp.phoneclaw.LiveActivityWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.crisp.phoneclaw.LiveActivityWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A7C700000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 44;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LiveLand/Widget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.4.0;
+				PHONECLAW_WIDGET_BUNDLE_ID = com.crisp.phoneclaw.LiveActivityWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.crisp.phoneclaw.LiveActivityWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		DB4D14820691F551F7A64548 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A1AB7F250BEEFF938318AA75 /* Pods-PhoneClaw.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = PhoneClaw.entitlements;
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
+				CURRENT_PROJECT_VERSION = 44;
+				DEVELOPMENT_TEAM = UBF8T346G9;
+				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Frameworks/sherpa-onnx.xcframework/ios-arm64/Headers",
+				);
+				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(inherited)",
+					"$(SRCROOT)/Frameworks/piper_plus.xcframework/ios-arm64/Headers",
+				);
+				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(inherited)",
+					"$(SRCROOT)/Frameworks/onnxruntime.xcframework/ios-arm64",
+					"$(SRCROOT)/Frameworks/piper_plus.xcframework/ios-arm64",
+					"$(SRCROOT)/Frameworks/sherpa-onnx.xcframework/ios-arm64",
+				);
+				MARKETING_VERSION = 1.4.0;
+				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
+					"$(inherited)",
+					"-lonnxruntime",
+					"-lpiper_plus",
+					"-lsherpa-onnx",
+					"-lc++",
+				);
+				PHONECLAW_APP_BUNDLE_ID = com.crisp.phoneclaw;
+				PRODUCT_BUNDLE_IDENTIFIER = com.crisp.phoneclaw;
+				SDKROOT = iphoneos;
+				SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/PhoneClaw-Bridging-Header.h";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A7C700000000000000000003 /* Build configuration list for PBXNativeTarget "PhoneClawLiveActivityWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A7C700000000000000000001 /* Debug */,
+				A7C700000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B11AD88A6CD732D24531EE34 /* Build configuration list for PBXNativeTarget "PhoneClaw" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DB4D14820691F551F7A64548 /* Debug */,
+				428228F932F50032A2F8F13C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D08DE168688EBAEF987138AB /* Build configuration list for PBXProject "PhoneClaw" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				359B222D24D31B6A31BB84F7 /* Debug */,
+				173FD5E3042F677AC8EEF557 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		AA4000000000000000000001 /* XCLocalSwiftPackageReference "Packages/InferenceKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/InferenceKit;
+		};
+		AA4000000000000000000004 /* XCLocalSwiftPackageReference "Packages/FluidAudio" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/FluidAudio;
+		};
+		AA4000000000000000000006 /* XCLocalSwiftPackageReference "LocalPackages/PhoneClawEngine" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = LocalPackages/PhoneClawEngine;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AA4000000000000000000002 /* XCRemoteSwiftPackageReference "mlx-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ml-explore/mlx-swift";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 0.31.3;
+			};
+		};
+		AA4000000000000000000003 /* XCRemoteSwiftPackageReference "swift-transformers" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/huggingface/swift-transformers";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 1.1.9;
+			};
+		};
+		AA4000000000000000000005 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/gonzalezreal/swift-markdown-ui";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 2.4.1;
+			};
+		};
+		AA4000000000000000000007 /* XCRemoteSwiftPackageReference "argmax-oss-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/argmax-oss-swift";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 0.18.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AA5000000000000000000001 /* MLX */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA4000000000000000000002 /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLX;
+		};
+		AA5000000000000000000002 /* MLXFast */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA4000000000000000000002 /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXFast;
+		};
+		AA5000000000000000000003 /* MLXNN */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA4000000000000000000002 /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLXNN;
+		};
+		AA5000000000000000000004 /* MLXLMCommon */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA4000000000000000000001 /* XCLocalSwiftPackageReference "Packages/InferenceKit" */;
+			productName = MLXLMCommon;
+		};
+		AA5000000000000000000005 /* MLXVLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA4000000000000000000001 /* XCLocalSwiftPackageReference "Packages/InferenceKit" */;
+			productName = MLXVLM;
+		};
+		AA5000000000000000000006 /* Tokenizers */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA4000000000000000000003 /* XCRemoteSwiftPackageReference "swift-transformers" */;
+			productName = Tokenizers;
+		};
+		AA5000000000000000000007 /* MLXLLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA4000000000000000000001 /* XCLocalSwiftPackageReference "Packages/InferenceKit" */;
+			productName = MLXLLM;
+		};
+		AA5000000000000000000008 /* FluidAudio */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA4000000000000000000004 /* XCLocalSwiftPackageReference "Packages/FluidAudio" */;
+			productName = FluidAudio;
+		};
+		AA5000000000000000000009 /* MarkdownUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA4000000000000000000005 /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
+			productName = MarkdownUI;
+		};
+		AA5000000000000000000010 /* PhoneClawEngine */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA4000000000000000000006 /* XCLocalSwiftPackageReference "LocalPackages/PhoneClawEngine" */;
+			productName = PhoneClawEngine;
+		};
+		AA5000000000000000000011 /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA4000000000000000000007 /* XCRemoteSwiftPackageReference "argmax-oss-swift" */;
+			productName = WhisperKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 3FB79357A07D44E17582311F /* Project object */;
+}

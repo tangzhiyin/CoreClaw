@@ -1,0 +1,74 @@
+# ─── Models（大文件，不入库）───────────────────────────────────────
+# 仅忽略仓库根的 /Models/ 权重目录, 前导斜杠必须, 否则会意外
+# 把 Packages/InferenceKit/Libraries/MLXLLM/Models/ 这类 Swift 源码目录
+# 也 ignore 掉 (fresh clone 编译不过, 见 issue #7)
+/Models/
+*.litertlm
+*.litertlm.xnnpack_cache
+*.safetensors
+*.gguf
+
+# ─── CocoaPods ────────────────────────────────────────────────────
+Pods/
+# Podfile.lock 保留：便于多人复现环境
+# *.xcworkspace 由 CocoaPods 生成，可选保留；这里保留
+
+# ─── Xcode ────────────────────────────────────────────────────────
+*.xcuserstate
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+DerivedData/
+build/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# ─── Swift Package Manager ────────────────────────────────────────
+.build/
+.swiftpm/
+
+# ─── 构建产物 / 外部子目录 ────────────────────────────────────────
+LiteRT-LM/
+*.app/
+
+# ─── macOS 杂项 ───────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+*.swp
+*.swo
+*~
+
+# ─── 环境 / 密钥 ──────────────────────────────────────────────────
+.env
+*.pem
+*.p8
+*.p12
+*.cer
+*.mobileprovision
+private_keys/
+.private_keys/
+.appstoreconnect/
+
+# ─── 编辑器 ───────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# ─── 构建产物 / 二进制库 ──────────────────────────────────────────
+*.profraw
+*.dylib
+*.a
+*.o
+# 但保留 xcframework 内的静态库 + 动态库 (issue #12)
+# LocalPackages/**/*.xcframework — vendored LiteRTLM (see
+# LocalPackages/PhoneClawEngine/Package.swift for build pipeline).
+!Frameworks/**/*.a
+!LocalPackages/**/*.a
+!LocalPackages/**/*.dylib
+
+# ─── PhoneClawCLI (本地开发测试工具, 不入仓库) ───────────────────
+PhoneClawCLI/
