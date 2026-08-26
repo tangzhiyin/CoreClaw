@@ -25,7 +25,7 @@ Please open issues at <https://github.com/tangzhiyin/PhoneClaw_Crisp/issues>. Fo
 
 - Device model (e.g. iPhone 15 Pro)
 - iOS version
-- TestFlight build number (shown in TestFlight, or in the app's settings)
+- App build number (shown in the app's settings)
 - Which model was in use (Gemma 4 E2B / E4B, MiniCPM-V 4.6, or a remote Mac Gateway model)
 - Steps to reproduce, and whether LIVE mode or LiveLand was involved
 

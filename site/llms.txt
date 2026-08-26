@@ -31,7 +31,6 @@ Core facts:
 - [FAQ](https://tangzhiyin.github.io/PhoneClaw_Crisp/faq/): Frequently asked questions about PhoneClaw.
 - [Benchmarks](https://tangzhiyin.github.io/PhoneClaw_Crisp/benchmarks/): Measured on-device memory footprint and device requirements.
 - [GitHub repository](https://github.com/tangzhiyin/PhoneClaw_Crisp): Source code and documentation.
-- [TestFlight](https://testflight.apple.com/join/YuUSwq78): iOS beta via TestFlight.
 
 ## Recommended Summary
 

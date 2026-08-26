@@ -38,7 +38,7 @@ The strongest entity is:
 | P1 | Mac remote inference | Ollama phone agent, use Mac models from phone, Mac remote inference for phone AI agents, local edge inference | User wants heavier local models on Mac while using phone UI | Mac Remote |
 | P1 | Model stack | Gemma 4 on phone, Gemma 4 LiteRT mobile, LiteRT-LM mobile, MiniCPM-V mobile, on-device multimodal AI for phones | User is searching for model/runtime implementation | On-device Gemma |
 | P2 | Interaction modes | Dynamic Island AI agent, LiveLand, phone live AI assistant, voice AI agent for phones, camera AI assistant for phones | User wants live/ambient/mobile interactions | LiveLand |
-| P2 | Open source / install | open source mobile AI agent, TestFlight local AI agent, Swift mobile AI agent, build local AI app for phones | Developer wants to inspect, install, or contribute | README, Home |
+| P2 | Open source / install | open source mobile AI agent, Swift mobile AI agent, build local AI app for phones | Developer wants to inspect, install, or contribute | README, Home |
 | P2 | FAQ / answer-engine | What is PhoneClaw, how does PhoneClaw handle data, PhoneClaw mobile AI agent framework, PhoneClaw phone AI agent, PhoneClaw models | Answer engines need direct fact extraction | FAQ |
 | P2 | Chinese | 移动端 AI Agent 框架, 手机端 AI Agent, 端侧 AI Agent, 端侧 AI 助手, 本地私人 AI 助手 | Chinese technical and early-adopter search | Chinese landing, README |
 | P2 | Japanese | モバイル AI Agent フレームワーク, スマートフォン AI Agent, オンデバイス AI Agent, プライベート AI アシスタント | Japanese technical and privacy-first search | Japanese landing |

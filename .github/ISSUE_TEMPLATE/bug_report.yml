@@ -25,8 +25,8 @@ body:
   - type: input
     id: build-number
     attributes:
-      label: TestFlight build number
-      description: Shown in the TestFlight app next to the version. Write "source build" if you built from Xcode.
+      label: App build number
+      description: Shown in the app's settings. Write "source build" if you built from Xcode.
       placeholder: e.g. 46
     validations:
       required: true

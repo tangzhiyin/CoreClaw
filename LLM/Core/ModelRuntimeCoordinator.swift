@@ -208,7 +208,7 @@ public final class ModelRuntimeCoordinator {
     /// Non-crashing generation entry for user-facing paths.
     ///
     /// A stale UI tap or a model autoload race can reach the generation path
-    /// while the coordinator is no longer `.ready`. In TestFlight/release that
+    /// while the coordinator is no longer `.ready`. In release builds that
     /// must be a rejected turn, not a process abort.
     public func beginGenerationIfPossible() -> GenerationTransaction? {
         guard case .ready(let modelID, _) = sessionState else {

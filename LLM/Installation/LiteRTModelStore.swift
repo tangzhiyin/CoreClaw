@@ -9,7 +9,7 @@ import Foundation
 // `@MainActor`: 4 个状态字典 (installStates / downloadProgress / resumableModelIDs /
 // activeTasks) 是 SwiftUI @Observable 状态源, 必须收敛到主线程隔离, 否则会被
 // 安装协程 (Task { await install(...) }) 和 UI 重渲撞出 Swift Dictionary 的
-// 并发破坏 — 见 TestFlight 1.4.0(27) 崩溃。
+// 并发破坏 — 见 release 1.4.0(27) 崩溃。
 // 例外: 纯文件系统查询的 `artifactPath` 及其辅助函数标 `nonisolated`, 让
 // LiteRTBackend / MiniCPMVBackend 在 nonisolated async load 路径里能同步调。
 @Observable

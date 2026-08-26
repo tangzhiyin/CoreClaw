@@ -34,7 +34,7 @@ Chinese:
 - Useful personal workflows: schedule, reminders, contacts, Health data, clipboard, images, voice, web search.
 - LiveLand and LIVE mode as mobile-native interaction surfaces.
 - Optional Mac Gateway for heavier local inference over LAN.
-- Open source and available on TestFlight.
+- Open source and buildable with Xcode.
 
 ## Product boundaries
 
@@ -60,7 +60,6 @@ It runs models and native mobile Skills on device:
 - Web Search when explicitly requested
 
 GitHub: https://github.com/tangzhiyin/PhoneClaw_Crisp
-TestFlight: https://testflight.apple.com/join/YuUSwq78
 ```
 
 Chinese:
@@ -77,7 +76,6 @@ PhoneClaw 是一个开源的手机本地 AI Agent 运行时。
 - 明确需要时联网搜索
 
 GitHub: https://github.com/tangzhiyin/PhoneClaw_Crisp
-TestFlight: https://testflight.apple.com/join/YuUSwq78
 ```
 
 ## Hacker News / Reddit style post
@@ -93,7 +91,6 @@ The Skill system is file-driven: each capability is defined by SKILL.md and back
 
 GitHub: https://github.com/tangzhiyin/PhoneClaw_Crisp
 Site: https://tangzhiyin.github.io/PhoneClaw_Crisp/
-TestFlight: https://testflight.apple.com/join/YuUSwq78
 ```
 
 ## Demo scripts
@@ -149,7 +146,6 @@ swiftui
 - Site: https://tangzhiyin.github.io/PhoneClaw_Crisp/
 - Chinese landing: https://tangzhiyin.github.io/PhoneClaw_Crisp/zh/
 - Benchmarks: https://tangzhiyin.github.io/PhoneClaw_Crisp/benchmarks/
-- TestFlight: https://testflight.apple.com/join/YuUSwq78
 - On-device Gemma note: ON_DEVICE_GEMMA.md
 - Skill system note: SKILL_SYSTEM.md
 - iOS memory note: IOS_MEMORY_LIMITS.md

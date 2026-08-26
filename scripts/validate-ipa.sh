@@ -5,7 +5,7 @@
 #   - 裸 .dylib 塞在 Frameworks/*.framework/ 里 → App Store 拒包
 #   - framework binary 名与目录名不匹配 → 签名校验失败
 #   - MinimumOSVersion 不一致 → 审核警告
-#   - ITSAppUsesNonExemptEncryption 未设置 → TestFlight Missing Compliance
+#   - ITSAppUsesNonExemptEncryption 未设置 → App Store 加密合规检查失败
 #   - @rpath hard-link 指向不存在的裸 dylib → 启动崩溃
 #
 # 用法:

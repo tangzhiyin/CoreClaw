@@ -38,7 +38,7 @@ public struct DownloadProgress: Sendable, Equatable {
 // 状态字典 (installStates / downloadProgress / 内部 resumable / activeTasks) 的读写
 // 必须收敛到 MainActor。背景: 这些字段是 SwiftUI @Observable 状态源, UI body 在主
 // 线程同步读, 安装协程在后台写 — 不隔离会触发 Dictionary backing storage 的并发
-// 破坏 (TestFlight 1.4.0(27) 崩溃; arm64e 上表现为 PAC 失败的 EXC_BAD_ACCESS)。
+// 破坏 (release 1.4.0(27) 崩溃; arm64e 上表现为 PAC 失败的 EXC_BAD_ACCESS)。
 //
 // 例外: `artifactPath` 是纯文件系统查询, backends (LiteRTBackend / MiniCPMVBackend)
 // 在 nonisolated async load 路径里同步调它, 不能让它跳 main, 因此保持 nonisolated。

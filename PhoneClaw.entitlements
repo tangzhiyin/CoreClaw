@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<!-- 抬高 jetsam 杀进程阈值, 默认 ~3 GB → 最高 ~5 GB.
-	     Sideloadly 签名时被默默丢掉, paid Dev cert (Xcode 直签 / TestFlight /
+	     Sideloadly 签名时被默默丢掉, paid Dev cert (Xcode 直签 /
 	     App Store) 才真正生效. -->
 	<key>com.apple.developer.kernel.increased-memory-limit</key>
 	<true/>

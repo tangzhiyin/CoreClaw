@@ -227,8 +227,6 @@ Model recommendation:
 
 ## Quick Start
 
-Recommended install: [TestFlight](https://testflight.apple.com/join/YuUSwq78). After installing, download a model in `Model Settings`, then enable the Skills you need.
-
 Building from source requires macOS + Xcode 16, iOS 17+, CocoaPods, a real device, and an Apple ID.
 
 ### 1. Clone the repository

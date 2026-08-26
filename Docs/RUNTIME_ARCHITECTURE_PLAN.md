@@ -1096,7 +1096,7 @@ exit $ERRORS
 - 手工回归 checklist（至少覆盖：纯文本聊天、图片输入、CPU/GPU 切换、模型下载、取消生成、Live 模式）
 - 新模块有 unit test
 - AgentEngine 行数持续减少
-- 打 TestFlight 验证
+- 打 Release 包验证
 
 ---
 
@@ -1124,7 +1124,7 @@ exit $ERRORS
 
 | # | 规则 | 违反后果 |
 |---|------|---------|
-| S1 | `ITSAppUsesNonExemptEncryption=false` 固化在主 App 的 `Info.plist` | TestFlight Missing Compliance，阻塞分发 |
+| S1 | `ITSAppUsesNonExemptEncryption=false` 固化在主 App 的 `Info.plist` | App Store 加密合规检查失败，阻塞分发 |
 | S2 | 所有 embedded framework 和主 binary 必须用同一 signing identity 签名 | 安装失败 / 拒包 |
 | S3 | Archive → Export 时使用 Xcode 的 automatic signing，不手动 strip + 重签 | 确保签名链完整 |
 

@@ -55,7 +55,7 @@ let package = Package(
         // ───────────────────────────────────────────────────────────
         // LiteRT-LM plugin dylibs — 单独 framework 化
         // ───────────────────────────────────────────────────────────
-        // App Store / TestFlight 不允许 .framework 里塞 standalone .dylib
+        // App Store 不允许 .framework 里塞 standalone .dylib
         // (error 90171). 把三个 plugin dylib 各自包成独立 .framework, 再
         // 各自塞进一个 xcframework, 通过 SPM binaryTarget 让 app 自动 embed。
         //
