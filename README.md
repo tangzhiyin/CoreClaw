@@ -9,7 +9,7 @@ Turn your phone into a local AI agent runtime.
 ![License](https://img.shields.io/badge/License-Apache%202.0-green?style=flat-square)
 [![GitHub stars](https://img.shields.io/github/stars/tangzhiyin/PhoneClaw_Crisp?style=flat-square)](https://github.com/tangzhiyin/PhoneClaw_Crisp)
 
-[Website](https://tangzhiyin.github.io/PhoneClaw_Crisp/) · [TestFlight](https://testflight.apple.com/join/YuUSwq78) · [中文](README_zh.md) · [Report an Issue](https://github.com/tangzhiyin/PhoneClaw_Crisp/issues) · [Request a Feature](https://github.com/tangzhiyin/PhoneClaw_Crisp/issues)
+[Website](https://tangzhiyin.github.io/PhoneClaw_Crisp/)· [中文](README_zh.md) · [Report an Issue](https://github.com/tangzhiyin/PhoneClaw_Crisp/issues) · [Request a Feature](https://github.com/tangzhiyin/PhoneClaw_Crisp/issues)
 
 </div>
 
@@ -33,7 +33,7 @@ PhoneClaw is a local AI agent framework for phones and edge devices. It runs Gem
 ## Latest Updates
 
 **2026-08-25**
-
+- Add Crisp.SKill under the SKill side
 
 
 **2026-06-08**
