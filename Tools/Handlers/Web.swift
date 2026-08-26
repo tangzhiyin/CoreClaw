@@ -71,6 +71,39 @@ enum WebTools {
         }
     }
 
+    private enum SearchProvider: String, Sendable {
+        case bingRSS = "bing-rss"
+        case bingNewsRSS = "bing-news-rss"
+        case duckDuckGoHTML = "duckduckgo-html"
+        case googleNewsRSS = "google-news-rss"
+        case baiduNewsRSS = "baidu-news-rss"
+
+        func search(
+            query: String,
+            maxResults: Int,
+            window: WebFreshness.Window
+        ) async throws -> [SearchResult] {
+            switch self {
+            case .bingRSS:
+                return try await WebTools.searchBingRSS(query: query, maxResults: maxResults, window: window)
+            case .bingNewsRSS:
+                return try await WebTools.searchBingNewsRSS(query: query, maxResults: maxResults, window: window)
+            case .duckDuckGoHTML:
+                return try await WebTools.searchDuckDuckGo(query: query, maxResults: maxResults, window: window)
+            case .googleNewsRSS:
+                return try await WebTools.searchGoogleNewsRSS(query: query, maxResults: maxResults, window: window)
+            case .baiduNewsRSS:
+                return try await WebTools.searchBaiduNewsRSS(query: query, maxResults: maxResults, window: window)
+            }
+        }
+    }
+
+    private struct ProviderOutcome: Sendable {
+        let provider: SearchProvider
+        let results: [SearchResult]
+        let errorDescription: String?
+    }
+
     private struct SearchDocument: Sendable {
         let title: String
         let url: String
@@ -314,38 +347,28 @@ enum WebTools {
         )
         var providerErrors: [String] = []
 
-        let providers: [(String, (String, Int, WebFreshness.Window) async throws -> [SearchResult])] = [
-            ("bing-rss", searchBingRSS),
-            ("bing-news-rss", searchBingNewsRSS),
-            ("duckduckgo-html", searchDuckDuckGo)
-        ]
-
         var allResults: [SearchResult] = []
-        for plannedQuery in plan.queries {
-            for (providerName, provider) in providers {
-                if let skipReason = await providerCircuitBreaker.skipReason(for: providerName) {
-                    providerErrors.append("\(providerName) [\(plannedQuery)]: \(skipReason)")
-                    continue
+        // Two query variants are enough for fallback coverage. Running every
+        // planned query serially used to multiply provider timeouts and could
+        // leave the tool apparently stuck for more than a minute.
+        for plannedQuery in plan.queries.prefix(2) {
+            let outcomes = await searchProvidersConcurrently(
+                query: plannedQuery,
+                maxResults: maxResults,
+                window: freshnessWindow
+            )
+            for outcome in outcomes {
+                let providerName = outcome.provider.rawValue
+                if let errorDescription = outcome.errorDescription {
+                    providerErrors.append("\(providerName) [\(plannedQuery)]: \(errorDescription)")
+                } else if outcome.results.isEmpty {
+                    providerErrors.append("\(providerName) [\(plannedQuery)]: empty")
+                } else {
+                    allResults.append(contentsOf: outcome.results)
                 }
-                if providerName == "duckduckgo-html",
-                   hasEnoughFreshResults(allResults, maxResults: maxResults, window: freshnessWindow) {
-                    providerErrors.append("\(providerName) [\(plannedQuery)]: skipped: enough results from RSS providers")
-                    continue
-                }
-                do {
-                    let results = uniqueResults(try await provider(plannedQuery, maxResults, freshnessWindow))
-                    await providerCircuitBreaker.recordSuccess(provider: providerName)
-                    if results.isEmpty {
-                        providerErrors.append("\(providerName) [\(plannedQuery)]: empty")
-                    } else {
-                        allResults.append(contentsOf: results)
-                    }
-                } catch {
-                    if let circuitMessage = await providerCircuitBreaker.recordFailure(provider: providerName, error: error) {
-                        providerErrors.append(circuitMessage)
-                    }
-                    providerErrors.append("\(providerName) [\(plannedQuery)]: \(error.localizedDescription)")
-                }
+            }
+            if hasEnoughFreshResults(allResults, maxResults: maxResults, window: freshnessWindow) {
+                break
             }
         }
 
@@ -559,6 +582,131 @@ enum WebTools {
         return Array(results.prefix(maxResults))
     }
 
+    private static func searchGoogleNewsRSS(query: String, maxResults: Int, window: WebFreshness.Window) async throws -> [SearchResult] {
+        guard var components = URLComponents(string: "https://news.google.com/rss/search") else {
+            throw WebToolError.invalidURL
+        }
+        let locale: (language: String, country: String, edition: String)
+        if LanguageService.shared.current.isJapanese {
+            locale = ("ja", "JP", "JP:ja")
+        } else if LanguageService.shared.current.isChinese {
+            locale = ("zh-CN", "CN", "CN:zh-Hans")
+        } else {
+            locale = ("en-US", "US", "US:en")
+        }
+        components.queryItems = [
+            URLQueryItem(name: "q", value: query),
+            URLQueryItem(name: "hl", value: locale.language),
+            URLQueryItem(name: "gl", value: locale.country),
+            URLQueryItem(name: "ceid", value: locale.edition)
+        ]
+        guard let url = components.url else { throw WebToolError.invalidURL }
+
+        let data = try await fetchData(
+            url: url,
+            accept: "application/rss+xml, application/xml, text/xml",
+            timeout: 5
+        )
+        try validateRSSResponse(data, provider: "Google News")
+        return Array(BingRSSParser(source: "google-news-rss").parse(data: data).prefix(maxResults))
+    }
+
+    private static func searchBaiduNewsRSS(query: String, maxResults: Int, window: WebFreshness.Window) async throws -> [SearchResult] {
+        guard var components = URLComponents(string: "https://news.baidu.com/ns") else {
+            throw WebToolError.invalidURL
+        }
+        components.queryItems = [
+            URLQueryItem(name: "word", value: query),
+            URLQueryItem(name: "tn", value: "newsrss"),
+            URLQueryItem(name: "sr", value: "0"),
+            URLQueryItem(name: "cl", value: "2"),
+            URLQueryItem(name: "rn", value: String(maxResults)),
+            URLQueryItem(name: "ct", value: "0")
+        ]
+        guard let url = components.url else { throw WebToolError.invalidURL }
+
+        let data = try await fetchData(
+            url: url,
+            accept: "application/rss+xml, application/xml, text/xml",
+            timeout: 5
+        )
+        try validateRSSResponse(data, provider: "Baidu News")
+        return Array(BingRSSParser(source: "baidu-news-rss").parse(data: data).prefix(maxResults))
+    }
+
+    private static func validateRSSResponse(_ data: Data, provider: String) throws {
+        let prefix = String(decoding: data.prefix(2_048), as: UTF8.self).lowercased()
+        guard prefix.contains("<rss") || prefix.contains("<feed") else {
+            throw WebToolError.blocked(provider)
+        }
+    }
+
+    private static func searchProvidersConcurrently(
+        query: String,
+        maxResults: Int,
+        window: WebFreshness.Window
+    ) async -> [ProviderOutcome] {
+        var providers: [SearchProvider] = [
+            .bingRSS,
+            .bingNewsRSS,
+            .duckDuckGoHTML,
+            .googleNewsRSS
+        ]
+        if LanguageService.shared.current.isChinese {
+            providers.append(.baiduNewsRSS)
+        }
+
+        var availableProviders: [SearchProvider] = []
+        var skippedOutcomes: [ProviderOutcome] = []
+        for provider in providers {
+            if let reason = await providerCircuitBreaker.skipReason(for: provider.rawValue) {
+                skippedOutcomes.append(ProviderOutcome(
+                    provider: provider,
+                    results: [],
+                    errorDescription: reason
+                ))
+            } else {
+                availableProviders.append(provider)
+            }
+        }
+
+        let completed = await withTaskGroup(of: ProviderOutcome.self) { group in
+            for provider in availableProviders {
+                group.addTask {
+                    do {
+                        let results = uniqueResults(
+                            try await provider.search(
+                                query: query,
+                                maxResults: maxResults,
+                                window: window
+                            )
+                        )
+                        await providerCircuitBreaker.recordSuccess(provider: provider.rawValue)
+                        return ProviderOutcome(provider: provider, results: results, errorDescription: nil)
+                    } catch {
+                        let circuitMessage = await providerCircuitBreaker.recordFailure(
+                            provider: provider.rawValue,
+                            error: error
+                        )
+                        let descriptions = [circuitMessage, error.localizedDescription].compactMap { $0 }
+                        return ProviderOutcome(
+                            provider: provider,
+                            results: [],
+                            errorDescription: descriptions.joined(separator: "; ")
+                        )
+                    }
+                }
+            }
+
+            var outcomes: [ProviderOutcome] = []
+            for await outcome in group {
+                outcomes.append(outcome)
+            }
+            return outcomes
+        }
+        return skippedOutcomes + completed
+    }
+
     // MARK: - Fetch
 
     private static func fetchReadablePage(
@@ -603,7 +751,7 @@ enum WebTools {
         return nil
     }
 
-    private static func fetchData(url: URL, accept: String, timeout: TimeInterval = 10) async throws -> Data {
+    private static func fetchData(url: URL, accept: String, timeout: TimeInterval = 6) async throws -> Data {
         var request = URLRequest(url: url)
         request.timeoutInterval = timeout
         request.cachePolicy = .reloadIgnoringLocalCacheData
@@ -614,7 +762,14 @@ enum WebTools {
             forHTTPHeaderField: "User-Agent"
         )
 
-        let (data, response) = try await URLSession.shared.data(for: request)
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = timeout
+        configuration.timeoutIntervalForResource = timeout
+        configuration.waitsForConnectivity = false
+        let session = URLSession(configuration: configuration)
+        defer { session.invalidateAndCancel() }
+
+        let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else { return data }
         guard (200...299).contains(http.statusCode) else {
             throw WebToolError.httpStatus(http.statusCode)

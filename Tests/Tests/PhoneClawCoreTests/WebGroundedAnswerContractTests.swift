@@ -131,17 +131,23 @@ final class WebGroundedAnswerContractTests: XCTestCase {
 
         XCTAssertTrue(webHandler.contains("SearchProviderCircuitBreaker"))
         XCTAssertTrue(webHandler.contains("provider cooling down after repeated timeouts"))
-        XCTAssertTrue(webHandler.contains("skipped: enough results from RSS providers"))
         XCTAssertTrue(webHandler.contains("fetchText(url: url, accept: \"text/html\", timeout: 4)"))
+        XCTAssertTrue(webHandler.contains("searchProvidersConcurrently("))
+        XCTAssertTrue(webHandler.contains("withTaskGroup(of: ProviderOutcome.self)"))
+        XCTAssertTrue(webHandler.contains("plan.queries.prefix(2)"))
+        XCTAssertTrue(webHandler.contains("configuration.waitsForConnectivity = false"))
+        XCTAssertTrue(webHandler.contains("configuration.timeoutIntervalForResource = timeout"))
+    }
 
-        let bingIndex = webHandler.range(of: "(\"bing-rss\", searchBingRSS)")?.lowerBound
-        let newsIndex = webHandler.range(of: "(\"bing-news-rss\", searchBingNewsRSS)")?.lowerBound
-        let ddgIndex = webHandler.range(of: "(\"duckduckgo-html\", searchDuckDuckGo)")?.lowerBound
-        XCTAssertNotNil(bingIndex)
-        XCTAssertNotNil(newsIndex)
-        XCTAssertNotNil(ddgIndex)
-        XCTAssertLessThan(bingIndex!, ddgIndex!)
-        XCTAssertLessThan(newsIndex!, ddgIndex!)
+    func testWebHandlerSupportsMainlandAndInternationalNetworks() throws {
+        let webHandler = try source("Tools/Handlers/Web.swift")
+
+        XCTAssertTrue(webHandler.contains("case googleNewsRSS = \"google-news-rss\""))
+        XCTAssertTrue(webHandler.contains("case baiduNewsRSS = \"baidu-news-rss\""))
+        XCTAssertTrue(webHandler.contains("https://news.google.com/rss/search"))
+        XCTAssertTrue(webHandler.contains("https://news.baidu.com/ns"))
+        XCTAssertTrue(webHandler.contains("if LanguageService.shared.current.isChinese"))
+        XCTAssertTrue(webHandler.contains("providers.append(.baiduNewsRSS)"))
     }
 
     // MARK: Structured fallback reply unchanged

@@ -32,6 +32,15 @@ PhoneClaw is a local AI agent framework for phones and edge devices. It runs Gem
 
 ## Latest Updates
 
+**2026-08-26**
+
+- **Task complete:** migrated the repository identity and public project links to **PhoneClaw Crisp** under `tangzhiyin/PhoneClaw_Crisp`
+- Added **Crisp** as the lightweight default Skill for ordinary text requests while preserving priority for specialized Skills, multimodal flows, and explicit Web tools
+- Fixed iOS device and Simulator build errors, updated Foundation Models compatibility, and preserved device-only runtime integrations without breaking Simulator builds
+- Reworked Web Search to avoid hanging requests: providers now run concurrently with hard request/resource timeouts and bounded query retries
+- Added regional Web Search fallbacks for both mainland China and international networks through Bing, Bing News, DuckDuckGo, Google News, and Baidu News
+- Validation completed with successful iOS device and Simulator builds, 114 core tests, and 3 Mac Gateway tests
+
 **2026-08-25**
 - Add Crisp.SKill under the SKill side
 

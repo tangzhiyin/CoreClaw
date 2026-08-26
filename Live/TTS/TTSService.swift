@@ -80,8 +80,7 @@ class TTSService {
             state = .ready
         }
         return
-        #endif
-
+        #else
         state = .loading
 
         // 按系统语言加载不同 TTS — 中文 keqing / 英文 Piper libritts_r-medium。
@@ -113,6 +112,7 @@ class TTSService {
         backend = "system"
         isAvailable = true
         state = .ready
+        #endif
     }
 
     /// 中文 keqing TTS 初始化。

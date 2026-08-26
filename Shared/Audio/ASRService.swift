@@ -153,8 +153,7 @@ class ASRService {
         #if targetEnvironment(simulator)
         print("[ASR] Simulator build: sherpa-onnx disabled")
         return (nil, nil, false)
-        #endif
-
+        #else
         // 按系统语言选择 ASR 资产 — 中文用 zh-only sherpa, 英文用 en-only sherpa。
         // 两个仓库的文件命名不一样: zh 是 encoder.int8.onnx 等短名,
         // en 是 encoder-epoch-99-avg-1.int8.onnx 等带 epoch 后缀的长名。
@@ -213,6 +212,7 @@ class ASRService {
         let trainingNote = isChinese ? "2025-06-30" : "LibriSpeech+GigaSpeech 2023-06-21"
         print("[ASR] \(available ? "✅ Ready (\(langTag), int8, \(trainingNote))" : "❌ Init failed")")
         return (full, streaming, available)
+        #endif
     }
 
     /// 只构建并返回 ReazonSpeech 日语离线 recognizer (不写 self) — 提交由调用方在 generation guard 后做。
