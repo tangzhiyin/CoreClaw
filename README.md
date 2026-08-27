@@ -65,6 +65,12 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 - Added an immediate, localized explanation that LiteRT local inference requires a physical iPhone.
 - Classified this failure as an unavailable backend so the interface shows the actual cause instead of a generic model-load error.
 
+### Xcode package-resolution repair
+
+- Fixed simultaneous missing-module errors for MLX, WhisperKit, Numerics, Tokenizers, and MarkdownUI caused by corrupted PhoneAI DerivedData.
+- Replaced only the stale PhoneAI build cache and regenerated the Swift Package dependency graph.
+- Restored successful signed Simulator builds in Xcode's normal DerivedData location.
+
 ### Deep-gray visual refresh
 
 - Replaced the previous light porcelain and copper palette with a unified deep-gray color system.
