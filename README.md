@@ -70,6 +70,8 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 - Fixed simultaneous missing-module errors for MLX, WhisperKit, Numerics, Tokenizers, and MarkdownUI caused by corrupted PhoneAI DerivedData.
 - Replaced only the stale PhoneAI build cache and regenerated the Swift Package dependency graph.
 - Restored successful signed Simulator builds in Xcode's normal DerivedData location.
+- Removed the final two Xcode build-phase issues by making the Gemma bundling and private-Skill removal scripts dependency-aware.
+- Added tracked placeholder metadata for the ignored `Models/` directory so incremental builds can detect local model additions without publishing model weights.
 
 ### Deep-gray visual refresh
 

@@ -1045,42 +1045,44 @@
 		};
 		BB2000000000000000000022 /* Bundle Gemma 4 E2B model */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/Models",
 			);
 			name = "Bundle Gemma 4 E2B model";
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/phoneai-bundle-gemma-e2b.stamp",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -euo pipefail\n\nMODEL_NAME=\"gemma-4-E2B-it.litertlm\"\nEXPECTED_SIZE=2588147712\nSOURCE=\"${SRCROOT}/Models/${MODEL_NAME}\"\nDESTINATION=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/${MODEL_NAME}\"\n\n# Keep ordinary Debug builds lightweight. Release archives include the model so\n# a TestFlight installation can run offline without a separate 2.59 GB download.\nif [ \"${CONFIGURATION:-}\" != \"Release\" ]; then\n  rm -f \"${DESTINATION}\"\n  echo \"note: Gemma 4 E2B bundling is enabled for Release builds only\"\n  exit 0\nfi\n\nif [ ! -f \"${SOURCE}\" ]; then\n  rm -f \"${DESTINATION}\"\n  if [ \"${ACTION:-}\" = \"install\" ]; then\n    echo \"error: Release archive requires ${SOURCE}. Download Gemma 4 E2B before archiving.\" >&2\n    exit 1\n  fi\n  echo \"note: Optional bundled Gemma 4 E2B model is unavailable; Release build will use the in-app downloader\"\n  exit 0\nfi\n\nACTUAL_SIZE=$(stat -f '%z' \"${SOURCE}\")\nif [ \"${ACTUAL_SIZE}\" -ne \"${EXPECTED_SIZE}\" ]; then\n  echo \"error: ${SOURCE} has ${ACTUAL_SIZE} bytes; expected ${EXPECTED_SIZE}. Remove the incomplete file and download it again.\" >&2\n  exit 1\nfi\n\nmkdir -p \"$(dirname \"${DESTINATION}\")\"\nif [ ! -f \"${DESTINATION}\" ] || [ \"$(stat -f '%z' \"${DESTINATION}\")\" -ne \"${EXPECTED_SIZE}\" ]; then\n  ditto \"${SOURCE}\" \"${DESTINATION}\"\nfi\necho \"Bundled ${MODEL_NAME} (${ACTUAL_SIZE} bytes)\"\n";
+			shellScript = "set -euo pipefail\n\nMODEL_NAME=\"gemma-4-E2B-it.litertlm\"\nEXPECTED_SIZE=2588147712\nSOURCE=\"${SRCROOT}/Models/${MODEL_NAME}\"\nDESTINATION=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/${MODEL_NAME}\"\nSTAMP=\"${SCRIPT_OUTPUT_FILE_0}\"\nmkdir -p \"$(dirname \"${STAMP}\")\"\n\n# Keep ordinary Debug builds lightweight. Release archives include the model so\n# a TestFlight installation can run offline without a separate 2.59 GB download.\nif [ \"${CONFIGURATION:-}\" != \"Release\" ]; then\n  rm -f \"${DESTINATION}\"\n  echo \"note: Gemma 4 E2B bundling is enabled for Release builds only\"\n  touch \"${STAMP}\"\n  exit 0\nfi\n\nif [ ! -f \"${SOURCE}\" ]; then\n  rm -f \"${DESTINATION}\"\n  if [ \"${ACTION:-}\" = \"install\" ]; then\n    echo \"error: Release archive requires ${SOURCE}. Download Gemma 4 E2B before archiving.\" >&2\n    exit 1\n  fi\n  echo \"note: Optional bundled Gemma 4 E2B model is unavailable; Release build will use the in-app downloader\"\n  touch \"${STAMP}\"\n  exit 0\nfi\n\nACTUAL_SIZE=$(stat -f '%z' \"${SOURCE}\")\nif [ \"${ACTUAL_SIZE}\" -ne \"${EXPECTED_SIZE}\" ]; then\n  echo \"error: ${SOURCE} has ${ACTUAL_SIZE} bytes; expected ${EXPECTED_SIZE}. Remove the incomplete file and download it again.\" >&2\n  exit 1\nfi\n\nmkdir -p \"$(dirname \"${DESTINATION}\")\"\nif [ ! -f \"${DESTINATION}\" ] || [ \"$(stat -f '%z' \"${DESTINATION}\")\" -ne \"${EXPECTED_SIZE}\" ]; then\n  ditto \"${SOURCE}\" \"${DESTINATION}\"\nfi\necho \"Bundled ${MODEL_NAME} (${ACTUAL_SIZE} bytes)\"\ntouch \"${STAMP}\"\n";
 			showEnvVarsInLog = 0;
 		};
 		BB2000000000000000000023 /* Remove private Crisp skill */ = {
 			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/Skills/Library",
 			);
 			name = "Remove private Crisp skill";
 			outputFileListPaths = (
 			);
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/phoneai-remove-private-crisp.stamp",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -euo pipefail\n\nPRIVATE_SKILL=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Library/crisp\"\nif [ -e \"${PRIVATE_SKILL}\" ]; then\n  rm -rf \"${PRIVATE_SKILL}\"\n  echo \"Removed private Crisp skill from the app bundle\"\nfi\n";
+			shellScript = "set -euo pipefail\n\nPRIVATE_SKILL=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Library/crisp\"\nSTAMP=\"${SCRIPT_OUTPUT_FILE_0}\"\nmkdir -p \"$(dirname \"${STAMP}\")\"\nif [ -e \"${PRIVATE_SKILL}\" ]; then\n  rm -rf \"${PRIVATE_SKILL}\"\n  echo \"Removed private Crisp skill from the app bundle\"\nfi\ntouch \"${STAMP}\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */

@@ -2,7 +2,8 @@
 # 仅忽略仓库根的 /Models/ 权重目录, 前导斜杠必须, 否则会意外
 # 把 Packages/InferenceKit/Libraries/MLXLLM/Models/ 这类 Swift 源码目录
 # 也 ignore 掉 (fresh clone 编译不过, 见 issue #7)
-/Models/
+/Models/*
+!/Models/.gitkeep
 *.litertlm
 *.litertlm.xnnpack_cache
 *.safetensors
