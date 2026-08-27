@@ -72,6 +72,8 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 - Restored successful signed Simulator builds in Xcode's normal DerivedData location.
 - Removed the final two Xcode build-phase issues by making the Gemma bundling and private-Skill removal scripts dependency-aware.
 - Added tracked placeholder metadata for the ignored `Models/` directory so incremental builds can detect local model additions without publishing model weights.
+- Recovered a stuck Xcode PIF transfer session that caused both Clean and Build to fail before target compilation.
+- Restarted the PhoneAI build service session and confirmed a complete Clean followed by a signed Simulator Build.
 
 ### Deep-gray visual refresh
 
