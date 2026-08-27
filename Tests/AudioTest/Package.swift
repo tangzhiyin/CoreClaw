@@ -2,7 +2,7 @@
 import PackageDescription
 
 // AudioTest — 独立的 Mac CLI, 验证 Gemma 4 MLX 模型的音频处理能力。
-// 不依赖 PhoneClawCLI / AgentEngine / LiteRT (iOS-only), 用最短路径跑:
+// 不依赖 PhoneAICLI / AgentEngine / LiteRT (iOS-only), 用最短路径跑:
 //   audio.mp3 → AVAudioFile decode → UserInput.Audio.pcm → MLXVLM → 输出
 
 let package = Package(

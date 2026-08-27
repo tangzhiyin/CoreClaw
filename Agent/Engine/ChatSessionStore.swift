@@ -50,7 +50,7 @@ final class ChatSessionStore {
     private let sessionsIndexFileName = "sessions_index.json"
     private let saveDebounceInterval: TimeInterval = 0.35
     private let maxPendingSaveInterval: TimeInterval = 3.0
-    static let currentSessionDefaultsKey = "PhoneClaw.currentSessionID"
+    static let currentSessionDefaultsKey = "PhoneAI.currentSessionID"
 
     // MARK: - Init
 
@@ -352,7 +352,7 @@ final class ChatSessionStore {
 
     private func sessionsDirectoryURL() -> URL {
         let supportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let appDir = supportDir.appendingPathComponent("PhoneClaw", isDirectory: true)
+        let appDir = supportDir.appendingPathComponent("PhoneAI", isDirectory: true)
         return appDir.appendingPathComponent(sessionsDirectoryName, isDirectory: true)
     }
 }

@@ -310,7 +310,7 @@ final class LiveLandVoiceRuntime {
         setTranscript(transcript)
 
         guard let agentEngine else {
-            let message = "LiveLand 尚未连接到 PhoneClaw Agent。"
+            let message = "LiveLand 尚未连接到 PhoneAI Agent。"
             await showFinalResult(message, success: false, status: message)
             phase = .listening
             scheduleListeningRefresh(after: generation, delay: Self.resultDwell)

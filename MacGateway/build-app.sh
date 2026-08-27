@@ -1,6 +1,6 @@
 #!/bin/bash
-# 把 SwiftPM 可执行打成 PhoneClawGateway.app —— 带 Info.plist (Local Network/Bonjour 权限 + 主窗口 + 菜单栏)。
-# 用法: bash build-app.sh   然后 open PhoneClawGateway.app
+# 把 SwiftPM 可执行打成 PhoneAIGateway.app —— 带 Info.plist (Local Network/Bonjour 权限 + 主窗口 + 菜单栏)。
+# 用法: bash build-app.sh   然后 open PhoneAIGateway.app
 set -e
 cd "$(dirname "$0")"
 
@@ -12,12 +12,12 @@ if [ ! -f "Assets/AppIcon.icns" ] || [ "Assets/MacAppIcon-1024.png" -nt "Assets/
   python3 "Assets/generate_mac_icon.py"
 fi
 
-APP="PhoneClawGateway.app"
+APP="PhoneAIGateway.app"
 echo "[2/4] 组装 $APP …"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS"
 mkdir -p "$APP/Contents/Resources"
-cp ".build/release/PhoneClawGateway" "$APP/Contents/MacOS/PhoneClawGateway"
+cp ".build/release/PhoneAIGateway" "$APP/Contents/MacOS/PhoneAIGateway"
 cp "Info.plist" "$APP/Contents/Info.plist"
 cp "Assets/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 copied_resource_bundle=0

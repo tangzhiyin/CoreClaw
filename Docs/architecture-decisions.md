@@ -1,4 +1,4 @@
-# PhoneClaw Architecture Decision Records (ADR)
+# PhoneAI Architecture Decision Records (ADR)
 
 > 日期：2026-04-07
 > 上下文：五轮交叉评审（对比 OpenClaw / Claude Skills / Vera），确认端侧小模型推理的架构边界。
@@ -101,7 +101,7 @@
 - 每次推理从头构建完整 KV cache，prompt 前缀稳定性不影响延迟
 - 任何"缓存友好 prompt 重构"需先实现实际的 prefix caching
 
-**重评条件**：PhoneClaw 实现跨请求 KV cache 持久化 + 前缀匹配。
+**重评条件**：PhoneAI 实现跨请求 KV cache 持久化 + 前缀匹配。
 
 ---
 

@@ -1,6 +1,6 @@
 import Foundation
 
-// MARK: - PhoneClaw L10n String Namespace
+// MARK: - PhoneAI L10n String Namespace
 //
 // 所有 UI 文案都走这个 typed namespace, 不再在 View 里散写 `tr("中文", "English")`。
 //

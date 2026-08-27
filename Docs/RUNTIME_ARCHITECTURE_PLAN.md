@@ -1,4 +1,4 @@
-# PhoneClaw 运行时架构收敛方案 v2
+# PhoneAI 运行时架构收敛方案 v2
 
 > 目标：不换框架，做一次运行时架构收敛。把散落在 AgentEngine / LiteRTBackend /
 > BackendDispatcher / LiteRTModelStore 里的隐式状态流转，收敛成可预测、可测试、
@@ -17,7 +17,7 @@ Phase 1-6 + 二轮 review 修复完成后,plan 与代码的对照:
 
 | Plan 章节 | 状态 | 备注 |
 |---|---|---|
-| §3.2 LiteRTBootstrap | ✅ 完整 | `LLM/Core/LiteRTBootstrap.swift` + PhoneClawApp.init 第一行;Mac CLI 路径 `#if canImport(PhoneClawEngine)` 守护 |
+| §3.2 LiteRTBootstrap | ✅ 完整 | `LLM/Core/LiteRTBootstrap.swift` + PhoneAIApp.init 第一行;Mac CLI 路径 `#if canImport(PhoneAIEngine)` 守护 |
 | §3.2 RuntimeSessionState | ✅ 完整 | 含 LoadPhase / BackendSwitch / RuntimeError 全部 case;9 个 unit test 覆盖转移白名单 |
 | §3.2 GenerationTransaction | ✅ 加强 | 加 `didBeginStreaming` 修正 cancel-before-stream 路径;13 个 unit test 覆盖状态机 + await termination |
 | §3.2 ModelRuntimeCoordinator | ✅ 完整 | load / switchBackend / beginGeneration / cancel / unload / recover |
@@ -164,7 +164,7 @@ AgentEngine: **2071 → 237 行** (88.5% 削减,远超 plan §九 Phase 5 的 < 
 │  Engine Layer (需要接口演进，内部实现基本不变)                  │
 │  InferenceService (补 async unload / 结构化错误)              │
 │  BackendDispatcher / LiteRTBackend / MiniCPMVBackend          │
-│  PhoneClawEngine (C wrapper)                                  │
+│  PhoneAIEngine (C wrapper)                                  │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -214,7 +214,7 @@ enum LiteRTBootstrap {
 
 // 调用点 — 必须是最早的同步初始化
 @main
-struct PhoneClawApp: App {
+struct PhoneAIApp: App {
     init() {
         LiteRTBootstrap.bootstrap()  // ← 第一行，早于一切
         PCLog.suppressRuntimeNoise()
@@ -778,7 +778,7 @@ switchBackend("gpu")
 
 ```swift
 @main
-struct PhoneClawApp: App {
+struct PhoneAIApp: App {
     init() {
         // ▸ 第一行：LiteRT 进程级初始化（同步，必须在任何 engine_create 之前）
         // bootstrap() 内部已处理: PCLog.suppressRuntimeNoise() + GPU accelerator preload
@@ -1014,8 +1014,8 @@ exit $ERRORS
 
 做的事：
   - 新建 LiteRTBootstrap enum
-  - 从 PhoneClawEngine.swift 的 _preloadGpuAcceleratorOnce 挪到 Bootstrap
-  - PhoneClawApp.init() 第一行调 LiteRTBootstrap.bootstrap()
+  - 从 PhoneAIEngine.swift 的 _preloadGpuAcceleratorOnce 挪到 Bootstrap
+  - PhoneAIApp.init() 第一行调 LiteRTBootstrap.bootstrap()
   - LiteRTBackend.load() 入口加 assert(LiteRTBootstrap.isBootstrapped)
   - 加诊断日志确认 bootstrap 时间戳
 
@@ -1102,7 +1102,7 @@ exit $ERRORS
 
 ## 十、App Store Connect 合规约束
 
-> 这些规则是架构约束，不是打包阶段临时修。PhoneClaw 已经踩过裸 dylib 拒包、
+> 这些规则是架构约束，不是打包阶段临时修。PhoneAI 已经踩过裸 dylib 拒包、
 > framework 内嵌 dylib、MinimumOSVersion 不一致、Missing Compliance 等问题。
 > 后续所有 runtime / framework / model 打包方案都必须默认满足以下规则。
 
@@ -1115,7 +1115,7 @@ exit $ERRORS
 | F3 | framework binary 名必须和 framework 目录名匹配，如 `LiteRtMetalAccelerator.framework/LiteRtMetalAccelerator` | 签名校验失败 |
 | F4 | 每个 embedded framework 必须有正确 `Info.plist`：`CFBundleExecutable` 匹配 binary 名、`CFBundlePackageType=FMWK`、`MinimumOSVersion` | 拒包 |
 | F5 | nested framework 的 `MinimumOSVersion` 不能低于主 App 的最低系统版本 | 拒包 / 审核警告 |
-| F6 | 不要手动塞 `libswift*.dylib` 到 `Payload/PhoneClaw.app/Frameworks/`。Swift runtime / SwiftSupport 交给 Xcode archive/export 处理 | 签名冲突 / 拒包 |
+| F6 | 不要手动塞 `libswift*.dylib` 到 `Payload/PhoneAI.app/Frameworks/`。Swift runtime / SwiftSupport 交给 Xcode archive/export 处理 | 签名冲突 / 拒包 |
 | F7 | 不要对 Swift runtime dylib 重新签名 | 签名无效 |
 | F8 | `otool -L` 不能出现无法在 app bundle 中解析的 `@rpath/libLiteRt*.dylib` hard-link。主 app 不能 hard-link 到不存在的裸 dylib | 启动崩溃 / 拒包 |
 | F9 | 可以保留 framework binary 的 install name 用于 runtime `dlopen` 兼容，但主 app 不能静态链接到它 | 运行时 OK，链接期约束 |
@@ -1203,7 +1203,7 @@ func install(model: ModelDescriptor) async throws {
 | BackendDispatcher | **演进** | 转发 `unloadAsync()`，被 Coordinator 管理生命周期 |
 | LiteRTBackend 内部实现 | 基本保持 | `load()` / `generate()` 不变，`unload()` 补 async 版本 |
 | MiniCPMVBackend | 保持 | 后续按需补 `unloadAsync()` 真实实现 |
-| PhoneClawEngine (C wrapper) | 保持 | `destroySynchronously()` 已够用 |
+| PhoneAIEngine (C wrapper) | 保持 | `destroySynchronously()` 已够用 |
 | ResumableAssetDownloader | 保持 | 断点续传逻辑已验证 |
 | Router / Planner / ToolChain | 保持 | 直接挪到 AgentOrchestrator 下 |
 | streamWithBatchedCallbacks | 保持 | 流式刷新策略合理 |

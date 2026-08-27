@@ -5,7 +5,7 @@ import UIKit
 import AppKit
 #endif
 
-// MARK: - PhoneClaw 设计系统(瓷器风,v2)
+// MARK: - PhoneAI 设计系统(瓷器风,v2)
 // 跨平台共享:macOS + iOS
 //
 // v2 配色锚点:

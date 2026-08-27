@@ -4,7 +4,7 @@ enum LiveLaunchRoute: Equatable {
     case liveLand
     case voice
 
-    static let scheme = "phoneclaw"
+    static let scheme = "phoneai"
 
     static var liveLandURL: URL {
         URL(string: "\(scheme)://liveland")!
@@ -33,8 +33,8 @@ enum LiveLaunchRoute: Equatable {
 }
 
 enum LiveLaunchRequestStore {
-    private static let pendingLiveLandLaunchKey = "phoneclaw.pendingLiveLandLaunch"
-    private static let pendingVoiceLaunchKey = "phoneclaw.pendingLiveVoiceLaunch"
+    private static let pendingLiveLandLaunchKey = "phoneai.pendingLiveLandLaunch"
+    private static let pendingVoiceLaunchKey = "phoneai.pendingLiveVoiceLaunch"
 
     static func requestLiveLandLaunch() {
         UserDefaults.standard.set(true, forKey: pendingLiveLandLaunchKey)

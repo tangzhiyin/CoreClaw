@@ -41,7 +41,7 @@ public enum KVReuseBenchmark {
 //
 // Gemma 4 E4B re-prefills the entire prompt every generateStream call, which at
 // Phase 2 skill-expanded prompt size (~400 tok system + turn history) costs
-// ~200ms TTFT per turn. Python probe (phoneclaw_probe/kv_reuse_multi.py) measured
+// ~200ms TTFT per turn. Python probe (phoneai_probe/kv_reuse_multi.py) measured
 // a 1.9x speedup (355ms → 182ms) by holding one KVCache across turns and only
 // prefilling the delta since the last call.
 //

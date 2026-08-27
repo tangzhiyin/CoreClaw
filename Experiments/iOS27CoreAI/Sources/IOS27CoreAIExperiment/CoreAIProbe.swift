@@ -33,12 +33,12 @@ public struct CoreAIProbeResult: Codable, Equatable, Sendable {
 }
 
 public struct CoreAIProbe: Sendable {
-    public static let betaFlag = "PHONECLAW_IOS27_BETA_SDK"
+    public static let betaFlag = "PHONEAI_IOS27_BETA_SDK"
 
     public init() {}
 
     public func availability() -> PlanningModelAvailability {
-        #if canImport(CoreAI) && PHONECLAW_IOS27_BETA_SDK
+        #if canImport(CoreAI) && PHONEAI_IOS27_BETA_SDK
         if #available(iOS 27.0, macOS 27.0, *) {
             return .available
         } else {
@@ -50,7 +50,7 @@ public struct CoreAIProbe: Sendable {
     }
 
     public func inspectModel(at modelURL: URL) async throws -> CoreAIProbeResult {
-        #if canImport(CoreAI) && PHONECLAW_IOS27_BETA_SDK
+        #if canImport(CoreAI) && PHONEAI_IOS27_BETA_SDK
         if #available(iOS 27.0, macOS 27.0, *) {
             return try await inspectModelWithCoreAI(at: modelURL)
         }
@@ -73,7 +73,7 @@ public struct CoreAIProbe: Sendable {
     }
 }
 
-#if canImport(CoreAI) && PHONECLAW_IOS27_BETA_SDK
+#if canImport(CoreAI) && PHONEAI_IOS27_BETA_SDK
 import CoreAI
 
 @available(iOS 27.0, macOS 27.0, *)

@@ -498,7 +498,7 @@ class TTSService {
         var s = text
         let brandPatterns = [
             #"(?i)\bPhone\s*Claw\b"#,
-            #"(?i)\bPhoneClaw\b"#,
+            #"(?i)\bPhoneAI\b"#,
         ]
         for pattern in brandPatterns {
             s = s.replacingOccurrences(

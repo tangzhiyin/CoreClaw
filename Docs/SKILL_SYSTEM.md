@@ -1,6 +1,6 @@
-# PhoneClaw Skill System
+# PhoneAI Skill System
 
-PhoneClaw uses a file-driven Skill system. Each capability is described by a `SKILL.md` file and backed by native tool implementations when device access is required.
+PhoneAI uses a file-driven Skill system. Each capability is described by a `SKILL.md` file and backed by native tool implementations when device access is required.
 
 This lets the app grow new abilities without turning the system prompt into one large, fragile block.
 
@@ -36,7 +36,7 @@ Use calendar-query-events before answering schedule questions.
 
 ## Skill types
 
-PhoneClaw separates Skills by behavior and privacy boundary.
+PhoneAI separates Skills by behavior and privacy boundary.
 
 | Type | Meaning | Examples |
 |------|---------|----------|
@@ -52,7 +52,7 @@ Every tool-capable Skill declares `allowed-tools`. The model can only use the to
 
 This prevents a prompt-only Skill from silently gaining access to unrelated device capabilities.
 
-Skills with a larger instruction body may also declare `compact-instructions`. PhoneClaw uses this concise fallback together with the tool schema when device memory is tight, preserving essential behavior without injecting the full body.
+Skills with a larger instruction body may also declare `compact-instructions`. PhoneAI uses this concise fallback together with the tool schema when device memory is tight, preserving essential behavior without injecting the full body.
 
 Examples:
 
@@ -95,7 +95,6 @@ Current built-in Skills include:
 - Translate
 - Health
 - Web Search
-- Crisp (Outlook, Exchange, Microsoft Graph, computer installation, and mobile troubleshooting)
 
 ## Future directions
 

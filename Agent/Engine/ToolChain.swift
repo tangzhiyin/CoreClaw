@@ -618,7 +618,7 @@ extension AgentEngine {
 
     func priorToolRequest(from artifact: RecentContextArtifact) -> (toolName: String, arguments: [String: Any])? {
         guard let payload = parseJSONObject(artifact.detail),
-              let request = payload["phoneclaw_tool_request"] as? [String: Any],
+              let request = payload["phoneai_tool_request"] as? [String: Any],
               let toolName = request["tool"] as? String,
               !toolName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               let arguments = request["arguments"] as? [String: Any] else {
@@ -686,7 +686,7 @@ extension AgentEngine {
               var payload = parseJSONObject(detail) else {
             return detail
         }
-        payload["phoneclaw_tool_request"] = [
+        payload["phoneai_tool_request"] = [
             "tool": toolName,
             "arguments": arguments
         ]

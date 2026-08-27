@@ -1,6 +1,6 @@
 # Black-box User Task Test Matrix
 
-This document defines PhoneClaw's black-box test coverage from the user's point
+This document defines PhoneAI's black-box test coverage from the user's point
 of view. It intentionally does not start from built-in skills or tool names.
 
 The test author should behave as if they do not know what capabilities exist.
@@ -71,7 +71,7 @@ repeatable:
   - Sleep last night
   - Recent heart rate / workout fixture
 - Clipboard:
-  - Initial text: `hello phoneclaw`
+  - Initial text: `hello phoneai`
 
 ## Tier 0: Critical User Tasks
 
@@ -188,7 +188,7 @@ These must run in every E2B smoke pass.
 | ID | User text | Expected outcome |
 |---|---|---|
 | CLP-001 | 读一下剪贴板 | `execute_read`; grounded clipboard content |
-| CLP-002 | 把 hello phoneclaw 复制到剪贴板 | `execute_write`; explicit content |
+| CLP-002 | 把 hello phoneai 复制到剪贴板 | `execute_write`; explicit content |
 | CLP-003 | 复制一下 | `ask_clarification`; missing content |
 | CLP-004 | 把刚才那句话复制一下 | Multi-turn coreference; execute only if prior content exists |
 | CLP-005 | 剪贴板里是什么, 顺便翻译成中文 | chained read + answer; no hallucination |

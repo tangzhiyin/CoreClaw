@@ -4,16 +4,16 @@
 <dict>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>com.crisp.phoneclaw.liveland-continuation</string>
+		<string>com.crisp.phoneai.liveland-continuation</string>
 	</array>
 	<key>CFBundleDisplayName</key>
-	<string>PhoneClaw</string>
+	<string>PhoneAI</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleName</key>
-	<string>PhoneClaw</string>
+	<string>PhoneAI</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -22,10 +22,10 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.crisp.phoneclaw</string>
+			<string>com.crisp.phoneai</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>phoneclaw</string>
+				<string>phoneai</string>
 			</array>
 		</dict>
 	</array>
@@ -39,30 +39,30 @@
 	<true/>
 	<key>NSBonjourServices</key>
 	<array>
-		<string>_phoneclaw-llm._tcp</string>
+		<string>_phoneai-llm._tcp</string>
 	</array>
 	<key>NSCalendarsFullAccessUsageDescription</key>
-	<string>PhoneClaw reads calendar events only when you ask for schedule summaries, availability checks, or local planning analysis.</string>
+	<string>PhoneAI reads calendar events only when you ask for schedule summaries, availability checks, or local planning analysis.</string>
 	<key>NSCalendarsUsageDescription</key>
-	<string>PhoneClaw uses Calendar access to create events and read schedules only when you ask for local planning analysis.</string>
+	<string>PhoneAI uses Calendar access to create events and read schedules only when you ask for local planning analysis.</string>
 	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
-	<string>PhoneClaw needs to create calendar events</string>
+	<string>PhoneAI needs to create calendar events</string>
 	<key>NSCameraUsageDescription</key>
-	<string>PhoneClaw uses the camera in LIVE mode to perceive your surroundings</string>
+	<string>PhoneAI uses the camera in LIVE mode to perceive your surroundings</string>
 	<key>NSContactsUsageDescription</key>
-	<string>PhoneClaw needs to store contact information</string>
+	<string>PhoneAI needs to store contact information</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>PhoneClaw reads Health data (steps, distance, active energy, heart rate, sleep, workouts, weight, and HRV) locally to generate summaries and insights. Nothing leaves your device.</string>
+	<string>PhoneAI reads Health data (steps, distance, active energy, heart rate, sleep, workouts, weight, and HRV) locally to generate summaries and insights. Nothing leaves your device.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>PhoneClaw does not write Health data. This permission description is included because HealthKit access requires a write-purpose string for App Store validation.</string>
+	<string>PhoneAI does not write Health data. This permission description is included because HealthKit access requires a write-purpose string for App Store validation.</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>PhoneClaw 在局域网内发现并连接你的 Mac,把推理交给 Mac 上更强的大模型运行。</string>
+	<string>PhoneAI 在局域网内发现并连接你的 Mac,把推理交给 Mac 上更强的大模型运行。</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>PhoneClaw uses the microphone for LIVE voice conversations, including an active LIVE session that can continue while the app is in the background.</string>
+	<string>PhoneAI uses the microphone for LIVE voice conversations, including an active LIVE session that can continue while the app is in the background.</string>
 	<key>NSRemindersFullAccessUsageDescription</key>
-	<string>PhoneClaw needs Reminders access to create reminders</string>
+	<string>PhoneAI needs Reminders access to create reminders</string>
 	<key>NSRemindersUsageDescription</key>
-	<string>PhoneClaw needs access to Reminders</string>
+	<string>PhoneAI needs access to Reminders</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UIBackgroundModes</key>

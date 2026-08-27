@@ -97,8 +97,8 @@ extension AgentEngine {
         guard !config.enableThinking else { return text }
 
         var result = text
-        result = result.replacingOccurrences(of: "[[/PHONECLAW_THINK]]", with: "")
-        result = result.replacingOccurrences(of: "[[PHONECLAW_THINK]]", with: "")
+        result = result.replacingOccurrences(of: "[[/PHONEAI_THINK]]", with: "")
+        result = result.replacingOccurrences(of: "[[PHONEAI_THINK]]", with: "")
         result = result.replacingOccurrences(
             of: #"(?im)^\s*Thinking Process:\s*\n*"#,
             with: "",

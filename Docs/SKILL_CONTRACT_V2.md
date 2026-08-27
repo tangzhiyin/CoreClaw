@@ -76,7 +76,7 @@ prompts:
 
 ## Activation Policy
 
-Apple's Foundation Models utilities distinguish prompt-based skill activation from instructions-based activation. PhoneClaw should mirror that distinction without coupling the contract to one OS version:
+Apple's Foundation Models utilities distinguish prompt-based skill activation from instructions-based activation. PhoneAI should mirror that distinction without coupling the contract to one OS version:
 
 | Mode | Use when | Runtime behavior |
 |------|----------|------------------|

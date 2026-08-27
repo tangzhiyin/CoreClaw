@@ -76,9 +76,9 @@ private func create<C: Codable, P>(
 /// Registry of VLM model type, e.g 'paligemma', to functions that can instantiate the model
 /// from configuration.
 ///
-/// NOTE: Slimmed to Gemma multimodal family (paligemma + gemma3) only for PhoneClaw.
+/// NOTE: Slimmed to Gemma multimodal family (paligemma + gemma3) only for PhoneAI.
 /// Upstream mlx-swift-lm registers many VLM types (Qwen2-VL, Qwen3-VL, Idefics3, SmolVLM,
-/// FastVLM, Pixtral, Mistral3, LFM2-VL, GlmOcr, ...). PhoneClaw uses Gemma 4 multimodal
+/// FastVLM, Pixtral, Mistral3, LFM2-VL, GlmOcr, ...). PhoneAI uses Gemma 4 multimodal
 /// exclusively via a custom implementation in `LLM/MLX/Gemma4/Gemma4Model.swift` which
 /// registers itself into this shared registry at runtime via
 /// `VLMTypeRegistry.shared.registerModelType("gemma4", ...)`.
@@ -94,7 +94,7 @@ public enum VLMTypeRegistry {
 public enum VLMProcessorTypeRegistry {
 
     /// Shared instance with default processor types.
-    /// Slimmed to match `VLMTypeRegistry` — PhoneClaw registers `Gemma4Processor` at runtime.
+    /// Slimmed to match `VLMTypeRegistry` — PhoneAI registers `Gemma4Processor` at runtime.
     public static let shared: ProcessorTypeRegistry = .init(creators: [
         "PaliGemmaProcessor": create(
             PaliGemmaProcessorConfiguration.self, PaliGemmaProcessor.init),
@@ -106,7 +106,7 @@ public enum VLMProcessorTypeRegistry {
 /// Registry of models and any overrides that go with them, e.g. prompt augmentation.
 /// If asked for an unknown configuration this will use the model/tokenizer as-is.
 ///
-/// NOTE: Slimmed to Gemma multimodal family only for PhoneClaw. See `VLMTypeRegistry` above.
+/// NOTE: Slimmed to Gemma multimodal family only for PhoneAI. See `VLMTypeRegistry` above.
 public class VLMRegistry: AbstractModelRegistry, @unchecked Sendable {
 
     /// Shared instance with default model configurations.

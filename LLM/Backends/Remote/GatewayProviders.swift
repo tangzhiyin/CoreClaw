@@ -605,7 +605,7 @@ struct LocalCLIProvider: GatewayProvider {
 
     private static func runCodex(_ path: String, prompt: String, model: String) throws -> String {
         let outputURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("phoneclaw-codex-\(UUID().uuidString).txt")
+            .appendingPathComponent("phoneai-codex-\(UUID().uuidString).txt")
         defer { try? FileManager.default.removeItem(at: outputURL) }
 
         let cleanModel = model.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -647,7 +647,7 @@ struct LocalCLIProvider: GatewayProvider {
         onText: @Sendable @escaping (String) -> Void
     ) throws -> String {
         let outputURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("phoneclaw-codex-\(UUID().uuidString).txt")
+            .appendingPathComponent("phoneai-codex-\(UUID().uuidString).txt")
         defer { try? FileManager.default.removeItem(at: outputURL) }
 
         let cleanModel = model.trimmingCharacters(in: .whitespacesAndNewlines)

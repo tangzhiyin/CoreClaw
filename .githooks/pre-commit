@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# PhoneClaw pre-commit hook — harness 守门 + skill i18n sync 守门
+# PhoneAI pre-commit hook — harness 守门 + skill i18n sync 守门
 #
 # 两个检查独立:
 #   1. Skill bilingual sync (总是跑, 不吃 HARNESS skip)
-#      跳过: PHONECLAW_SKIP_SKILL_SYNC=1 git commit ...
+#      跳过: PHONEAI_SKIP_SKILL_SYNC=1 git commit ...
 #   2. CLI harness (仅当 staged 文件触碰 agent/skill/prompt/router 时跑
 #      E2B + E4B 两个模型全绿)
-#      跳过: PHONECLAW_SKIP_HARNESS=1 git commit ...
+#      跳过: PHONEAI_SKIP_HARNESS=1 git commit ...
 #
 # 任一拒绝就拒 commit。`git commit --no-verify` 跳所有 (慎用).
 #
@@ -29,8 +29,8 @@ fi
 
 # ── 2. Harness 检查 ───────────────────────────────────────────────
 # 快速出口: 手动跳过 harness 只
-if [[ -n "${PHONECLAW_SKIP_HARNESS:-}" ]]; then
-    echo "[pre-commit] PHONECLAW_SKIP_HARNESS set — harness 跳过"
+if [[ -n "${PHONEAI_SKIP_HARNESS:-}" ]]; then
+    echo "[pre-commit] PHONEAI_SKIP_HARNESS set — harness 跳过"
     exit 0
 fi
 
@@ -40,8 +40,8 @@ GUARDED_PATHS=(
     "LLM/"
     "Skills/Library/"
     "Tools/"
-    "PhoneClawCLI/Sources/"
-    "PhoneClawCLI/Scenarios/"
+    "PhoneAICLI/Sources/"
+    "PhoneAICLI/Scenarios/"
 )
 
 STAGED=$(git diff --cached --name-only --diff-filter=ACMR)
@@ -62,15 +62,15 @@ fi
 echo "[pre-commit] 触发 harness (守门路径: $MATCHED)"
 
 REPO_ROOT=$(git rev-parse --show-toplevel)
-cd "$REPO_ROOT/PhoneClawCLI"
+cd "$REPO_ROOT/PhoneAICLI"
 
 # 跑两个 .litertlm 模型 — E2B 是默认部署模型, E4B 是升级选项, 任何一个红就拒绝。
 # CLI 守门必须跟 iOS 设备运行时一致走 LiteRT, 不能回落到旧 MLX 目录模型。
 FAILED_MODELS=()
 for M in e2b e4b; do
-    LOG="/tmp/phoneclaw-precommit-${M}.log"
+    LOG="/tmp/phoneai-precommit-${M}.log"
     echo "[pre-commit] 跑 ${M} (.litertlm/LiteRT) ..."
-    if ! PHONECLAW_LITERT=1 ./run.sh test "${M}" > "${LOG}" 2>&1; then
+    if ! PHONEAI_LITERT=1 ./run.sh test "${M}" > "${LOG}" 2>&1; then
         echo "❌ ${M} harness 运行失败 (build 挂了?):"
         tail -20 "${LOG}"
         FAILED_MODELS+=("${M}")
@@ -88,8 +88,8 @@ done
 if [[ ${#FAILED_MODELS[@]} -gt 0 ]]; then
     echo ""
     echo "❌ 以下模型失败: ${FAILED_MODELS[*]}"
-    echo "日志: /tmp/phoneclaw-precommit-{e2b,e4b}.log"
-    echo "紧急跳过: PHONECLAW_SKIP_HARNESS=1 git commit ..."
+    echo "日志: /tmp/phoneai-precommit-{e2b,e4b}.log"
+    echo "紧急跳过: PHONEAI_SKIP_HARNESS=1 git commit ..."
     exit 1
 fi
 

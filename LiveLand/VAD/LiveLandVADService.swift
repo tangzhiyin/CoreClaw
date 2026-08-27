@@ -72,7 +72,7 @@ class LiveLandVADService {
     private let chunkSize = VadManager.chunkSize
 
     /// 串行队列保护 pendingSamples, 避免 audio tap 并发竞争
-    private let processingQueue = DispatchQueue(label: "com.phoneclaw.vad.processing")
+    private let processingQueue = DispatchQueue(label: "com.phoneai.vad.processing")
 
     /// Serial chunk pipeline — replaces per-chunk Task spawning
     private var chunkContinuation: AsyncStream<[Float]>.Continuation?

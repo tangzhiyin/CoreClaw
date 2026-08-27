@@ -1,6 +1,6 @@
 import Foundation
-#if canImport(PhoneClawEngine)
-import PhoneClawEngine
+#if canImport(PhoneAIEngine)
+import PhoneAIEngine
 #endif
 
 // MARK: - LiteRTBootstrap
@@ -22,7 +22,7 @@ import PhoneClawEngine
 //   - 幂等 — 内部 dispatch_once，多次调用安全
 //
 // 调用方:
-//   PhoneClawApp.init()  →  LiteRTBootstrap.bootstrap()  (第一行)
+//   PhoneAIApp.init()  →  LiteRTBootstrap.bootstrap()  (第一行)
 //
 // 不做的事:
 //   - 不创建任何 engine（那是 LiteRTBackend.load() 的职责）
@@ -59,7 +59,7 @@ enum LiteRTBootstrap {
         //    This dlopen registers the Metal backend into LiteRT's singleton
         //    Environment before any engine_create can seal it.
         //    CLI/Mac harness skips this — uses MLX, never calls LiteRT.
-        #if canImport(PhoneClawEngine)
+        #if canImport(PhoneAIEngine)
         LiteRTRuntime.preloadGpuAccelerator()
         #endif
 
@@ -67,7 +67,7 @@ enum LiteRTBootstrap {
         bootstrapTimestamp = CFAbsoluteTimeGetCurrent()
         isBootstrapped = true
 
-        #if canImport(PhoneClawEngine)
+        #if canImport(PhoneAIEngine)
         PCLog.event("litert_bootstrap",
                     detail: "gpu_preloaded=\(LiteRTRuntime.isGpuAcceleratorPreloaded) elapsed_ms=\(String(format: "%.1f", (bootstrapTimestamp - LiteRTRuntime.preloadTimestamp) * 1000))")
         #else

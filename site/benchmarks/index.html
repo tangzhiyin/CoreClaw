@@ -3,21 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PhoneClaw on-device footprints - Gemma 4 on iPhone (LiteRT)</title>
+<title>PhoneAI on-device footprints - Gemma 4 on iPhone (LiteRT)</title>
 <meta name="description" content="Measured on-device memory footprints and documented device requirements for running Gemma 4 E2B / E4B via LiteRT and MiniCPM-V 4.6 on iPhone: peak resident memory, image-input overhead, LIVE mode peak, download sizes, and backend caveats.">
 <meta name="robots" content="index,follow,max-image-preview:large">
-<link rel="canonical" href="https://tangzhiyin.github.io/PhoneClaw_Crisp/benchmarks/">
+<link rel="canonical" href="https://tangzhiyin.github.io/PhoneAI/benchmarks/">
 
 <meta property="og:type" content="article">
-<meta property="og:site_name" content="PhoneClaw">
-<meta property="og:title" content="PhoneClaw on-device footprints - Gemma 4 on iPhone (LiteRT)">
+<meta property="og:site_name" content="PhoneAI">
+<meta property="og:title" content="PhoneAI on-device footprints - Gemma 4 on iPhone (LiteRT)">
 <meta property="og:description" content="Measured memory footprints and documented device requirements for Gemma 4 E2B / E4B via LiteRT and MiniCPM-V 4.6 on iPhone. Every figure lists its source and measurement date.">
-<meta property="og:url" content="https://tangzhiyin.github.io/PhoneClaw_Crisp/benchmarks/">
-<meta property="og:image" content="https://tangzhiyin.github.io/PhoneClaw_Crisp/assets/social-card.png">
+<meta property="og:url" content="https://tangzhiyin.github.io/PhoneAI/benchmarks/">
+<meta property="og:image" content="https://tangzhiyin.github.io/PhoneAI/assets/social-card.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="PhoneClaw on-device footprints - Gemma 4 on iPhone (LiteRT)">
+<meta name="twitter:title" content="PhoneAI on-device footprints - Gemma 4 on iPhone (LiteRT)">
 <meta name="twitter:description" content="Measured memory footprints and documented device requirements for on-device Gemma 4 on iPhone.">
-<meta name="twitter:image" content="https://tangzhiyin.github.io/PhoneClaw_Crisp/assets/social-card.png">
+<meta name="twitter:image" content="https://tangzhiyin.github.io/PhoneAI/assets/social-card.png">
 
 <link rel="icon" href="../assets/app-icon.png">
 <link rel="stylesheet" href="../assets/style.css">
@@ -27,30 +27,30 @@
   "@graph": [
     {
       "@type": "TechArticle",
-      "@id": "https://tangzhiyin.github.io/PhoneClaw_Crisp/benchmarks/#article",
-      "headline": "PhoneClaw on-device footprints - Gemma 4 on iPhone (LiteRT)",
+      "@id": "https://tangzhiyin.github.io/PhoneAI/benchmarks/#article",
+      "headline": "PhoneAI on-device footprints - Gemma 4 on iPhone (LiteRT)",
       "description": "Measured on-device memory footprints and documented device requirements for running Gemma 4 E2B / E4B via LiteRT and MiniCPM-V 4.6 on iPhone.",
-      "url": "https://tangzhiyin.github.io/PhoneClaw_Crisp/benchmarks/",
-      "image": "https://tangzhiyin.github.io/PhoneClaw_Crisp/assets/social-card.png",
+      "url": "https://tangzhiyin.github.io/PhoneAI/benchmarks/",
+      "image": "https://tangzhiyin.github.io/PhoneAI/assets/social-card.png",
       "datePublished": "2026-08-06",
       "dateModified": "2026-08-06",
       "author": {
         "@type": "Organization",
-        "@id": "https://tangzhiyin.github.io/PhoneClaw_Crisp/#organization",
-        "name": "PhoneClaw"
+        "@id": "https://tangzhiyin.github.io/PhoneAI/#organization",
+        "name": "PhoneAI"
       },
       "about": {
         "@type": "SoftwareApplication",
-        "@id": "https://tangzhiyin.github.io/PhoneClaw_Crisp/#software",
-        "name": "PhoneClaw"
+        "@id": "https://tangzhiyin.github.io/PhoneAI/#software",
+        "name": "PhoneAI"
       }
     },
     {
       "@type": "BreadcrumbList",
-      "@id": "https://tangzhiyin.github.io/PhoneClaw_Crisp/benchmarks/#breadcrumb",
+      "@id": "https://tangzhiyin.github.io/PhoneAI/benchmarks/#breadcrumb",
       "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "PhoneClaw", "item": "https://tangzhiyin.github.io/PhoneClaw_Crisp/" },
-        { "@type": "ListItem", "position": 2, "name": "On-device footprints", "item": "https://tangzhiyin.github.io/PhoneClaw_Crisp/benchmarks/" }
+        { "@type": "ListItem", "position": 1, "name": "PhoneAI", "item": "https://tangzhiyin.github.io/PhoneAI/" },
+        { "@type": "ListItem", "position": 2, "name": "On-device footprints", "item": "https://tangzhiyin.github.io/PhoneAI/benchmarks/" }
       ]
     }
   ]
@@ -61,7 +61,7 @@
 
 <nav class="site-nav">
   <div class="wrap">
-    <a class="brand" href="../"><img src="../assets/app-icon.png" alt="">PhoneClaw</a>
+    <a class="brand" href="../"><img src="../assets/app-icon.png" alt="">PhoneAI</a>
     <div class="nav-links">
       <a href="../mobile-agent-framework/">Framework</a>
       <a href="../on-device-gemma/">Models</a>
@@ -69,7 +69,7 @@
       <a href="../liveland/">LiveLand</a>
       <a href="../privacy/">Privacy</a>
       <a href="../faq/">FAQ</a>
-      <a class="nav-cta" href="https://github.com/tangzhiyin/PhoneClaw_Crisp">GitHub</a>
+      <a class="nav-cta" href="https://github.com/tangzhiyin/PhoneAI">GitHub</a>
     </div>
   </div>
 </nav>
@@ -78,8 +78,8 @@
   <div class="wrap">
     <div class="hero-content">
       <p class="eyebrow">On-device facts</p>
-      <h1>PhoneClaw on-device footprints - Gemma 4 on iPhone (LiteRT)</h1>
-      <p class="lede">PhoneClaw's on-device runtime is Google LiteRT (running Gemma 4 E2B / E4B) and MiniCPM-V 4.6 — not Apple MLX.</p>
+      <h1>PhoneAI on-device footprints - Gemma 4 on iPhone (LiteRT)</h1>
+      <p class="lede">PhoneAI's on-device runtime is Google LiteRT (running Gemma 4 E2B / E4B) and MiniCPM-V 4.6 — not Apple MLX.</p>
       <div class="hero-actions">
         <a class="button primary" href="../on-device-gemma/">Model stack</a>
         <a class="button" href="../">Home</a>
@@ -113,11 +113,11 @@
         </article>
         <article class="data-row warn">
           <h3>App memory ceiling</h3>
-          <p>4 GB is the approximate usable app memory ceiling on 6 GB RAM iPhones, which is why PhoneClaw gates local runtimes on available memory headroom.</p>
+          <p>4 GB is the approximate usable app memory ceiling on 6 GB RAM iPhones, which is why PhoneAI gates local runtimes on available memory headroom.</p>
         </article>
         <article class="data-row">
           <h3>Context window</h3>
-          <p>4096 tokens is the conservative context window PhoneClaw currently favors, leaving room for model weights, KV cache, image or audio input, tool-call state, and iOS memory pressure. Documented in Docs/IOS_MEMORY_LIMITS.md.</p>
+          <p>4096 tokens is the conservative context window PhoneAI currently favors, leaving room for model weights, KV cache, image or audio input, tool-call state, and iOS memory pressure. Documented in Docs/IOS_MEMORY_LIMITS.md.</p>
         </article>
       </div>
       <table class="privacy-table">
@@ -155,7 +155,7 @@
           <p class="section-kicker">Documented requirements</p>
           <h2>Devices and download sizes, straight from the README.</h2>
         </div>
-        <p class="section-copy">These are the published requirements in the PhoneClaw repository README.</p>
+        <p class="section-copy">These are the published requirements in the PhoneAI repository README.</p>
       </div>
       <div class="stack">
         <article class="panel">
@@ -176,7 +176,7 @@
         <article class="panel">
           <span class="panel-label">Mac Gateway</span>
           <h3>Port 18080</h3>
-          <p>18080 is the default port of the PhoneClaw Mac Gateway, which advertises the _phoneclaw-llm._tcp Bonjour service and must run as PhoneClawGateway.app. Documented in README section 7.</p>
+          <p>18080 is the default port of the PhoneAI Mac Gateway, which advertises the _phoneai-llm._tcp Bonjour service and must run as PhoneAIGateway.app. Documented in README section 7.</p>
         </article>
       </div>
     </div>
@@ -211,7 +211,7 @@
 
 <footer class="footer">
   <div class="wrap">
-    <p class="footer-word" aria-hidden="true">PhoneClaw</p>
+    <p class="footer-word" aria-hidden="true">PhoneAI</p>
     <div class="footer-row">
       <a href="../">Home</a>
       <a href="../mobile-agent-framework/">Framework</a>
@@ -223,9 +223,9 @@
       <a href="../faq/">FAQ</a>
       <a href="../zh/">中文</a>
       <a href="../ja/">日本語</a>
-      <a href="https://github.com/tangzhiyin/PhoneClaw_Crisp">GitHub</a>
+      <a href="https://github.com/tangzhiyin/PhoneAI">GitHub</a>
     </div>
-    <p>PhoneClaw is a mobile-native local AI Agent framework for phones and edge devices. Its iOS runtime runs on-device models and native iOS Skills by default, and supports optional Mac Gateway remote inference for heavier local models.</p>
+    <p>PhoneAI is a mobile-native local AI Agent framework for phones and edge devices. Its iOS runtime runs on-device models and native iOS Skills by default, and supports optional Mac Gateway remote inference for heavier local models.</p>
   </div>
 </footer>
 

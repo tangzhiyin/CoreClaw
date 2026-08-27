@@ -8,7 +8,7 @@ import Network
 //   - Mac 网关侧:      LANAdvertiser — NWListener 发布服务 + TXT (Mac 稳定 id)。
 //     (测试期最小实现, 用来对测;以后菜单栏网关复用同一套 Network 框架代码。)
 //
-// 服务类型 _phoneclaw-llm._tcp;TXT 带 id (Mac 稳定身份, 供绑定层) + v (协议版本)。
+// 服务类型 _phoneai-llm._tcp;TXT 带 id (Mac 稳定身份, 供绑定层) + v (协议版本)。
 // 绑定 / 配对 / 重连在下一步 (LANBinding.swift)。
 //
 // 设计: 发现只拿 (名字 + 稳定 id + endpoint);真要连时再 resolve 成 host:port
@@ -16,7 +16,7 @@ import Network
 // 名字解析兜住, 绑定只认稳定 id。
 
 enum LANService {
-    static let type = "_phoneclaw-llm._tcp"
+    static let type = "_phoneai-llm._tcp"
     static let txtKeyID = "id"
     static let txtKeyVersion = "v"
     static let version = "1"
@@ -129,7 +129,7 @@ final class LANDiscoveryService {
 final class LANAdvertiser {
     private var listener: NWListener?
 
-    /// 发布 _phoneclaw-llm._tcp + TXT(id, v)。port=nil 让系统选。
+    /// 发布 _phoneai-llm._tcp + TXT(id, v)。port=nil 让系统选。
     func start(name: String, macID: String, port: UInt16? = nil) throws {
         guard listener == nil else { return }
         let nwListener: NWListener

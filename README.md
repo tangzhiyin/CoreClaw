@@ -5,9 +5,9 @@ Turn your phone into a local AI agent runtime.
 ![Swift](https://img.shields.io/badge/Swift-5.10-orange?style=flat-square)
 ![iOS](https://img.shields.io/badge/iOS-17%2B-blue?style=flat-square)
 ![License](https://img.shields.io/badge/License-Apache%202.0-green?style=flat-square)
-[![GitHub stars](https://img.shields.io/github/stars/tangzhiyin/PhoneClaw_Crisp?style=flat-square)](https://github.com/tangzhiyin/PhoneClaw_Crisp)
+[![GitHub stars](https://img.shields.io/github/stars/tangzhiyin/PhoneAI?style=flat-square)](https://github.com/tangzhiyin/PhoneAI)
 
-[Website](https://tangzhiyin.github.io/PhoneClaw_Crisp/) · [Report an Issue](https://github.com/tangzhiyin/PhoneClaw_Crisp/issues) · [Request a Feature](https://github.com/tangzhiyin/PhoneClaw_Crisp/issues)
+[Website](https://tangzhiyin.github.io/PhoneAI/) · [Report an Issue](https://github.com/tangzhiyin/PhoneAI/issues) · [Request a Feature](https://github.com/tangzhiyin/PhoneAI/issues)
 
 </div>
 
@@ -17,38 +17,34 @@ Turn your phone into a local AI agent runtime.
 
 </div>
 
-PhoneClaw is a local AI agent framework for phones and edge devices. It runs Gemma 4 E2B / E4B via LiteRT and MiniCPM-V 4.6 on device, uses native mobile Skills for Calendar, Reminders, Contacts, Clipboard, Health data, image understanding, voice, and LiveLand, and lets you explicitly choose Web Search, webpage reading, or LAN-based Mac Gateway inference when a task needs it.
+PhoneAI is a local AI agent framework for phones and edge devices. It runs Gemma 4 E2B / E4B via LiteRT and MiniCPM-V 4.6 on device, uses native mobile Skills for Calendar, Reminders, Contacts, Clipboard, Health data, image understanding, voice, and LiveLand, and lets you explicitly choose Web Search, webpage reading, or LAN-based Mac Gateway inference when a task needs it.
 
-*PhoneClaw (this project) is unrelated to the Android automation repo "rohanarun/phoneclaw" or the "phoneclaw" GitHub organization. Android app-store search results may also show a separate app with the same name.*
+*PhoneAI (this project) is unrelated to the Android automation repo "rohanarun/phoneai" or the "phoneai" GitHub organization. Android app-store search results may also show a separate app with the same name.*
 
 ## Demo
 
 <div align="center">
   <video src="https://github.com/user-attachments/assets/355bf2bf-d9cc-4354-aae0-c5d5cb0ca1ee" width="100%" height="auto" controls autoplay loop muted></video>
-  <p><em>Demo: PhoneClaw running Gemma 4 on-device via LiteRT, executing native iOS Skills.</em></p>
+  <p><em>Demo: PhoneAI running Gemma 4 on-device via LiteRT, executing native iOS Skills.</em></p>
 </div>
 
 ## Latest Updates
 
 **2026-08-26**
 
-- **Task complete:** migrated the repository identity and public project links to **PhoneClaw Crisp** under `tangzhiyin/PhoneClaw_Crisp`
-- Added **Crisp** as the lightweight default Skill for ordinary text requests while preserving priority for specialized Skills, multimodal flows, and explicit Web tools
+- **Task complete:** renamed the complete application, targets, packages, files, identifiers, documentation, and public project links to **PhoneAI** under `tangzhiyin/PhoneAI`
 - Fixed iOS device and Simulator build errors, updated Foundation Models compatibility, and preserved device-only runtime integrations without breaking Simulator builds
 - Reworked Web Search to avoid hanging requests: providers now run concurrently with hard request/resource timeouts and bounded query retries
 - Added regional Web Search fallbacks for both mainland China and international networks through Bing, Bing News, DuckDuckGo, Google News, and Baidu News
-- Validation completed with successful iOS device and Simulator builds, 114 core tests, and 3 Mac Gateway tests
-
-**2026-08-25**
-- Add Crisp.SKill under the SKill side
-
+- Added a simplified iPhone and AI app icon with dedicated default and dark appearances
+- Validation completed with successful Debug, Release, Simulator, and archive builds, plus 112 core and 3 Mac Gateway tests
 
 **2026-06-08**
 
-- Added the PhoneClaw Gateway Mac client: keep it running on your Mac, advertise it over Bonjour, then pair from the iPhone to use Mac-side Ollama, Codex CLI, or Antigravity CLI as a remote inference source
+- Added the PhoneAI Gateway Mac client: keep it running on your Mac, advertise it over Bonjour, then pair from the iPhone to use Mac-side Ollama, Codex CLI, or Antigravity CLI as a remote inference source
 - Added a `Mac Remote` page in iPhone settings: discover Macs on the same LAN, approve pairing on the Mac, choose a Mac-side model, then use it from the normal chat screen
 - Remote models are only used after you explicitly pair a Mac and select one. With Ollama, inference stays on your Mac; with CLI or other upstream providers, data handling follows that provider's behavior
-- How to use: download [PhoneClawGateway-macOS-v0.1.1.zip](https://github.com/tangzhiyin/PhoneClaw_Crisp/releases/download/mac-gateway-v0.1.1/PhoneClawGateway-macOS-v0.1.1.zip), unzip it, open `PhoneClawGateway.app`, allow Local Network permission, then pair from `Mac Remote` on the iPhone; see [Use the Mac client for remote inference](#7-use-the-mac-client-for-remote-inference)
+- How to use: download [PhoneAIGateway-macOS-v0.1.1.zip](https://github.com/tangzhiyin/PhoneAI/releases/download/mac-gateway-v0.1.1/PhoneAIGateway-macOS-v0.1.1.zip), unzip it, open `PhoneAIGateway.app`, allow Local Network permission, then pair from `Mac Remote` on the iPhone; see [Use the Mac client for remote inference](#7-use-the-mac-client-for-remote-inference)
 
 <details>
 <summary>Update history</summary>
@@ -56,7 +52,7 @@ PhoneClaw is a local AI agent framework for phones and edge devices. It runs Gem
 
 ### 2026-05-12
 
-- Released v1.4.0 — [Download](https://github.com/tangzhiyin/PhoneClaw_Crisp/releases/tag/v1.4.0)
+- Released v1.4.0 — [Download](https://github.com/tangzhiyin/PhoneAI/releases/tag/v1.4.0)
 - Added MiniCPM-V 4.6 multimodal model — image Q&A and real-time camera recognition in LIVE mode
 - Fixed several known issues in LIVE mode
 
@@ -66,10 +62,10 @@ PhoneClaw is a local AI agent framework for phones and edge devices. It runs Gem
 
 ### 2026-04-25
 
-- Released v1.3.1 — [Download](https://github.com/tangzhiyin/PhoneClaw_Crisp/releases/tag/v1.3.1)
+- Released v1.3.1 — [Download](https://github.com/tangzhiyin/PhoneAI/releases/tag/v1.3.1)
 - Added English LIVE mode
 - Fixed some known bugs
-- Released v1.3.0 — [Download](https://github.com/tangzhiyin/PhoneClaw_Crisp/releases/tag/v1.3.0)
+- Released v1.3.0 — [Download](https://github.com/tangzhiyin/PhoneAI/releases/tag/v1.3.0)
 - Added English localization — the app automatically switches based on system language.
 - Refactored the download module: resumable downloads, background downloads, and automatic fastest-mirror selection based on current network conditions.
 
@@ -77,11 +73,11 @@ PhoneClaw is a local AI agent framework for phones and edge devices. It runs Gem
 
 - Released v1.2.2 — added the ability to choose between GPU or CPU inference backend directly from the settings page; CPU is now the default to fit within Sideloadly-signed memory limits.
 - ⚠️ **Sideloadly-signed IPA usage note**: due to the memory cap of sideload-signing, **the E4B model only works on CPU** (GPU will fail). We recommend using **the E2B model** — it's fully featured and more stable under the cap.
-- 💡 **If you can, build from source with Xcode**: Xcode-signed builds aren't subject to the sideload memory cap — you can run E2B / E4B with GPU enabled for best performance. [Download](https://github.com/tangzhiyin/PhoneClaw_Crisp/releases/tag/v1.2.2)
+- 💡 **If you can, build from source with Xcode**: Xcode-signed builds aren't subject to the sideload memory cap — you can run E2B / E4B with GPU enabled for best performance. [Download](https://github.com/tangzhiyin/PhoneAI/releases/tag/v1.2.2)
 
 ### 2026-04-20
 
-- Released an unsigned IPA — sign and install to iPhone via [Sideloadly](https://sideloadly.io/). [Download](https://github.com/tangzhiyin/PhoneClaw_Crisp/releases/tag/v1.1.0)
+- Released an unsigned IPA — sign and install to iPhone via [Sideloadly](https://sideloadly.io/). [Download](https://github.com/tangzhiyin/PhoneAI/releases/tag/v1.1.0)
 
 ### 2026-04-18
 
@@ -126,7 +122,7 @@ PhoneClaw is a local AI agent framework for phones and edge devices. It runs Gem
 
 **Private Local Agent**: Run inference and Skill calls directly on device. Use natural language to work with Calendar, Reminders, Contacts, Clipboard, Health data, and other local tasks.
 
-**Mac Remote Inference**: Optionally pair with a Mac on the same LAN through PhoneClaw Gateway and use Mac-side Ollama, Codex CLI, or Antigravity CLI models while keeping the native iPhone chat and Skill experience.
+**Mac Remote Inference**: Optionally pair with a Mac on the same LAN through PhoneAI Gateway and use Mac-side Ollama, Codex CLI, or Antigravity CLI models while keeping the native iPhone chat and Skill experience.
 
 **Image Understanding and LIVE Vision**: Ask questions about photos from the camera or photo picker, or enable the camera in LIVE mode so the model can understand the scene in real time.
 
@@ -140,15 +136,6 @@ PhoneClaw is a local AI agent framework for phones and edge devices. It runs Gem
 
 **File-Driven Skill System**: Each capability is defined by a single Markdown file (SKILL.md). Adding or modifying a skill can happen through the Skill file. Skills are language-agnostic — anyone can write and share them.
 
-**Default Crisp Skill Routing**: PhoneClaw uses Crisp as the default Skill for ordinary text requests.
-
-- Explicitly matched specialized Skills, such as Calendar, Reminders, and Translate, still take priority.
-- When no other Skill matches, Crisp is loaded automatically.
-- The default path uses compact instructions to reduce per-turn memory usage and latency.
-- Default Crisp routing does not force a web search.
-- When Crisp uses shared Web tools, follow-up turns remain in the Crisp context.
-- Image and audio paths keep their existing behavior.
-
 **Model Management and Resumable Downloads**: Gemma main models and LIVE voice models can be downloaded, canceled, resumed, and retried directly on iPhone, or bundled into the app at build time.
 
 **Fully Offline First with Clear Data Flow**: Inference and local Skill calls run on-device by default. Conversations, images, and personal data stay on iPhone. Web Search, webpage reading, and paired Mac remote inference are explicit user-triggered capabilities; Mac remote inference sends the current request to your paired Mac, and any further upstream access depends on the provider selected in the Mac client.
@@ -160,7 +147,7 @@ PhoneClaw is a local AI agent framework for phones and edge devices. It runs Gem
 ## Technical Notes
 
 - [On-device Gemma on iPhone](Docs/ON_DEVICE_GEMMA.md)
-- [PhoneClaw Skill System](Docs/SKILL_SYSTEM.md)
+- [PhoneAI Skill System](Docs/SKILL_SYSTEM.md)
 - [iOS Memory and Context Limits](Docs/IOS_MEMORY_LIMITS.md)
 - [Promotion Kit](Docs/PROMOTION_KIT.md)
 
@@ -230,8 +217,8 @@ Building from source requires macOS + Xcode 16, iOS 17+, CocoaPods, a real devic
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/tangzhiyin/PhoneClaw_Crisp.git
-cd PhoneClaw_Crisp
+git clone https://github.com/tangzhiyin/PhoneAI.git
+cd PhoneAI
 ```
 
 ### 2. Install dependencies
@@ -311,14 +298,14 @@ After downloading, add `Models/sherpa-asr-zh` and `Models/vits-zh-hf-keqing` as 
 ### 4. Open the workspace
 
 ```bash
-open PhoneClaw.xcworkspace
+open PhoneAI.xcworkspace
 ```
 
 > Always open `.xcworkspace`.
 
 ### 5. Configure signing and run
 
-1. In Xcode, select the PhoneClaw target
+1. In Xcode, select the PhoneAI target
 2. Open Signing & Capabilities
 3. Set your Team
 4. Change the Bundle Identifier to a unique value
@@ -344,30 +331,30 @@ Translate that last line into English
 
 ### 7. Use the Mac client for remote inference
 
-The Mac client turns a Mac on the same LAN into an optional remote inference source for the phone runtime. PhoneClaw still uses its chat UI and Skill system, while model inference requests are sent to your paired Mac.
+The Mac client turns a Mac on the same LAN into an optional remote inference source for the phone runtime. PhoneAI still uses its chat UI and Skill system, while model inference requests are sent to your paired Mac.
 
 **Option A: download the release (recommended)**
 
-1. Download [PhoneClawGateway-macOS-v0.1.1.zip](https://github.com/tangzhiyin/PhoneClaw_Crisp/releases/download/mac-gateway-v0.1.1/PhoneClawGateway-macOS-v0.1.1.zip)
-2. Unzip it and open `PhoneClawGateway.app`
+1. Download [PhoneAIGateway-macOS-v0.1.1.zip](https://github.com/tangzhiyin/PhoneAI/releases/download/mac-gateway-v0.1.1/PhoneAIGateway-macOS-v0.1.1.zip)
+2. Unzip it and open `PhoneAIGateway.app`
 3. On first launch, allow the macOS Local Network permission prompt
-4. If macOS blocks first launch, open Finder, right-click `PhoneClawGateway.app`, then choose `Open`
+4. If macOS blocks first launch, open Finder, right-click `PhoneAIGateway.app`, then choose `Open`
 
-Gateway listens on port `18080` by default and advertises the `_phoneclaw-llm._tcp` Bonjour service.
+Gateway listens on port `18080` by default and advertises the `_phoneai-llm._tcp` Bonjour service.
 
 **Option B: build from source**
 
 ```bash
 cd MacGateway
 bash build-app.sh
-open PhoneClawGateway.app
+open PhoneAIGateway.app
 ```
 
 The source-built app also needs macOS Local Network permission.
 
 **Configure the Mac runtime source**
 
-1. Open `PhoneClawGateway.app`
+1. Open `PhoneAIGateway.app`
 2. Choose a runtime source in the main window: Ollama, Codex CLI, or Antigravity CLI
 3. If you use Ollama, install and start Ollama first, then pull a model, for example:
 
@@ -380,11 +367,11 @@ ollama pull gemma3:4b
 **Pair from the iPhone**
 
 1. Make sure the iPhone and Mac are on the same LAN
-2. Open PhoneClaw → top-right slider → `Mac Remote`
+2. Open PhoneAI → top-right slider → `Mac Remote`
 3. Tap the Mac, then approve the request in the Mac client
 4. After pairing, choose a Mac-side model and return to chat
 
-Remote models appear under the `Remote` section in the model picker. For Mac discovery, check that the Mac client is running, Local Network permission is allowed, both devices are on the same Wi-Fi, and the macOS firewall allows `PhoneClawGateway.app` to accept LAN connections.
+Remote models appear under the `Remote` section in the model picker. For Mac discovery, check that the Mac client is running, Local Network permission is allowed, both devices are on the same Wi-Fi, and the macOS firewall allows `PhoneAIGateway.app` to accept LAN connections.
 
 ## Default Install Flow and Model Bundling
 
@@ -404,7 +391,7 @@ By default, the project builds a lightweight app while model files download on d
 
 1. Keep `Models/gemma-4-E2B-it.litertlm`, remove `Models/gemma-4-E4B-it.litertlm`
 2. In Xcode's Project Navigator, delete the unused model file reference and choose Remove Reference
-3. In PhoneClaw > Build Phases > Copy Bundle Resources, make sure `gemma-4-E2B-it.litertlm` is included as a single file resource
+3. In PhoneAI > Build Phases > Copy Bundle Resources, make sure `gemma-4-E2B-it.litertlm` is included as a single file resource
 4. Edit `allModels` in `LLM/Models/PredefinedModels.swift` to only include the models actually shipped (otherwise the settings page will show options that don't exist)
 
 ### Option C — Both E2B and E4B
@@ -426,7 +413,7 @@ Then add both `.litertlm` files into Xcode's `Copy Bundle Resources`.
 Create a `SKILL.md` file in the app's data directory and hot-reload in-app:
 
 ```
-Application Support/PhoneClaw/skills/<skill-id>/SKILL.md
+Application Support/PhoneAI/skills/<skill-id>/SKILL.md
 ```
 
 ```yaml
@@ -467,10 +454,10 @@ Why does the model fail to load after switching?
 Verify that the model file name matches `allModels` in `LLM/Models/PredefinedModels.swift`, that the model has finished downloading on-device if you are using the shell-only install flow, or that it was actually included in the app bundle if you are shipping it built-in, and that the device has enough memory.
 
 Why does creating a reminder fail?
-The latest code first attempts to reuse an existing writable reminder list. If none is found, it tries to automatically create a PhoneClaw list. If that also fails, the system reminder source itself is likely read-only.
+The latest code first attempts to reuse an existing writable reminder list. If none is found, it tries to automatically create a PhoneAI list. If that also fails, the system reminder source itself is likely read-only.
 
 How do I make the iPhone discover the Mac client?
-Make sure `PhoneClawGateway.app` is running and macOS has allowed Local Network permission. The iPhone and Mac must be on the same LAN. If discovery still fails, check that the macOS firewall allows the app to accept incoming connections, or rebuild the app with `bash MacGateway/build-app.sh` and open the generated app again.
+Make sure `PhoneAIGateway.app` is running and macOS has allowed Local Network permission. The iPhone and Mac must be on the same LAN. If discovery still fails, check that the macOS firewall allows the app to accept incoming connections, or rebuild the app with `bash MacGateway/build-app.sh` and open the generated app again.
 
 ## Roadmap
 
@@ -516,11 +503,11 @@ Beyond the main chat model, suitable additions include:
 - [ ] A smaller tool argument extraction model
 - [ ] A stronger planning model or multi-model pipeline
 
-This moves PhoneClaw from "one big model doing everything" toward "multiple local models working together."
+This moves PhoneAI from "one big model doing everything" toward "multiple local models working together."
 
 ### 4. Cross-app automation
 
-PhoneClaw uses the cross-app capabilities that iOS actually provides:
+PhoneAI uses the cross-app capabilities that iOS actually provides:
 
 - [x] App Intents / Shortcuts (LiveLand / LIVE launch intents shipped; task-level intents planned)
 - [ ] URL Scheme / Deep Link
@@ -538,7 +525,7 @@ A realistic goal: pass content between apps, open a specific app to a specific s
 - [ ] Screen understanding
 - [ ] External hardware integration
 
-Explore connecting external video input and screen understanding with local models, so PhoneClaw goes beyond answering questions in isolation and develops stronger real-world perception and scheduling capabilities.
+Explore connecting external video input and screen understanding with local models, so PhoneAI goes beyond answering questions in isolation and develops stronger real-world perception and scheduling capabilities.
 
 
 ## References

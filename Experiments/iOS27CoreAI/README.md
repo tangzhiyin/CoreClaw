@@ -1,10 +1,10 @@
 # iOS 27 Core AI Experiment
 
-This package is an isolated research surface for iOS 27 APIs. It is intentionally not wired into `PhoneClaw.xcodeproj`.
+This package is an isolated research surface for iOS 27 APIs. It is intentionally not wired into `PhoneAI.xcodeproj`.
 
 ## Goals
 
-- Keep current PhoneClaw production runtime untouched.
+- Keep current PhoneAI production runtime untouched.
 - Compile on the current non-iOS-27 toolchain.
 - Provide a guarded place to test Core AI and Foundation Models once Xcode 27 is installed.
 - Validate routing and argument-extraction ideas before changing `AgentEngine`, `BackendDispatcher`, or `ModelRuntimeCoordinator`.
@@ -24,7 +24,7 @@ This only runs the portable planning-model scaffolding.
 Once Xcode 27 beta is installed, try:
 
 ```sh
-swift test -Xswiftc -DPHONECLAW_IOS27_BETA_SDK
+swift test -Xswiftc -DPHONEAI_IOS27_BETA_SDK
 ```
 
 If `CoreAI` or `FoundationModels` APIs shifted, fix this package first before touching the main app.

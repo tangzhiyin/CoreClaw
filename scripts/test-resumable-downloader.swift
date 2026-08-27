@@ -93,7 +93,7 @@ struct ResumableDownloaderTest {
         let session = URLSession(configuration: configuration)
 
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("phoneclaw-resumable-downloader-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("phoneai-resumable-downloader-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: root) }
 
         let modelsDir = root.appendingPathComponent("models", isDirectory: true)

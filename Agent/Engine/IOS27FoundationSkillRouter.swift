@@ -316,14 +316,14 @@ private enum IOS27FoundationSkillRouterRuntime {
         } + ["none"])
 
         let root = DynamicGenerationSchema(
-            name: "PhoneClawSkillRoute",
-            description: "A PhoneClaw skill routing decision.",
+            name: "PhoneAISkillRoute",
+            description: "A PhoneAI skill routing decision.",
             properties: [
                 DynamicGenerationSchema.Property(
                     name: "action",
                     description: "Routing action.",
                     schema: DynamicGenerationSchema(
-                        name: "PhoneClawSkillRouteAction",
+                        name: "PhoneAISkillRouteAction",
                         anyOf: ["answerDirectly", "useSkill", "askClarification"]
                     )
                 ),
@@ -331,7 +331,7 @@ private enum IOS27FoundationSkillRouterRuntime {
                     name: "skillID",
                     description: "Selected skill identifier. Use none when no skill is selected.",
                     schema: DynamicGenerationSchema(
-                        name: "PhoneClawSkillRouteSkillID",
+                        name: "PhoneAISkillRouteSkillID",
                         anyOf: skillIDChoices
                     )
                 ),
@@ -339,7 +339,7 @@ private enum IOS27FoundationSkillRouterRuntime {
                     name: "toolName",
                     description: "Selected tool name from the selected skill, or none.",
                     schema: DynamicGenerationSchema(
-                        name: "PhoneClawSkillRouteToolName",
+                        name: "PhoneAISkillRouteToolName",
                         anyOf: toolChoices
                     )
                 ),
@@ -467,8 +467,8 @@ private enum IOS27FoundationSkillRouterRuntime {
     }
 
     private static let instructions = """
-    You are PhoneClaw's conservative fallback skill router.
-    Use the provided schema. Return useSkill only when the user clearly asks PhoneClaw
+    You are PhoneAI's conservative fallback skill router.
+    Use the provided schema. Return useSkill only when the user clearly asks PhoneAI
     to perform an action through one of the listed Skills. Return answerDirectly only
     for explanation, definition, summary, or ordinary chat requests that need no tool.
     Return askClarification when a matching Skill exists but required details are missing.

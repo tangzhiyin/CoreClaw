@@ -36,8 +36,8 @@ enum DisplayItem: Identifiable {
 
 /// 用于纯思考占位的稳定 ID
 private let thinkingPlaceholderID = UUID()
-private let thinkingOpenMarker = "[[PHONECLAW_THINK]]"
-private let thinkingCloseMarker = "[[/PHONECLAW_THINK]]"
+private let thinkingOpenMarker = "[[PHONEAI_THINK]]"
+private let thinkingCloseMarker = "[[/PHONEAI_THINK]]"
 
 private func splitThinkingAndResponse(from text: String) -> (thinking: String?, response: String?) {
     guard !text.isEmpty else { return (nil, nil) }

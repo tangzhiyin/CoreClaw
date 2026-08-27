@@ -1,6 +1,6 @@
 import Foundation
 
-#if canImport(FoundationModels) && PHONECLAW_IOS27_BETA_SDK
+#if canImport(FoundationModels) && PHONEAI_IOS27_BETA_SDK
 import FoundationModels
 
 @available(iOS 27.0, macOS 27.0, *)
@@ -37,7 +37,7 @@ public final class FoundationPlanningModelService: PlanningModelService {
     public init() {}
 
     public func availability() async -> PlanningModelAvailability {
-        .unavailable("FoundationModels is not available. Re-run with Xcode 27 and -DPHONECLAW_IOS27_BETA_SDK.")
+        .unavailable("FoundationModels is not available. Re-run with Xcode 27 and -DPHONEAI_IOS27_BETA_SDK.")
     }
 
     public func route(_ input: PlanningInput) async throws -> PlanningDecision {

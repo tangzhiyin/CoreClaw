@@ -11,8 +11,8 @@ private let callbackControlMarkers = [
     "</tool_call>",
     "<function_call>",
     "</function_call>",
-    "[[PHONECLAW_THINK]]",
-    "[[/PHONECLAW_THINK]]"
+    "[[PHONEAI_THINK]]",
+    "[[/PHONEAI_THINK]]"
 ]
 
 private func isTokenLimitError(_ error: Error) -> Bool {

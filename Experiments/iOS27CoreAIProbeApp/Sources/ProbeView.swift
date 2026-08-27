@@ -9,9 +9,9 @@ import CoreAI
 import FoundationModels
 
 @available(iOS 27.0, *)
-@Generable(description: "A PhoneClaw skill routing decision.")
+@Generable(description: "A PhoneAI skill routing decision.")
 private struct GuidedSkillRoute {
-    @Guide(description: "Routing action. Use useSkill for requests that create, schedule, modify, or execute an action. Use answerDirectly only when PhoneClaw should reply with text and perform no action.", .anyOf(["answerDirectly", "useSkill", "askClarification"]))
+    @Guide(description: "Routing action. Use useSkill for requests that create, schedule, modify, or execute an action. Use answerDirectly only when PhoneAI should reply with text and perform no action.", .anyOf(["answerDirectly", "useSkill", "askClarification"]))
     var action: String
 
     @Guide(description: "Selected skill identifier. For meeting scheduling, choose calendar.", .anyOf(["calendar", "reminders", "clipboard", "health", "translate", "web-search", "null"]))
@@ -160,7 +160,7 @@ struct ProbeView: View {
                     instructions: "Reply with one short sentence. Do not use Markdown."
                 )
                 let response = try await session.respond(
-                    to: "Say that PhoneClaw can access the iOS 27 system language model."
+                    to: "Say that PhoneAI can access the iOS 27 system language model."
                 )
                 result.append("Response: \(response.content)")
             } catch {
@@ -192,7 +192,7 @@ struct ProbeView: View {
             do {
                 let session = LanguageModelSession(
                     instructions: """
-                    You are PhoneClaw's routing model. Return exactly one compact JSON object and no Markdown.
+                    You are PhoneAI's routing model. Return exactly one compact JSON object and no Markdown.
                     Schema:
                     {"action":"answerDirectly|useSkill|askClarification","skillID":"calendar|reminders|clipboard|health|translate|web-search|null","toolName":"string|null","confidence":0.0,"reason":"short"}
                     """
@@ -404,10 +404,10 @@ struct ProbeView: View {
     }
 
     private static let guidedRouteInstructions = """
-    You are PhoneClaw's deterministic skill router. Use the provided schema.
+    You are PhoneAI's deterministic skill router. Use the provided schema.
     Policy:
-    - answerDirectly means PhoneClaw only replies with text and performs no action.
-    - useSkill means PhoneClaw invokes one of the listed Skills/tools.
+    - answerDirectly means PhoneAI only replies with text and performs no action.
+    - useSkill means PhoneAI invokes one of the listed Skills/tools.
     - If the user asks to create, schedule, set, send, open, modify, delete, search, translate, remember, or operate on device/app state, choose useSkill when a matching Skill exists.
     - For calendar event creation or meeting scheduling, date and time are required. If date or time is missing, choose action=askClarification, skillID=calendar, toolName=calendar-create-event.
     - For calendar event creation or meeting scheduling with date and time present, choose action=useSkill, skillID=calendar, toolName=calendar-create-event.

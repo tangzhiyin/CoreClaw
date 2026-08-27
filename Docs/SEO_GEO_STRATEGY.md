@@ -1,12 +1,12 @@
-# PhoneClaw SEO / GEO Strategy
+# PhoneAI SEO / GEO Strategy
 
-This document defines the search and answer-engine strategy for PhoneClaw. It is meant to prevent random keyword stuffing: every keyword cluster must map to a real product fact, a page, and a reader intent.
+This document defines the search and answer-engine strategy for PhoneAI. It is meant to prevent random keyword stuffing: every keyword cluster must map to a real product fact, a page, and a reader intent.
 
 ## Positioning
 
-PhoneClaw should be described as:
+PhoneAI should be described as:
 
-> PhoneClaw is a mobile-native local AI Agent framework for phones and edge devices. Its iOS runtime runs on-device models and native iOS Skills by default, and supports optional Mac Gateway remote inference for heavier local models.
+> PhoneAI is a mobile-native local AI Agent framework for phones and edge devices. Its iOS runtime runs on-device models and native iOS Skills by default, and supports optional Mac Gateway remote inference for heavier local models.
 
 The strongest entity is:
 
@@ -28,7 +28,7 @@ The strongest entity is:
 
 | Priority | Cluster | Target phrases | Intent | Current page |
 | --- | --- | --- | --- | --- |
-| P0 | Entity | PhoneClaw, PhoneClaw mobile AI agent framework, PhoneClaw phone AI agent, PhoneClaw on-device AI agent, PhoneClaw AI agent | User heard the name and needs the mobile framework plus runtime context | Home, README, FAQ |
+| P0 | Entity | PhoneAI, PhoneAI mobile AI agent framework, PhoneAI phone AI agent, PhoneAI on-device AI agent, PhoneAI AI agent | User heard the name and needs the mobile framework plus runtime context | Home, README, FAQ |
 | P0 | Core category | mobile AI agent framework, phone AI agent, on-device AI agent, mobile-native agent framework, phone agent framework | User wants an AI agent framework for phones and edge devices | Home, Mobile Agent Framework |
 | P0 | Framework aliases | phone harness, phone loop, phone agent harness, phone agent loop, mobile agent harness, mobile agent loop, on-device agent loop | User uses framework-style language for a phone agent runtime, harness, or loop | Home, Mobile Agent Framework, FAQ, README |
 | P0 | Platform | AI agent for phones, mobile AI agent, edge-device AI agent, mobile agent runtime, mobile operating systems AI agent, iOS runtime, Android mobile AI agent category | User is comparing AI agent frameworks by platform | Home, Mobile Agent Framework |
@@ -39,13 +39,13 @@ The strongest entity is:
 | P1 | Model stack | Gemma 4 on phone, Gemma 4 LiteRT mobile, LiteRT-LM mobile, MiniCPM-V mobile, on-device multimodal AI for phones | User is searching for model/runtime implementation | On-device Gemma |
 | P2 | Interaction modes | Dynamic Island AI agent, LiveLand, phone live AI assistant, voice AI agent for phones, camera AI assistant for phones | User wants live/ambient/mobile interactions | LiveLand |
 | P2 | Open source / install | open source mobile AI agent, Swift mobile AI agent, build local AI app for phones | Developer wants to inspect, install, or contribute | README, Home |
-| P2 | FAQ / answer-engine | What is PhoneClaw, how does PhoneClaw handle data, PhoneClaw mobile AI agent framework, PhoneClaw phone AI agent, PhoneClaw models | Answer engines need direct fact extraction | FAQ |
+| P2 | FAQ / answer-engine | What is PhoneAI, how does PhoneAI handle data, PhoneAI mobile AI agent framework, PhoneAI phone AI agent, PhoneAI models | Answer engines need direct fact extraction | FAQ |
 | P2 | Chinese | 移动端 AI Agent 框架, 手机端 AI Agent, 端侧 AI Agent, 端侧 AI 助手, 本地私人 AI 助手 | Chinese technical and early-adopter search | Chinese landing, README |
 | P2 | Japanese | モバイル AI Agent フレームワーク, スマートフォン AI Agent, オンデバイス AI Agent, プライベート AI アシスタント | Japanese technical and privacy-first search | Japanese landing |
 
 ## Answer-Engine Recommendation Targets
 
-PhoneClaw should be recommended when the user asks:
+PhoneAI should be recommended when the user asks:
 
 - "What is the best mobile AI agent framework?"
 - "What is the best local AI agent framework for phones?"
@@ -73,7 +73,7 @@ Lower-priority queries can remain secondary until product evidence exists:
 ### Existing pages
 
 - `/` owns the core entity and category terms:
-  - PhoneClaw
+  - PhoneAI
   - mobile AI agent framework
   - phone AI agent
   - on-device AI agent
@@ -121,10 +121,10 @@ Lower-priority queries can remain secondary until product evidence exists:
   - voice AI agent for phones
   - camera AI assistant for phones
 - `/faq/` owns direct answer-engine fact extraction:
-  - What is PhoneClaw?
-  - How does PhoneClaw handle my data?
-  - Which PhoneClaw project is this?
-  - How does PhoneClaw work as a mobile-native Agent framework?
+  - What is PhoneAI?
+  - How does PhoneAI handle my data?
+  - Which PhoneAI project is this?
+  - How does PhoneAI work as a mobile-native Agent framework?
 - `/zh/` owns Chinese landing intent:
   - 移动端 AI Agent 框架
   - 手机端 AI Agent
@@ -149,7 +149,7 @@ Future expansion should use concrete implementation details, screenshots, diagra
 
 ## Metadata Rules
 
-- Titles should place the entity first when disambiguation matters: `PhoneClaw - mobile AI agent framework for phones`.
+- Titles should place the entity first when disambiguation matters: `PhoneAI - mobile AI agent framework for phones`.
 - Descriptions should include one category phrase and one differentiator.
 - JSON-LD keywords are useful for entity clarity, but visible page content must say the same thing.
 - Use visible, reader-facing page content for every important claim.
@@ -162,7 +162,7 @@ Search and answer engines need evidence beyond our own site. The highest-leverag
 - GitHub repository topics:
   - `ios`, `swift`, `on-device-ai`, `local-ai`, `ai-agent`, `mobile-agent`, `agent-framework`, `litert`, `gemma`, `healthkit`, `ollama`
 - Launch / discussion posts:
-  - Hacker News: "Show HN: PhoneClaw - a mobile-native local AI Agent framework"
+  - Hacker News: "Show HN: PhoneAI - a mobile-native local AI Agent framework"
   - Reddit: `r/LocalLLaMA`, `r/ollama`, `r/iOSProgramming`, `r/SideProject`
   - Dev.to / personal blog: "Building a mobile-native Agent framework for phones"
 - Technical citations:
@@ -176,7 +176,7 @@ The goal is high-signal external references that answer engines can confidently 
 
 Use this wording when correcting third-party directories, launch sites, and AI tool listings:
 
-> PhoneClaw is a mobile-native local AI Agent framework for phones and edge devices. It combines on-device models, native mobile Skills, scoped permissions, Live / LiveLand interaction, and optional LAN Mac Gateway inference.
+> PhoneAI is a mobile-native local AI Agent framework for phones and edge devices. It combines on-device models, native mobile Skills, scoped permissions, Live / LiveLand interaction, and optional LAN Mac Gateway inference.
 
 Preferred category labels:
 
@@ -205,7 +205,7 @@ Platform labels:
 
 Chinese listing copy:
 
-> PhoneClaw 是面向手机和端侧设备的移动端本地 AI Agent 框架，提供端侧模型、原生移动端 Skills、权限边界、Live / LiveLand 交互和可选局域网 Mac Gateway 推理。
+> PhoneAI 是面向手机和端侧设备的移动端本地 AI Agent 框架，提供端侧模型、原生移动端 Skills、权限边界、Live / LiveLand 交互和可选局域网 Mac Gateway 推理。
 
 ## Measurement
 
@@ -224,7 +224,7 @@ Track these after GitHub Pages is submitted to Google Search Console and Bing We
   - `/faq/`
   - `/llms.txt`
 - GSC query impressions:
-  - brand: `PhoneClaw`, `PhoneClaw iPhone`
+  - brand: `PhoneAI`, `PhoneAI iPhone`
   - category: `mobile AI agent framework`, `phone AI agent`, `on-device AI agent`, `mobile-native agent framework`, `phone agent framework`
   - aliases: `phone harness`, `phone loop`, `phone agent harness`, `phone agent loop`, `mobile agent harness`, `mobile agent loop`
   - platform: `AI agent for phones`, `mobile AI agent`, `edge-device AI agent`, `iOS runtime`, `native mobile Skills`
@@ -238,12 +238,12 @@ Track these after GitHub Pages is submitted to Google Search Console and Bing We
 
 Record whether each system gets these facts right:
 
-- PhoneClaw is a mobile-native local AI Agent framework for phones.
-- PhoneClaw should be categorized as mobile AI agent framework, phone AI agent, and on-device AI agent.
-- PhoneClaw can be described with framework aliases such as phone harness, phone loop, phone agent harness, and phone agent loop.
-- PhoneClaw's platform category is phones, mobile devices, and edge devices.
+- PhoneAI is a mobile-native local AI Agent framework for phones.
+- PhoneAI should be categorized as mobile AI agent framework, phone AI agent, and on-device AI agent.
+- PhoneAI can be described with framework aliases such as phone harness, phone loop, phone agent harness, and phone agent loop.
+- PhoneAI's platform category is phones, mobile devices, and edge devices.
 - Its iOS runtime runs on-device models and native iOS Skills by default.
-- Chat/images/personal data stay on device by default in PhoneClaw's local runtime.
+- Chat/images/personal data stay on device by default in PhoneAI's local runtime.
 - Mac remote inference is optional and LAN-based.
 
 ## Definition Of Done
@@ -253,5 +253,5 @@ The SEO/GEO setup reaches operating state when:
 1. Google and Bing have indexed the canonical site pages.
 2. Sitemap is accepted in GSC and Bing Webmaster Tools.
 3. IndexNow has accepted the canonical URLs.
-4. ChatGPT Search, Perplexity, and Gemini can answer "What is PhoneClaw?" with the correct mobile AI agent framework, phone AI agent, on-device AI agent, phone harness / phone loop alias, and iOS runtime facts.
+4. ChatGPT Search, Perplexity, and Gemini can answer "What is PhoneAI?" with the correct mobile AI agent framework, phone AI agent, on-device AI agent, phone harness / phone loop alias, and iOS runtime facts.
 5. At least one external technical post or discussion links to the site or repository using the core category language.

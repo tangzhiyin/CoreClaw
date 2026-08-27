@@ -236,7 +236,7 @@ No behavior change.
 
 Validation:
 
-- `xcodebuild -list -workspace PhoneClaw.xcworkspace`
+- `xcodebuild -list -workspace PhoneAI.xcworkspace`
 - iOS build if practical.
 
 ### Phase 2: Migrate LiteRT single-file download

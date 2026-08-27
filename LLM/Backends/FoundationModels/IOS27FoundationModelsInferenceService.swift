@@ -262,9 +262,9 @@ final class FoundationModelsInferenceService: InferenceService {
     }
 
     private static let defaultInstructions = """
-    You are PhoneClaw's on-device assistant runtime.
+    You are PhoneAI's on-device assistant runtime.
     Follow the prompt's role labels and emit plain assistant text.
-    If the prompt asks for a PhoneClaw tool call, emit the exact textual tool-call protocol requested by the prompt.
+    If the prompt asks for a PhoneAI tool call, emit the exact textual tool-call protocol requested by the prompt.
     """
 
     private static func liveInstructions(_ systemPrompt: String?) -> String {
@@ -363,7 +363,7 @@ final class FoundationModelsInferenceService: InferenceService {
 
         let bridge = FoundationModelsNativeToolBridge()
         let nativeTools: [any Tool] = registeredTools.map {
-            PhoneClawFoundationModelsTool(registeredTool: $0, bridge: bridge)
+            PhoneAIFoundationModelsTool(registeredTool: $0, bridge: bridge)
         }
         let dynamicSession = LanguageModelSession(
             model: model,
@@ -470,7 +470,7 @@ private final class FoundationModelsNativeToolBridge: @unchecked Sendable {
         }
         lock.unlock()
 
-        PCLog.debug("[FoundationModels] mirrored native tool call into PhoneClaw ToolChain: \(name)")
+        PCLog.debug("[FoundationModels] mirrored native tool call into PhoneAI ToolChain: \(name)")
         if let activeContinuation {
             activeContinuation.yield(envelope)
         }
@@ -520,7 +520,7 @@ private enum FoundationModelsGeneratedContentConverter {
 }
 
 @available(iOS 27.0, macOS 27.0, *)
-private struct PhoneClawFoundationModelsTool: Tool, @unchecked Sendable {
+private struct PhoneAIFoundationModelsTool: Tool, @unchecked Sendable {
     typealias Arguments = GeneratedContent
     typealias Output = String
 
@@ -550,7 +550,7 @@ private struct PhoneClawFoundationModelsTool: Tool, @unchecked Sendable {
         return Self.externalExecutionAcknowledgement(toolName: registeredTool.name)
     }
 
-    private static let schemaNamePrefix = "PhoneClawToolArguments_"
+    private static let schemaNamePrefix = "PhoneAIToolArguments_"
 
     private static func schemaName(for rawName: String) -> String {
         let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "_"))
@@ -644,13 +644,13 @@ private struct PhoneClawFoundationModelsTool: Tool, @unchecked Sendable {
         let payload: [String: Any] = [
             "success": true,
             "tool": toolName,
-            "phoneclaw_external_execution": true,
-            "summary": "Tool request captured. PhoneClaw will execute it through the app ToolChain."
+            "phoneai_external_execution": true,
+            "summary": "Tool request captured. PhoneAI will execute it through the app ToolChain."
         ]
         guard JSONSerialization.isValidJSONObject(payload),
               let data = try? JSONSerialization.data(withJSONObject: payload),
               let json = String(data: data, encoding: .utf8) else {
-            return "Tool request captured. PhoneClaw will execute it through the app ToolChain."
+            return "Tool request captured. PhoneAI will execute it through the app ToolChain."
         }
         return json
     }

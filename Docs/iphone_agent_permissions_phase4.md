@@ -271,7 +271,7 @@ Info.plist: NSSiriUsageDescription
 
 ```
 所有 Agent Skill 通过 App Intents 暴露给 Siri:
-  "Hey Siri, 用 PhoneClaw 查一下我今天走了多少步"
-  "Hey Siri, PhoneClaw 帮我安排明天下午的会议"
-  "Hey Siri, PhoneClaw 分析我复制的内容"
+  "Hey Siri, 用 PhoneAI 查一下我今天走了多少步"
+  "Hey Siri, PhoneAI 帮我安排明天下午的会议"
+  "Hey Siri, PhoneAI 分析我复制的内容"
 ```

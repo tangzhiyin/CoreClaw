@@ -64,7 +64,7 @@ public class MLXLocalLLMService: LLMEngine, InferenceService {
     }
 
     private static func takeLiveComponentTestLaunchToken() -> Bool {
-        guard ProcessInfo.processInfo.environment["PHONECLAW_RUN_LIVE_COMPONENT_TEST"] == "1" else {
+        guard ProcessInfo.processInfo.environment["PHONEAI_RUN_LIVE_COMPONENT_TEST"] == "1" else {
             return false
         }
 

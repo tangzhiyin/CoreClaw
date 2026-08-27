@@ -1,6 +1,8 @@
 // Copyright © 2024-25 Apple Inc.
 
 // clang-format off
+#pragma clang diagnostic ignored "-Wc++17-extensions"
+
 #include "../../../utils.h"
 
 #include "../../../steel/attn/kernels/steel_attention.h"

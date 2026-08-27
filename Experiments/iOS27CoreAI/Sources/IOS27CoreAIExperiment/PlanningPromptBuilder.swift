@@ -2,7 +2,7 @@ import Foundation
 
 public enum PlanningPromptBuilder {
     public static let routingInstructions = """
-    You are PhoneClaw's routing model. Choose whether a user request should be answered directly, sent to one Skill, clarified, or refused.
+    You are PhoneAI's routing model. Choose whether a user request should be answered directly, sent to one Skill, clarified, or refused.
     Return exactly one JSON object with these keys:
     action: one of answerDirectly, useSkill, askClarification, refuse
     skillID: string or null

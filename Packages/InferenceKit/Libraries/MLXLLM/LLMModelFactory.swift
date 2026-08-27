@@ -18,8 +18,8 @@ private func create<C: Codable, M>(
 ///
 /// Typically called via ``LLMModelFactory/load(from:configuration:progressHandler:)``.
 ///
-/// NOTE: Slimmed to Gemma family only for PhoneClaw. Upstream mlx-swift-lm registers ~50
-/// model types (Llama, Phi, Qwen, Mistral, DeepSeek, ...). PhoneClaw ships Gemma 4 exclusively
+/// NOTE: Slimmed to Gemma family only for PhoneAI. Upstream mlx-swift-lm registers ~50
+/// model types (Llama, Phi, Qwen, Mistral, DeepSeek, ...). PhoneAI ships Gemma 4 exclusively
 /// via a custom implementation in `LLM/MLX/Gemma4/`, which registers itself into this shared
 /// registry at runtime via `LLMTypeRegistry.shared.registerModelType("gemma4", ...)`.
 /// Keeping the stock Gemma v1/v2/v3/v3n entries below as a safety net for cousin models that
@@ -39,8 +39,8 @@ public enum LLMTypeRegistry {
 /// Registry of models and any overrides that go with them, e.g. prompt augmentation.
 /// If asked for an unknown configuration this will use the model/tokenizer as-is.
 ///
-/// NOTE: Slimmed to Gemma family only for PhoneClaw. See the comment on LLMTypeRegistry
-/// above — PhoneClaw registers its own Gemma 4 model type at runtime, and no other
+/// NOTE: Slimmed to Gemma family only for PhoneAI. See the comment on LLMTypeRegistry
+/// above — PhoneAI registers its own Gemma 4 model type at runtime, and no other
 /// upstream model configurations are referenced.
 public class LLMRegistry: AbstractModelRegistry, @unchecked Sendable {
 

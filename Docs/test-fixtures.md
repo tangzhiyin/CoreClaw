@@ -5,7 +5,7 @@
 为了让 golden corpus 和多轮 baseline 可复现，测试捕获时必须固定时间锚点：
 
 ```bash
-PHONECLAW_FIXED_CURRENT_TIME_ANCHOR="2026-04-21 星期二 13:00"
+PHONEAI_FIXED_CURRENT_TIME_ANCHOR="2026-04-21 星期二 13:00"
 ```
 
 当前约定：

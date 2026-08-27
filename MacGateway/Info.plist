@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>PhoneClaw Gateway</string>
+    <string>PhoneAI Gateway</string>
     <key>CFBundleDisplayName</key>
-    <string>PhoneClaw Gateway</string>
+    <string>PhoneAI Gateway</string>
     <key>CFBundleIdentifier</key>
-    <string>ai.phoneclaw.gateway</string>
+    <string>ai.phoneai.gateway</string>
     <key>CFBundleExecutable</key>
-    <string>PhoneClawGateway</string>
+    <string>PhoneAIGateway</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>CFBundlePackageType</key>
@@ -25,10 +25,10 @@
     <false/>
     <!-- 局域网隐私: 没有这两项, macOS 会挡掉 Bonjour 广播 + 局域网服务, 手机发现不到 -->
     <key>NSLocalNetworkUsageDescription</key>
-    <string>PhoneClaw Gateway 在局域网内向你的 iPhone 提供本机 LLM 推理。</string>
+    <string>PhoneAI Gateway 在局域网内向你的 iPhone 提供本机 LLM 推理。</string>
     <key>NSBonjourServices</key>
     <array>
-        <string>_phoneclaw-llm._tcp</string>
+        <string>_phoneai-llm._tcp</string>
     </array>
 </dict>
 </plist>

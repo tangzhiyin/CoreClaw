@@ -7,7 +7,7 @@ import Security
 // 局域网 Mac 网关:广播自己 + OpenAI 兼容反向代理转发本机 Ollama。
 //   - NWListener 收手机的 HTTP (原生, 无依赖, 跟发现层同一套 Network 框架)
 //   - /v1/* 转发给 upstream (默认 localhost:11434 Ollama), 流式 SSE 原样透传回手机
-//   - LANAdvertiser 广播 _phoneclaw-llm._tcp + macID (复用发现层)
+//   - LANAdvertiser 广播 _phoneai-llm._tcp + macID (复用发现层)
 //
 // 现放 CLI 测全链路;以后移进菜单栏 app。/pair 握手 + 鉴权下一步加。
 // 简化前提 (受控客户端 RemoteInferenceService): 请求带 Content-Length (非 chunked);
@@ -79,7 +79,7 @@ struct PairedDevice: Identifiable, Sendable, Hashable, Codable {
 }
 
 enum GatewayCredentialStore {
-    private static let pairedDeviceService = "ai.phoneclaw.gateway.pairedDevices"
+    private static let pairedDeviceService = "ai.phoneai.gateway.pairedDevices"
 
     static func loadPairedDeviceToken(macID: String, deviceID: String) -> String? {
         load(service: pairedDeviceService, account: "\(macID)::\(deviceID)")
@@ -476,7 +476,7 @@ final class MacGateway {
     }
 
     private static func pairedDefaultsKey(macID: String) -> String {
-        "PhoneClaw.gateway.pairedDevices.\(macID)"
+        "PhoneAI.gateway.pairedDevices.\(macID)"
     }
 
     private static func loadPaired(macID: String) -> [PairedDevice] {

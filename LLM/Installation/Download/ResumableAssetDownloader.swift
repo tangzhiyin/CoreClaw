@@ -1000,7 +1000,7 @@ enum BackgroundDownloadError: Error {
 }
 
 private struct BackgroundDownloadTaskContext: Codable, Sendable {
-    private static let prefix = "phoneclaw-bg-download:"
+    private static let prefix = "phoneai-bg-download:"
 
     let schemaVersion: Int
     let assetID: String
@@ -1070,7 +1070,7 @@ private struct BackgroundDownloadTaskContext: Codable, Sendable {
 final class BackgroundDownloadSession: NSObject, URLSessionDownloadDelegate, URLSessionTaskDelegate {
     static let shared = BackgroundDownloadSession()
 
-    private let stateQueue = DispatchQueue(label: "com.phoneclaw.background-downloads.state")
+    private let stateQueue = DispatchQueue(label: "com.phoneai.background-downloads.state")
     private var transfers: [Int: BackgroundTransfer] = [:]
     private var manifestRootPaths: Set<String> = []
     private var backgroundCompletionHandlers: [String: () -> Void] = [:]
@@ -1078,7 +1078,7 @@ final class BackgroundDownloadSession: NSObject, URLSessionDownloadDelegate, URL
     private lazy var session: URLSession = {
         let configuration: URLSessionConfiguration
         if Bundle.main.bundleURL.pathExtension == "app" {
-            let bundleID = Bundle.main.bundleIdentifier ?? "com.phoneclaw.app"
+            let bundleID = Bundle.main.bundleIdentifier ?? "com.phoneai.app"
             configuration = URLSessionConfiguration.background(withIdentifier: "\(bundleID).background-downloads")
             configuration.sessionSendsLaunchEvents = true
             configuration.isDiscretionary = false

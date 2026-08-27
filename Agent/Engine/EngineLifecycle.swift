@@ -149,7 +149,7 @@ extension AgentEngine {
 
     // MARK: - SYSPROMPT 注入
 
-    /// 从 ApplicationSupport/PhoneClaw/SYSPROMPT.md 读取 system prompt。
+    /// 从 ApplicationSupport/PhoneAI/SYSPROMPT.md 读取 system prompt。
     /// 文件不存在时自动写入 kDefaultSystemPrompt（供用户后续编辑）。
     /// 两种自动迁移:
     /// 1. 缺新占位符且仍有旧 `___SKILLS___` → 备份后覆盖
@@ -162,7 +162,7 @@ extension AgentEngine {
         let fm = FileManager.default
         guard let supportDir = fm.urls(for: .applicationSupportDirectory,
                                         in: .userDomainMask).first else { return }
-        let dir  = supportDir.appendingPathComponent("PhoneClaw", isDirectory: true)
+        let dir  = supportDir.appendingPathComponent("PhoneAI", isDirectory: true)
         let file = dir.appendingPathComponent("SYSPROMPT.md")
 
         if !fm.fileExists(atPath: dir.path) {

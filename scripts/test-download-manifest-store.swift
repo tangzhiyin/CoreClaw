@@ -4,7 +4,7 @@ import Foundation
 struct DownloadManifestStoreTest {
     static func main() async throws {
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("phoneclaw-download-manifest-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("phoneai-download-manifest-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: root) }
 
         let store = DownloadManifestStore(rootDirectory: root)

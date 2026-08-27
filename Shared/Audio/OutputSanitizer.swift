@@ -5,13 +5,13 @@ import Foundation
 // Chat UI 和 Live Voice 共用的文本清洗逻辑。
 // 两种模式: chatUI 保留 thinking 标记, liveVoice 完全剥离。
 
-private let thinkingOpenMarker = "[[PHONECLAW_THINK]]"
-private let thinkingCloseMarker = "[[/PHONECLAW_THINK]]"
+private let thinkingOpenMarker = "[[PHONEAI_THINK]]"
+private let thinkingCloseMarker = "[[/PHONEAI_THINK]]"
 
 enum OutputSanitizer {
 
     enum Mode {
-        case chatUI      // thinking channel → [[PHONECLAW_THINK]]...
+        case chatUI      // thinking channel → [[PHONEAI_THINK]]...
         case liveVoice   // strip thinking/tool_call/all tags completely
     }
 
@@ -65,7 +65,7 @@ enum OutputSanitizer {
             processed = processed.replacingOccurrences(of: "{", with: "")
             processed = processed.replacingOccurrences(of: "}", with: "")
         } else {
-            // chatUI: strip tags but preserve [[PHONECLAW_THINK]] markers
+            // chatUI: strip tags but preserve [[PHONEAI_THINK]] markers
             processed = stripMLTagsPreservingMarkers(processed)
         }
 
@@ -87,7 +87,7 @@ enum OutputSanitizer {
 
     // MARK: - Private Helpers
 
-    /// Chat UI: convert <|channel|>thought\n...<channel|> to [[PHONECLAW_THINK]]...[[/PHONECLAW_THINK]]
+    /// Chat UI: convert <|channel|>thought\n...<channel|> to [[PHONEAI_THINK]]...[[/PHONEAI_THINK]]
     private static func preserveThinkingChannels(in text: String) -> String {
         let openTokens = ["<|channel|>thought\n", "<|channel>thought\n"]
         let closeToken = "<channel|>"
@@ -187,7 +187,7 @@ enum OutputSanitizer {
         return result
     }
 
-    /// Strip ML tags but preserve [[PHONECLAW_THINK]] markers
+    /// Strip ML tags but preserve [[PHONEAI_THINK]] markers
     private static func stripMLTagsPreservingMarkers(_ text: String) -> String {
         // Temporarily replace markers
         var result = text

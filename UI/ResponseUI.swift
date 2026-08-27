@@ -282,7 +282,7 @@ extension Notification.Name {
     /// 广播到所有 SelectionDismissibleTextView, 让它们清掉当前 selection。
     /// UITextView (isSelectable=true, isEditable=false) 不会因为外部 tap 自动清选区,
     /// 这是 UIKit 设计行为, 不是 bug; 我们通过这个通道补回"点别处就消失"的预期。
-    static let dismissAssistantTextSelection = Notification.Name("phoneclaw.dismissAssistantTextSelection")
+    static let dismissAssistantTextSelection = Notification.Name("phoneai.dismissAssistantTextSelection")
 }
 
 private final class SelectionDismissibleTextView: UITextView {

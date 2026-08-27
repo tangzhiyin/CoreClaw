@@ -1,5 +1,5 @@
 #!/bin/bash
-# PhoneClaw Skill translation sync check.
+# PhoneAI Skill translation sync check.
 #
 # 拦住的失败模式:
 #   1. SKILL.md 存在但 SKILL.<locale>.md 缺失
@@ -14,11 +14,11 @@
 # pre-commit 钩子里只关心当前 commit 里 staged 的 SKILL.md — 走 --staged-only。
 #
 # 跳过此检查 (仅限真要覆盖, 比如只改注释不影响翻译):
-#   PHONECLAW_SKIP_SKILL_SYNC=1 git commit ...
-# (跟 PHONECLAW_SKIP_HARNESS 独立, 不会被 harness skip 顺带跳过)
+#   PHONEAI_SKIP_SKILL_SYNC=1 git commit ...
+# (跟 PHONEAI_SKIP_HARNESS 独立, 不会被 harness skip 顺带跳过)
 
-if [[ -n "${PHONECLAW_SKIP_SKILL_SYNC:-}" ]]; then
-    echo "[check-skill-sync] PHONECLAW_SKIP_SKILL_SYNC set — 跳过"
+if [[ -n "${PHONEAI_SKIP_SKILL_SYNC:-}" ]]; then
+    echo "[check-skill-sync] PHONEAI_SKIP_SKILL_SYNC set — 跳过"
     exit 0
 fi
 
@@ -142,7 +142,7 @@ done
 if [[ $ERRORS -gt 0 ]]; then
     echo ""
     echo "[check-skill-sync] $ERRORS 个 skill 同步异常"
-    echo "跳过本次 (慎用): PHONECLAW_SKIP_SKILL_SYNC=1 git commit ..."
+    echo "跳过本次 (慎用): PHONEAI_SKIP_SKILL_SYNC=1 git commit ..."
     exit 1
 fi
 

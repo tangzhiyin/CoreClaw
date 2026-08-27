@@ -1,8 +1,8 @@
 // swift-tools-version: 6.1
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 //
-// NOTE: This is a SLIMMED fork of upstream `mlx-swift-lm` for PhoneClaw.
-// PhoneClaw only uses text LLM + multimodal VLM via a custom Gemma 4 implementation,
+// NOTE: This is a SLIMMED fork of upstream `mlx-swift-lm` for PhoneAI.
+// PhoneAI only uses text LLM + multimodal VLM via a custom Gemma 4 implementation,
 // so the following upstream targets have been dropped:
 //
 //   - MLXEmbedders          (embedding models — unused)

@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-// MARK: - PhoneClaw Language Service
+// MARK: - PhoneAI Language Service
 //
 // 单一语言入口。全 app 不再各自写 `Locale.preferredLanguages.contains { $0.hasPrefix("zh") }`,
 // 统一通过 `LanguageService.shared.current.resolved` 拿到生效语言 (zhHans / en / ja)。
@@ -77,7 +77,7 @@ final class LanguageService {
 
     static let shared = LanguageService()
 
-    private static let defaultsKey = "PhoneClaw.appLanguage"
+    private static let defaultsKey = "PhoneAI.appLanguage"
 
     /// 当前生效的语言上下文。读这个值即可, 无需再问 Locale。
     private(set) var current: LocalizationContext
@@ -373,11 +373,11 @@ private enum JapaneseFallbackLocalization {
         "End": "終了",
 
         "Download progress found. You can resume downloading.": "ダウンロード進捗があります。再開できます。",
-        "PhoneClaw processes chat, image understanding, voice, and tool execution locally by default. Chat content, images, and personal data are not uploaded to PhoneClaw servers.": "PhoneClawは既定でチャット、画像理解、音声、ツール実行を端末内で処理します。チャット内容、画像、個人データはPhoneClawサーバーへアップロードされません。",
+        "PhoneAI processes chat, image understanding, voice, and tool execution locally by default. Chat content, images, and personal data are not uploaded to PhoneAI servers.": "PhoneAIは既定でチャット、画像理解、音声、ツール実行を端末内で処理します。チャット内容、画像、個人データはPhoneAIサーバーへアップロードされません。",
         "Microphone, camera, calendar, reminders, contacts, and Health data are accessed only when you enable related features. Health data is read-only and used locally for summaries and insights.": "マイク、カメラ、カレンダー、リマインダー、連絡先、ヘルスケアデータは、関連機能を有効にした場合のみアクセスされます。ヘルスケアデータは読み取り専用で、端末内の要約と提案に使用されます。",
         "When you choose to download a model, the app connects to model sources to fetch model files. These downloads are model data, not executable code, and are stored on device.": "モデルのダウンロードを選択すると、アプリはモデル配布元に接続してモデルファイルを取得します。ダウンロードされるのはモデルデータであり、実行コードではなく、端末内に保存されます。",
-        "PhoneClaw does not use App Tracking Transparency tracking and does not use your data to track you across apps or websites.": "PhoneClawはApp Tracking Transparencyによる追跡を使用せず、アプリやWebサイトをまたいでユーザーを追跡する目的でデータを使用しません。",
-        "This summary explains how PhoneClaw handles data locally on device and when it accesses system permissions.": "この概要では、PhoneClawが端末内でデータを処理する方法と、システム権限へアクセスするタイミングを説明します。",
+        "PhoneAI does not use App Tracking Transparency tracking and does not use your data to track you across apps or websites.": "PhoneAIはApp Tracking Transparencyによる追跡を使用せず、アプリやWebサイトをまたいでユーザーを追跡する目的でデータを使用しません。",
+        "This summary explains how PhoneAI handles data locally on device and when it accesses system permissions.": "この概要では、PhoneAIが端末内でデータを処理する方法と、システム権限へアクセスするタイミングを説明します。",
     ]
 
     static func text(zh: String, en: String) -> String? {

@@ -18,7 +18,7 @@ When context grows, KV cache grows with it. That is why a model can advertise a 
 
 ## Product implication
 
-PhoneClaw is designed around practical local-agent tasks:
+PhoneAI is designed around practical local-agent tasks:
 
 - short and medium conversations
 - tool calls
@@ -31,7 +31,7 @@ It is not positioned as a cloud-scale long-context replacement. That boundary is
 
 ## Why 4096 is reasonable today
 
-PhoneClaw currently favors a conservative context window because the app must leave room for:
+PhoneAI currently favors a conservative context window because the app must leave room for:
 
 - model weights
 - KV cache
@@ -56,7 +56,7 @@ This is not a permanent limit. The comfortable context window can improve as:
 
 ## Design strategy
 
-PhoneClaw reduces pressure by using:
+PhoneAI reduces pressure by using:
 
 - focused Skills instead of one giant prompt
 - explicit tool routing
@@ -70,5 +70,5 @@ The core idea: use the model for reasoning and language, use native tools for du
 ## Useful links
 
 - [On-device Gemma on iPhone](ON_DEVICE_GEMMA.md)
-- [PhoneClaw Skill System](SKILL_SYSTEM.md)
+- [PhoneAI Skill System](SKILL_SYSTEM.md)
 - [README](../README.md)

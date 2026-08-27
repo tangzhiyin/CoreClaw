@@ -5,7 +5,7 @@ Standalone iOS app for visible true-device smoke tests.
 Open:
 
 ```sh
-open /Users/zxw/AITOOL/phoneclaw/Experiments/iOS27CoreAIProbeApp/iOS27CoreAIProbeApp.xcodeproj
+open /Users/zxw/AITOOL/phoneai/Experiments/iOS27CoreAIProbeApp/iOS27CoreAIProbeApp.xcodeproj
 ```
 
 Use `/Applications/Xcode-beta.app` / Xcode 27. Pick the `iOS27CoreAIProbeApp` scheme and run it on the iOS 27 device.

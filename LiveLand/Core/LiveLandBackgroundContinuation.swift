@@ -7,7 +7,7 @@ import BackgroundTasks
 final class LiveLandBackgroundContinuation {
     static let shared = LiveLandBackgroundContinuation()
 
-    static let taskIdentifier = "com.crisp.phoneclaw.liveland-continuation"
+    static let taskIdentifier = "com.crisp.phoneai.liveland-continuation"
 
     private let lock = NSLock()
     private var registered = false
@@ -15,7 +15,7 @@ final class LiveLandBackgroundContinuation {
     private var sessionActive = false
     private var activeTask: AnyObject?
     private var activeRequestIdentifier: String?
-    private var activeTitle = "PhoneClaw LiveLand"
+    private var activeTitle = "PhoneAI LiveLand"
     private var activeSubtitle = "Listening"
 
     private init() {}
@@ -54,7 +54,7 @@ final class LiveLandBackgroundContinuation {
         #endif
     }
 
-    func begin(title: String = "PhoneClaw LiveLand", subtitle: String = "Listening") {
+    func begin(title: String = "PhoneAI LiveLand", subtitle: String = "Listening") {
         #if canImport(BackgroundTasks)
         guard #available(iOS 26.0, *) else {
             print("[LiveLandBackground] continuous task unavailable before iOS 26")

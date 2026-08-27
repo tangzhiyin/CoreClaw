@@ -34,7 +34,7 @@ final class LiveCameraService: NSObject, @unchecked Sendable {
     // MARK: - AVCapture
 
     private let session = AVCaptureSession()
-    private let captureQueue = DispatchQueue(label: "com.phoneclaw.livecam", qos: .userInitiated)
+    private let captureQueue = DispatchQueue(label: "com.phoneai.livecam", qos: .userInitiated)
     private var videoOutput: AVCaptureVideoDataOutput?
     private var rawBuffer: CMSampleBuffer?    // 最新原始帧，captureQueue 上写
     private let rawBufferLock = NSLock()

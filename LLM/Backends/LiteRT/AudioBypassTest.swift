@@ -1,6 +1,6 @@
 #if DEBUG
 import Foundation
-import PhoneClawEngine
+import PhoneAIEngine
 
 // MARK: - Audio Bypass Test
 //
@@ -10,7 +10,7 @@ import PhoneClawEngine
 // 目的: 对比 engine.audio() (非流式) 和 engine.audioStreaming() (App 在用的流式),
 // 若非流式输出丰富而流式稀薄 → 坐实 streaming callback 丢 chunk。
 //
-// 触发: 设置环境变量 PHONECLAW_AUDIO_TEST=1
+// 触发: 设置环境变量 PHONEAI_AUDIO_TEST=1
 // (Edit Scheme → Run → Arguments → Environment Variables)
 
 enum AudioBypassTest {
@@ -18,7 +18,7 @@ enum AudioBypassTest {
     static let testPrompt = "请详细描述这段音频的内容，包括是什么类型、说了什么、有什么声音特征。"
 
     static func runIfRequested() {
-        guard ProcessInfo.processInfo.environment["PHONECLAW_AUDIO_TEST"] == "1" else {
+        guard ProcessInfo.processInfo.environment["PHONEAI_AUDIO_TEST"] == "1" else {
             return
         }
         Task.detached(priority: .utility) { await run() }

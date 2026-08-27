@@ -265,7 +265,7 @@ extension ToolRegistry {
             }
             if let error = await HealthTools.requestAllReadAuthorization() {
                 throw NSError(
-                    domain: "PhoneClaw.HealthPermission",
+                    domain: "PhoneAI.HealthPermission",
                     code: 1,
                     userInfo: [NSLocalizedDescriptionKey: error]
                 )

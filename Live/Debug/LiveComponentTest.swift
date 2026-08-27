@@ -29,7 +29,7 @@ enum LiveComponentTest {
         await tts.initialize()
 
         if tts.isAvailable {
-            await tts.speak("你好，我是 PhoneClaw。请对着手机说话测试语音检测。")
+            await tts.speak("你好，我是 PhoneAI。请对着手机说话测试语音检测。")
             for _ in 0..<150 {
                 try? await Task.sleep(nanoseconds: 100_000_000)
                 if tts.state != .speaking { break }
@@ -109,7 +109,7 @@ enum LiveComponentTest {
 
         if tts.isAvailable {
             print("[LiveTest] TTS ready, speaking...")
-            await tts.speak("你好，我是 PhoneClaw，一个运行在你手机上的 AI 助手。")
+            await tts.speak("你好，我是 PhoneAI，一个运行在你手机上的 AI 助手。")
             for _ in 0..<100 {
                 try? await Task.sleep(nanoseconds: 100_000_000)
                 if tts.state != .speaking { break }

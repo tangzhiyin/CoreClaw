@@ -1,6 +1,6 @@
 name: iOS27CoreAIProbeApp
 options:
-  bundleIdPrefix: com.crisp.phoneclaw
+  bundleIdPrefix: com.crisp.phoneai
   deploymentTarget:
     iOS: "27.0"
 settings:
@@ -17,7 +17,7 @@ targets:
       - path: Sources
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.crisp.phoneclaw.ios27probe
+        PRODUCT_BUNDLE_IDENTIFIER: com.crisp.phoneai.ios27probe
         PRODUCT_NAME: iOS27CoreAIProbeApp
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: iOS27 Probe

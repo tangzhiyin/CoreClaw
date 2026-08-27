@@ -1,4 +1,4 @@
-# PhoneClaw — https://tangzhiyin.github.io/PhoneClaw_Crisp/
+# PhoneAI — https://tangzhiyin.github.io/PhoneAI/
 User-agent: *
 Allow: /
 
@@ -24,4 +24,4 @@ Allow: /
 # User-agent: GPTBot
 # Disallow: /
 
-Sitemap: https://tangzhiyin.github.io/PhoneClaw_Crisp/sitemap.xml
+Sitemap: https://tangzhiyin.github.io/PhoneAI/sitemap.xml

@@ -7,7 +7,7 @@ import Foundation
 // 读取顺序: 环境变量 > UserDefaults > 编译时默认。
 
 private enum HotfixFlagKey: String {
-    case useHotfixPromptPipeline = "PHONECLAW_USE_HOTFIX_PROMPT_PIPELINE"
+    case useHotfixPromptPipeline = "PHONEAI_USE_HOTFIX_PROMPT_PIPELINE"
     case enablePreflightBudget = "ENABLE_PREFLIGHT_BUDGET"
     case enableCanonicalToolResult = "ENABLE_CANONICAL_TOOL_RESULT"
     case enableHistoryTrim = "ENABLE_HISTORY_TRIM"

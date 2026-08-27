@@ -14,8 +14,8 @@ struct PromptBuilder {
     static var defaultSystemPrompt: String { PromptLocale.current.defaultSystemPromptShort }
 
     // 内部 sentinel 标记, 纯数据, 无需本地化
-    private static let thinkingOpenMarker = "[[PHONECLAW_THINK]]"
-    private static let thinkingCloseMarker = "[[/PHONECLAW_THINK]]"
+    private static let thinkingOpenMarker = "[[PHONEAI_THINK]]"
+    private static let thinkingCloseMarker = "[[/PHONEAI_THINK]]"
 
     // 发给模型的指令 / 对话内标记, 按当前语言取
     private static var thinkingLanguageInstruction: String { PromptLocale.current.thinkingLanguageInstruction }
@@ -64,7 +64,7 @@ struct PromptBuilder {
     private static func currentTimeAnchorBlock() -> String {
         let locale = PromptLocale.current
         let format = locale.timeAnchorFormat
-        if let fixed = ProcessInfo.processInfo.environment["PHONECLAW_FIXED_CURRENT_TIME_ANCHOR"]?
+        if let fixed = ProcessInfo.processInfo.environment["PHONEAI_FIXED_CURRENT_TIME_ANCHOR"]?
             .trimmingCharacters(in: .whitespacesAndNewlines),
            !fixed.isEmpty {
             return String(format: format, fixed)
@@ -246,7 +246,7 @@ struct PromptBuilder {
         // (2026-04-16, E2B/E4B × "你是谁"/"翻译"/"删联系人"/"总结"/"天气" 矩阵) 证明:
         //   1. 全暴露后 Gemma 不会在 light 路径发 <tool_call> (尾缀"严禁输出"
         //      压制成功, 即使 prompt 里带 <tool_call> 例子也不会自发模仿)
-        //   2. E2B 在"你是谁"场景 persona 显著改善 (能说出 PhoneClaw)
+        //   2. E2B 在"你是谁"场景 persona 显著改善 (能说出 PhoneAI)
         //   3. E2B 在"删联系人"场景修掉致命幻觉 —— 只取第一段时 E2B 会回
         //      "好的，我已经将联系人张三删除了" 假装执行, 全暴露后正确询问
         //

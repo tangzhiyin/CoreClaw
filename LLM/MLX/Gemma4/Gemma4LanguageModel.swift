@@ -271,9 +271,9 @@ public class Gemma4LanguageModel: Module, KVCacheDimensionProvider {
         // 换 E4B 2 scenario 回归 (17/21 vs 19/21), E2B 无回归 (10/21 持平).
         // 真机目标: 缓解 jetsam 下多轮 tool_call 累积 OOM.
         //
-        // 覆盖: PHONECLAW_QUANTIZED_KV=0 关闭 (退回 fp16), =8 用 8-bit, 未设 → 4-bit.
+        // 覆盖: PHONEAI_QUANTIZED_KV=0 关闭 (退回 fp16), =8 用 8-bit, 未设 → 4-bit.
         let quantBits: Int? = {
-            let raw = ProcessInfo.processInfo.environment["PHONECLAW_QUANTIZED_KV"]
+            let raw = ProcessInfo.processInfo.environment["PHONEAI_QUANTIZED_KV"]
             guard let raw else { return 4 }
             if raw == "0" || raw == "off" || raw.lowercased() == "false" { return nil }
             if let n = Int(raw), n == 4 || n == 8 { return n }

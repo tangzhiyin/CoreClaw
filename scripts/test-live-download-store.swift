@@ -4,7 +4,7 @@ import Foundation
 struct LiveDownloadStoreTest {
     static func main() throws {
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("phoneclaw-live-download-store-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("phoneai-live-download-store-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: root) }
 
         let staging = root.appendingPathComponent(".downloads/live-vad/staging", isDirectory: true)

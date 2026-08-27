@@ -183,7 +183,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.crisp.phoneclaw.ios27probe;
+				PRODUCT_BUNDLE_IDENTIFIER = com.crisp.phoneai.ios27probe;
 				PRODUCT_NAME = iOS27CoreAIProbeApp;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -270,7 +270,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.crisp.phoneclaw.ios27probe;
+				PRODUCT_BUNDLE_IDENTIFIER = com.crisp.phoneai.ios27probe;
 				PRODUCT_NAME = iOS27CoreAIProbeApp;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";

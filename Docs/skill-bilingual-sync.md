@@ -1,6 +1,6 @@
 # Skill bilingual sync
 
-PhoneClaw 的 skill 库每个 skill 在 `Skills/Library/<id>/` 下有两个 markdown:
+PhoneAI 的 skill 库每个 skill 在 `Skills/Library/<id>/` 下有两个 markdown:
 
 - `SKILL.md` — 中文 (authoritative source, 用户/开发者先写这个)
 - `SKILL.en.md` — 英文翻译版 (zh 改了之后必须同步重翻)
@@ -77,10 +77,10 @@ git commit -m "feat(skills): calendar — add end_time rule"
 非常规场景 (如只改 zh 的注释, 不影响翻译语义) 可以:
 
 ```bash
-PHONECLAW_SKIP_SKILL_SYNC=1 git commit -m "..."
+PHONEAI_SKIP_SKILL_SYNC=1 git commit -m "..."
 ```
 
-变量**独立**于 `PHONECLAW_SKIP_HARNESS` — 跳 harness 不会顺带跳 skill sync。
+变量**独立**于 `PHONEAI_SKIP_HARNESS` — 跳 harness 不会顺带跳 skill sync。
 
 ## Runtime override 风险 (未覆盖)
 
