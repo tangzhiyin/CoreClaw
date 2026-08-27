@@ -592,14 +592,14 @@ private enum SkillsInfoTopic: Identifiable {
 }
 
 private enum SkillsStyle {
-    static let ink = Color(light: "303033", dark: "EEE9DF")
-    static let primary = Color(light: "2F3033", dark: "EEE9DF")
-    static let onPrimary = Color(light: "FFFFFF", dark: "1D1A16")
-    static let secondary = Color(light: "7A756E", dark: "B9AFA3")
-    static let muted = Color(light: "8B857C", dark: "A89F94")
-    static let tertiary = Color(light: "B9B0A5", dark: "7F766A")
-    static let hairline = Color(light: "E8E2D8", dark: "373128")
-    static let controlFill = Color(light: "ECE8E0", dark: "2C2821").opacity(0.76)
-    static let selectedFill = Color(light: "FFFFFF", dark: "211E19").opacity(0.72)
+    static let ink = Theme.textPrimary
+    static let primary = Theme.textPrimary
+    static let onPrimary = Theme.bg
+    static let secondary = Theme.textSecondary
+    static let muted = Theme.textSecondary.opacity(0.78)
+    static let tertiary = Theme.textTertiary
+    static let hairline = Theme.border
+    static let controlFill = Theme.bgHover.opacity(0.82)
+    static let selectedFill = Theme.bgElevated.opacity(0.9)
     static let danger = Color(light: "9E554D", dark: "E08B80")
 }

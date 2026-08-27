@@ -31,6 +31,37 @@ public enum PromptTokenEstimator {
         return max(1, Int((cjkTokens + otherTokens).rounded(.up)))
     }
 
+    /// Fits oversized user input into a token budget while retaining both the
+    /// request's opening context and its latest details.
+    public static func truncatePreservingEdges(_ text: String, maxTokens: Int) -> String {
+        let normalized = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard maxTokens > 0, estimate(normalized) > maxTokens else { return normalized }
+
+        let marker = "\n...\n"
+        var retainedCharacters = max(
+            1,
+            Int(Double(normalized.count) * Double(maxTokens) / Double(max(estimate(normalized), 1)) * 0.85)
+        )
+
+        while retainedCharacters > 1 {
+            let prefixCount = max(1, retainedCharacters * 2 / 3)
+            let suffixCount = max(0, retainedCharacters - prefixCount)
+            let candidate = String(normalized.prefix(prefixCount))
+                + marker
+                + String(normalized.suffix(suffixCount))
+            if estimate(candidate) <= maxTokens {
+                return candidate
+            }
+            retainedCharacters = max(1, Int(Double(retainedCharacters) * 0.85))
+        }
+
+        var candidate = String(normalized.prefix(1))
+        while estimate(candidate) > maxTokens, candidate.count > 1 {
+            candidate.removeLast()
+        }
+        return candidate
+    }
+
     /// 估算 prompt 的结构化 token 分布。`totalTokens` 保持等于旧的整段
     /// `estimate(_:)` 结果，避免引入 transcript 后让 context budget 变松。
     public static func estimateBreakdown(_ prompt: String) -> PromptTokenBreakdown {

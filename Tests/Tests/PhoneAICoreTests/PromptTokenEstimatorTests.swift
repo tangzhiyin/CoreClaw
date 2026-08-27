@@ -100,6 +100,19 @@ final class PromptTokenEstimatorTests: XCTestCase {
         }
     }
 
+    func testTruncatePreservingEdgesFitsBudgetAndKeepsRequestBoundaries() {
+        let opening = "请分析下面这份很长的故障日志，并给出修复步骤。"
+        let closing = "最终错误代码是 NETWORK_TIMEOUT_42。"
+        let input = opening + String(repeating: "中间日志内容 ", count: 400) + closing
+
+        let compacted = PromptTokenEstimator.truncatePreservingEdges(input, maxTokens: 180)
+
+        XCTAssertLessThanOrEqual(PromptTokenEstimator.estimate(compacted), 180)
+        XCTAssertTrue(compacted.hasPrefix(opening))
+        XCTAssertTrue(compacted.hasSuffix(closing))
+        XCTAssertTrue(compacted.contains("..."))
+    }
+
     func testLegacyEstimatorComparison() {
         // For a Chinese-heavy prompt, new estimator should report MORE tokens
         // than legacy `chars / 4.0` (which under-counted CJK).

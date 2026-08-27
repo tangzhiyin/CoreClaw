@@ -507,6 +507,9 @@ extension AgentEngine {
             shouldUseFullAgentPrompt: shouldUseFullAgentPrompt,
             canUseDelta: promptBundle.canUseDelta
         )
+        var effectiveTextForPrompt = normalizedText
+        var usesContextRecoverySystemPrompt = false
+        var contextRecoveryUsesDirectAnswer = false
         var textPromptPlan = makePromptPlan(
             prompt: promptBundle.streamingPrompt,
             shape: textPromptShape,
@@ -519,35 +522,67 @@ extension AgentEngine {
             && !promptBundle.canUseDelta {
             var trimmedPriorHistory = basePriorHistory
             while exceedsSafeContextBudget(textPromptPlan.budgetDecision) {
-                guard HotfixFeatureFlags.enableHistoryTrim,
-                      let nextTrimmedHistory = ConversationMemoryPolicy.nextTrimmedPriorHistory(
+                if HotfixFeatureFlags.enableHistoryTrim,
+                   let nextTrimmedHistory = ConversationMemoryPolicy.nextTrimmedPriorHistory(
                         from: trimmedPriorHistory,
                         historyPolicyForSkillOrTool: { [weak self] name in
                             self?.historyPolicy(forSkillOrToolName: name)
                         }
-                      ) else {
-                    let hardRejectMessage = PromptLocale.current.hardRejectContextTooLong
-                    if let existingIndex = earlyAssistantPlaceholderIndex,
-                       messages.indices.contains(existingIndex) {
-                        messages[existingIndex].update(role: .system, content: hardRejectMessage)
-                    } else {
-                        messages.append(ChatMessage(role: .system, content: hardRejectMessage))
-                    }
-                    recordCompletedObservation(
-                        plan: textPromptPlan,
-                        advancePromptPipelineState: false,
-                        preflightHardReject: true
+                   ) {
+                    trimmedPriorHistory = nextTrimmedHistory
+                } else if !usesContextRecoverySystemPrompt {
+                    usesContextRecoverySystemPrompt = true
+                    log(
+                        "[ContextRecovery] switching to compact system prompt: " +
+                        "estimated=\(textPromptPlan.budgetDecision.estimatedPromptTokens) " +
+                        "budget=\(selectedModelCapabilities.safeContextBudgetTokens)"
                     )
-                    finishTurn(context: turnContext)
-                    return
+                } else {
+                    let currentInputTokens = PromptTokenEstimator.estimate(effectiveTextForPrompt)
+                    let overflow = textPromptPlan.budgetDecision.estimatedPromptTokens
+                        + textPromptPlan.budgetDecision.reservedOutputTokens
+                        - selectedModelCapabilities.safeContextBudgetTokens
+                    let targetInputTokens = max(128, currentInputTokens - max(overflow + 64, 128))
+                    let compactedInput = PromptTokenEstimator.truncatePreservingEdges(
+                        effectiveTextForPrompt,
+                        maxTokens: targetInputTokens
+                    )
+                    if compactedInput == effectiveTextForPrompt,
+                       !contextRecoveryUsesDirectAnswer {
+                        contextRecoveryUsesDirectAnswer = true
+                        log("[ContextRecovery] dropping oversized tool schema for direct answer")
+                    } else if compactedInput == effectiveTextForPrompt {
+                        let hardRejectMessage = PromptLocale.current.hardRejectContextTooLong
+                        if let existingIndex = earlyAssistantPlaceholderIndex,
+                           messages.indices.contains(existingIndex) {
+                            messages[existingIndex].update(role: .system, content: hardRejectMessage)
+                        } else {
+                            messages.append(ChatMessage(role: .system, content: hardRejectMessage))
+                        }
+                        recordCompletedObservation(
+                            plan: textPromptPlan,
+                            advancePromptPipelineState: false,
+                            preflightHardReject: true
+                        )
+                        finishTurn(context: turnContext)
+                        return
+                    } else {
+                        effectiveTextForPrompt = compactedInput
+                        log(
+                            "[ContextRecovery] compacted current input: " +
+                            "tokens=\(currentInputTokens)->\(PromptTokenEstimator.estimate(compactedInput))"
+                        )
+                    }
                 }
 
-                trimmedPriorHistory = nextTrimmedHistory
                 if forceImageFollowUpTextPrompt, let imageFollowUpBridgeSummary {
+                    let recoverySystemPrompt = usesContextRecoverySystemPrompt
+                        ? PromptBuilder.contextRecoverySystemPrompt(allowsTools: false)
+                        : config.systemPrompt
                     let imageFollowUpTextPrompt = PromptBuilder.buildImageFollowUpTextPrompt(
-                        userMessage: normalizedText,
+                        userMessage: effectiveTextForPrompt,
                         assistantSummary: imageFollowUpBridgeSummary,
-                        systemPrompt: config.systemPrompt,
+                        systemPrompt: recoverySystemPrompt,
                         enableThinking: effectiveEnableThinking
                     )
                     promptBundle = (
@@ -559,18 +594,25 @@ extension AgentEngine {
                         streamingPlanningHistory: []
                     )
                 } else {
+                    let recoveryUsesFullAgentPrompt =
+                        shouldUseFullAgentPrompt && !contextRecoveryUsesDirectAnswer
                     promptBundle = buildTextPromptBundle(
                         priorHistory: trimmedPriorHistory,
-                        normalizedText: normalizedText,
+                        normalizedText: effectiveTextForPrompt,
                         shouldUsePlanner: shouldUsePlanner,
-                        shouldUseFullAgentPrompt: shouldUseFullAgentPrompt,
+                        shouldUseFullAgentPrompt: recoveryUsesFullAgentPrompt,
                         includeTimeAnchor: turnRequiresTimeAnchor,
                         includeImageHistoryMarkers: includeImageHistoryMarkers,
                         imageFollowUpBridgeSummary: imageFollowUpBridgeSummary,
                         activeSkillInfos: activeSkillInfos,
                         matchedSkillIdsForTurn: matchedSkillIdsForTurn,
                         preloadedSkills: preloadedSkills,
-                        currentUserMessage: currentUserMessage
+                        currentUserMessage: currentUserMessage,
+                        systemPromptOverride: usesContextRecoverySystemPrompt
+                            ? PromptBuilder.contextRecoverySystemPrompt(
+                                allowsTools: recoveryUsesFullAgentPrompt
+                            )
+                            : nil
                     )
                 }
                 textPromptPlan = makePromptPlan(
@@ -584,19 +626,23 @@ extension AgentEngine {
         let lightPrompt = promptBundle.lightPrompt
         let plannerInputPrompt = promptBundle.plannerInputPrompt
         let streamingPrompt = promptBundle.streamingPrompt
-        let runtimeToolScope = runtimeToolScope(
-            for: preloadedSkills,
-            shouldUseFullAgentPrompt: shouldUseFullAgentPrompt
-        )
+        let runtimeToolScope = contextRecoveryUsesDirectAnswer
+            ? RuntimeToolScope()
+            : runtimeToolScope(
+                for: preloadedSkills,
+                shouldUseFullAgentPrompt: shouldUseFullAgentPrompt
+            )
         lastTurnStreamingPrompt = streamingPrompt
         let canUseDelta = promptBundle.canUseDelta
         if canUseDelta {
             log("[Agent] KV cache delta mode: \(streamingPrompt.count) chars (vs full \(lightPrompt.count) chars)")
         }
         await prepareSessionGroupTransitionIfNeeded(for: textPromptPlan)
-        log("[Agent] text prompt mode=\(shouldUseFullAgentPrompt ? "agent" : "light"), planner-input-chars=\(plannerInputPrompt.count), streaming-chars=\(streamingPrompt.count), skills=\(activeSkillInfos.count)")
+        let streamingUsesFullAgentPrompt =
+            shouldUseFullAgentPrompt && !contextRecoveryUsesDirectAnswer
+        log("[Agent] text prompt mode=\(streamingUsesFullAgentPrompt ? "agent" : "light"), planner-input-chars=\(plannerInputPrompt.count), streaming-chars=\(streamingPrompt.count), skills=\(activeSkillInfos.count)")
         logPromptDiagnostics(
-            label: shouldUseFullAgentPrompt ? "processInput.agent" : "processInput.light",
+            label: streamingUsesFullAgentPrompt ? "processInput.agent" : "processInput.light",
             prompt: streamingPrompt
         )
 
@@ -716,7 +762,7 @@ extension AgentEngine {
                     }
 
                     let cleaned = self.cleanOutput(fullText)
-                    if shouldUseFullAgentPrompt,
+                    if streamingUsesFullAgentPrompt,
                        matchedSkillIdsForTurn.count == 1,
                        !preloadedSkills.isEmpty,
                        self.canFallbackToPreloadedSkillTool(

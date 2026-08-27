@@ -101,12 +101,10 @@ enum UIScale {
 
     // MARK: - Welcome Screen Spec
 
-    /// 品牌签名 (BrandMarkView) 占屏宽比例 — 极小, 是"签字" 不是 "印章".
-    /// 大屏反而 略缩, 留更多空气.
+    /// 聊天空白态 iPhone 背景标记占屏宽比例。
     static var orbWidthRatio: CGFloat { isLargeScreen ? 0.20 : 0.22 }
 
-    /// 品牌签名视觉直径. (名字保留 orbSize 是为了减少调用点改动 —
-    /// 历史 PorcelainOrbView 已被 BrandMarkView 替换.)
+    /// 背景标记高度。名字保留 orbSize 以减少调用点改动。
     static var orbSize: CGFloat { screenWidth * orbWidthRatio }
 
     /// 顶部固定留白 (topBar 下方 → 签名开始) — 让签名落到屏幕 ~ 42-45%

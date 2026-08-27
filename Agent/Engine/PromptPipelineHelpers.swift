@@ -198,7 +198,8 @@ extension AgentEngine {
         activeSkillInfos: [SkillInfo],
         matchedSkillIdsForTurn: [String],
         preloadedSkills: [PromptBuilder.PreloadedSkill],
-        currentUserMessage: ChatMessage
+        currentUserMessage: ChatMessage,
+        systemPromptOverride: String? = nil
     ) -> (
         lightPrompt: String,
         agentPrompt: String?,
@@ -207,13 +208,14 @@ extension AgentEngine {
         canUseDelta: Bool,
         streamingPlanningHistory: [ChatMessage]
     ) {
+        let effectiveSystemPrompt = systemPromptOverride ?? config.systemPrompt
         let enableThinkingForTextAnswer =
             effectiveEnableThinking && !shouldUseFullAgentPrompt && !shouldUsePlanner
         let lightHistory = shouldUsePlanner ? [] : priorHistory
         let lightPrompt = PromptBuilder.buildLightweightTextPrompt(
             userMessage: normalizedText,
             history: lightHistory,
-            systemPrompt: config.systemPrompt,
+            systemPrompt: effectiveSystemPrompt,
             enableThinking: enableThinkingForTextAnswer,
             historyDepth: lightHistory.count,
             includeImageHistoryMarkers: includeImageHistoryMarkers,
@@ -227,7 +229,7 @@ extension AgentEngine {
             includeImageHistoryMarkers: includeImageHistoryMarkers,
             imageFollowUpBridgeSummary: imageFollowUpBridgeSummary,
             history: priorHistory,
-            systemPrompt: config.systemPrompt,
+            systemPrompt: effectiveSystemPrompt,
             enableThinking: enableThinkingForTextAnswer,
             historyDepth: priorHistory.count,
             showListSkillsHint: matchedSkillIdsForTurn.isEmpty,

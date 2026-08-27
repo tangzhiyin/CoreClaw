@@ -5,45 +5,38 @@ import UIKit
 import AppKit
 #endif
 
-// MARK: - PhoneAI 设计系统(瓷器风,v2)
+// MARK: - PhoneAI 设计系统(深灰,v3)
 // 跨平台共享:macOS + iOS
 //
-// v2 配色锚点:
-//   - 主背景 champagne #F8F5EF (跟 master 设计稿一致)
-//   - 强调色 amber copper #C77A3F (跟 App Icon 金爪同色系,brand 主载体)
-//   - 状态点 muted gold #C39660 (避开 iOS 通知红语义)
-//   - 文字深灰系 (light theme 下保持高可读性)
-//
-// dark theme 的旧值 (#1A1915 / #D4A574 等) 已迁移走 — Live mode 内部
-// 用 dark 风格的 view 自己持有局部颜色, 不再走 Theme.bg。
+// light/dark appearance 都保持深灰基调，依靠表面层级和文字明度区分。
 
 struct Theme {
     // MARK: 背景
-    static let bg = Color(light: "F8F5EF", dark: "15130F")
-    static let bgElevated = Color(light: "FFFFFF", dark: "211E19")
-    static let bgHover = Color(light: "EAE5DB", dark: "2D2821")
+    static let bg = Color(light: "292B2F", dark: "16181B")
+    static let bgElevated = Color(light: "34373C", dark: "202328")
+    static let bgHover = Color(light: "41454B", dark: "2C3036")
 
     // MARK: 文字
-    static let textPrimary = Color(light: "3A342E", dark: "EFE9DF")
-    static let textSecondary = Color(light: "70675E", dark: "B9AFA3")
-    static let textTertiary = Color(light: "B8ADA0", dark: "756D63")
-    static let assistantText = Color(light: "4A433B", dark: "BDB3A6")
+    static let textPrimary = Color(light: "F1F2F3", dark: "F2F3F4")
+    static let textSecondary = Color(light: "BEC1C5", dark: "B8BCC1")
+    static let textTertiary = Color(light: "898E95", dark: "7D838B")
+    static let assistantText = Color(light: "DADCDF", dark: "D4D7DA")
 
     // MARK: 强调色 (brand)
-    static let accent = Color(light: "C77A3F", dark: "D59B63")
-    static let accentSubtle = Color(light: "C77A3F", dark: "D59B63").opacity(0.16)
-    static let accentMuted = Color(light: "C39660", dark: "C99B68")
-    static let accentGreen = Color(light: "7CB87C", dark: "8FD08F")
+    static let accent = Color(light: "858D98", dark: "929BA7")
+    static let accentSubtle = Color(light: "858D98", dark: "929BA7").opacity(0.22)
+    static let accentMuted = Color(light: "747D88", dark: "808A96")
+    static let accentGreen = Color(light: "71897A", dark: "7E9988")
 
     // MARK: 对话
-    static let userBubble = Color(light: "C49660", dark: "C49660").opacity(0.14)
-    static let userBubbleStroke = Color(light: "C49660", dark: "D0A16D").opacity(0.18)
-    static let userText = Color(light: "6A5848", dark: "E6D3BC")
-    static let quietAction = Color(light: "8D8275", dark: "8E8378").opacity(0.5)
+    static let userBubble = Color(light: "50555D", dark: "383D44").opacity(0.72)
+    static let userBubbleStroke = Color(light: "666D77", dark: "555C66").opacity(0.46)
+    static let userText = Color(light: "ECEEF0", dark: "E7E9EB")
+    static let quietAction = Color(light: "9DA2A9", dark: "8E949C").opacity(0.62)
 
     // MARK: 边框
-    static let border = Color(light: "E0DED7", dark: "39332A")
-    static let borderSubtle = Color(light: "F0EBE2", dark: "2B261F")
+    static let border = Color(light: "4B5058", dark: "373C43")
+    static let borderSubtle = Color(light: "383C42", dark: "292D32")
 
     // MARK: 响应式间距
     #if os(macOS)

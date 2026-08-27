@@ -875,6 +875,8 @@
 				479C4F7A038F48E691B8652F /* Sources */,
 				4B243621551C86F4B6922A8F /* Frameworks */,
 				E6F7081A2B3C4D5E6F708100 /* Resources */,
+				BB2000000000000000000023 /* Remove private Crisp skill */,
+				BB2000000000000000000022 /* Bundle Gemma 4 E2B model */,
 				A7C400000000000000000004 /* Embed Foundation Extensions */,
 				BB2000000000000000000021 /* Copy LiteRT runtime plugin frameworks */,
 				BB2000000000000000000020 /* Re-sign embedded dylibs */,
@@ -1039,6 +1041,46 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "set -euo pipefail\n\nSRC_ROOT=\"${SRCROOT}/LocalPackages/PhoneAIEngine/Frameworks\"\nFRAMEWORKS_DIR=\"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}\"\nSTAMP=\"${SCRIPT_OUTPUT_FILE_1}\"\nmkdir -p \"${FRAMEWORKS_DIR}\" \"$(dirname \"${STAMP}\")\"\n\ncase \"${PLATFORM_NAME:-}\" in\n  iphoneos)\n    SLICE=\"ios-arm64\"\n    ;;\n  iphonesimulator)\n    SLICE=\"ios-arm64-simulator\"\n    ;;\n  *)\n    echo \"note: Unknown platform '${PLATFORM_NAME:-}', skipping LiteRT runtime plugin frameworks\"\n    touch \"${STAMP}\"\n    exit 0\n    ;;\nesac\n\ncopy_companion_framework() {\n  name=\"$1\"\n  src=\"${SRC_ROOT}/${name}.xcframework/${SLICE}/${name}.framework\"\n  dst=\"${FRAMEWORKS_DIR}/${name}.framework\"\n\n  if [ ! -d \"${src}\" ]; then\n    echo \"note: Optional LiteRT companion framework slice is unavailable: ${src}; skipping\"\n    rm -rf \"${dst}\"\n    return 0\n  fi\n\n  rm -rf \"${dst}\"\n  ditto \"${src}\" \"${dst}\"\n\n  if [ \"${CODE_SIGNING_ALLOWED:-}\" = \"YES\" ]; then\n    sign_identity=\"${EXPANDED_CODE_SIGN_IDENTITY:-}\"\n    if [ -z \"${sign_identity}\" ]; then\n      sign_identity=\"-\"\n    fi\n    codesign --force --sign \"${sign_identity}\" --timestamp=none --preserve-metadata=identifier,entitlements \"${dst}\"\n  fi\n}\n\ncopy_companion_framework \"LiteRtMetalAccelerator\"\ncopy_companion_framework \"LiteRtTopKMetalSampler\"\ntouch \"${STAMP}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		BB2000000000000000000022 /* Bundle Gemma 4 E2B model */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Bundle Gemma 4 E2B model";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -euo pipefail\n\nMODEL_NAME=\"gemma-4-E2B-it.litertlm\"\nEXPECTED_SIZE=2588147712\nSOURCE=\"${SRCROOT}/Models/${MODEL_NAME}\"\nDESTINATION=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/${MODEL_NAME}\"\n\n# Keep ordinary Debug builds lightweight. Release archives include the model so\n# a TestFlight installation can run offline without a separate 2.59 GB download.\nif [ \"${CONFIGURATION:-}\" != \"Release\" ]; then\n  rm -f \"${DESTINATION}\"\n  echo \"note: Gemma 4 E2B bundling is enabled for Release builds only\"\n  exit 0\nfi\n\nif [ ! -f \"${SOURCE}\" ]; then\n  rm -f \"${DESTINATION}\"\n  if [ \"${ACTION:-}\" = \"install\" ]; then\n    echo \"error: Release archive requires ${SOURCE}. Download Gemma 4 E2B before archiving.\" >&2\n    exit 1\n  fi\n  echo \"note: Optional bundled Gemma 4 E2B model is unavailable; Release build will use the in-app downloader\"\n  exit 0\nfi\n\nACTUAL_SIZE=$(stat -f '%z' \"${SOURCE}\")\nif [ \"${ACTUAL_SIZE}\" -ne \"${EXPECTED_SIZE}\" ]; then\n  echo \"error: ${SOURCE} has ${ACTUAL_SIZE} bytes; expected ${EXPECTED_SIZE}. Remove the incomplete file and download it again.\" >&2\n  exit 1\nfi\n\nmkdir -p \"$(dirname \"${DESTINATION}\")\"\nif [ ! -f \"${DESTINATION}\" ] || [ \"$(stat -f '%z' \"${DESTINATION}\")\" -ne \"${EXPECTED_SIZE}\" ]; then\n  ditto \"${SOURCE}\" \"${DESTINATION}\"\nfi\necho \"Bundled ${MODEL_NAME} (${ACTUAL_SIZE} bytes)\"\n";
+			showEnvVarsInLog = 0;
+		};
+		BB2000000000000000000023 /* Remove private Crisp skill */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Remove private Crisp skill";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -euo pipefail\n\nPRIVATE_SKILL=\"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Library/crisp\"\nif [ -e \"${PRIVATE_SKILL}\" ]; then\n  rm -rf \"${PRIVATE_SKILL}\"\n  echo \"Removed private Crisp skill from the app bundle\"\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -1424,7 +1466,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = PhoneAI.entitlements;
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
-				CURRENT_PROJECT_VERSION = 44;
+				CURRENT_PROJECT_VERSION = 47;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
 				HEADER_SEARCH_PATHS = (
@@ -1448,7 +1490,7 @@
 					"$(SRCROOT)/Frameworks/piper_plus.xcframework/ios-arm64",
 					"$(SRCROOT)/Frameworks/sherpa-onnx.xcframework/ios-arm64",
 				);
-				MARKETING_VERSION = 1.4.0;
+				MARKETING_VERSION = 1.4.1;
 				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
 					"$(inherited)",
 					"-lonnxruntime",
@@ -1470,7 +1512,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 44;
+				CURRENT_PROJECT_VERSION = 47;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LiveLand/Widget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -1479,7 +1521,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.4.0;
+				MARKETING_VERSION = 1.4.1;
 				PHONEAI_WIDGET_BUNDLE_ID = "$(PHONEAI_APP_BUNDLE_ID).LiveActivityWidget";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PHONEAI_WIDGET_BUNDLE_ID)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1497,7 +1539,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 44;
+				CURRENT_PROJECT_VERSION = 47;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LiveLand/Widget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -1506,7 +1548,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.4.0;
+				MARKETING_VERSION = 1.4.1;
 				PHONEAI_WIDGET_BUNDLE_ID = "$(PHONEAI_APP_BUNDLE_ID).LiveActivityWidget";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PHONEAI_WIDGET_BUNDLE_ID)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1526,7 +1568,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = PhoneAI.entitlements;
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
-				CURRENT_PROJECT_VERSION = 44;
+				CURRENT_PROJECT_VERSION = 47;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = x86_64;
 				HEADER_SEARCH_PATHS = (
@@ -1550,7 +1592,7 @@
 					"$(SRCROOT)/Frameworks/piper_plus.xcframework/ios-arm64",
 					"$(SRCROOT)/Frameworks/sherpa-onnx.xcframework/ios-arm64",
 				);
-				MARKETING_VERSION = 1.4.0;
+				MARKETING_VERSION = 1.4.1;
 				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
 					"$(inherited)",
 					"-lonnxruntime",

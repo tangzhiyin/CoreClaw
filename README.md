@@ -31,6 +31,7 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 - Removed `Skills/Library/crisp/` from the public Git repository.
 - Added the private local Skill directory to `.gitignore`.
 - Preserved the three Skill files in the local working copy.
+- Explicitly removed the private Skill directory from every built app bundle so it cannot be distributed through TestFlight.
 - Removed the public contract test that required those private files in a fresh clone.
 - Confirmed that the GitHub repository contains no files under the private Skill path.
 
@@ -43,6 +44,15 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 - Added a direct-answer fallback when a tool schema is too large, instead of terminating the conversation.
 - Retained a final safety rejection only for requests that still cannot fit after every recovery stage.
 - Added token-budget and source-contract test coverage for the recovery behavior.
+
+### Bundled default AI model
+
+- Added Release and TestFlight archive support for bundling Gemma 4 E2B directly inside `PhoneAI.app`.
+- Made the bundled model the immediately available default model on a fresh installation, without requiring a separate in-app download.
+- Added an exact 2,588,147,712-byte integrity check before packaging the model.
+- Made Archive fail with a clear error when the local E2B file is missing, preventing an accidental TestFlight upload without the default model.
+- Kept Debug builds lightweight and preserved the existing in-app downloader as the fallback for source builds without the local model.
+- Kept the 2.59 GB model binary out of GitHub; release builders place `gemma-4-E2B-it.litertlm` in the ignored `Models/` directory before archiving.
 
 ### Deep-gray visual refresh
 
@@ -57,7 +67,7 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 
 - Published PhoneAI to TestFlight with a public invitation link: <https://testflight.apple.com/join/83pVSbzt>.
 - Updated the application version to `1.4.1`.
-- Updated the build number to `46`.
+- Updated the build number to `47`.
 - Synchronized the version and build number between the main app and Live Activity widget.
 - Removed the embedded-extension version mismatch warning that could affect archive validation.
 
@@ -110,7 +120,7 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 |---|---|
 | Application | PhoneAI |
 | Version | 1.4.1 |
-| Build | 46 |
+| Build | 47 |
 | Main bundle ID | `com.yokotox.phoneai` |
 | Widget bundle ID | `com.yokotox.phoneai.LiveActivityWidget` |
 | Xcode workspace | `PhoneAI.xcworkspace` |
@@ -138,6 +148,14 @@ In Xcode:
 5. Select an iPhone, Simulator, or generic iOS device.
 6. Build or archive the application.
 
+To create a TestFlight archive with Gemma 4 E2B preinstalled, place the complete model at:
+
+```text
+Models/gemma-4-E2B-it.litertlm
+```
+
+The model must be exactly 2,588,147,712 bytes. It is intentionally ignored by Git because GitHub cannot host a binary of this size. Normal Debug builds do not copy the model; Release archives bundle it into the app automatically.
+
 ## Validation completed
 
 - Debug iOS device build: passed.
@@ -151,4 +169,4 @@ In Xcode:
 
 ## Repository privacy note
 
-The private local Skill files under `Skills/Library/crisp/` are intentionally excluded from Git and are not included in the public GitHub repository.
+The private local Skill files under `Skills/Library/crisp/` are intentionally excluded from Git, the public GitHub repository, and built application bundles.
