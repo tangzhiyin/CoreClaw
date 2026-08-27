@@ -2,6 +2,12 @@
 
 PhoneAI is a local AI assistant application for iPhone. This README was reset on August 27, 2026 and records only the project work completed on August 26–27, 2026.
 
+## App UI
+
+<p align="center">
+  <img src="assets/phoneai-ui-2026-08-27.png" width="360" alt="PhoneAI deep-gray iPhone chat interface">
+</p>
+
 ## Changes on August 27, 2026
 
 ### Complete PhoneAI migration
@@ -41,6 +47,7 @@ PhoneAI is a local AI assistant application for iPhone. This README was reset on
 - Replaced the empty-chat center mark with a small, low-contrast iPhone outline containing AI sparkle and node elements.
 - Reduced the brightness, saturation, and contrast of both default and dark App Icons.
 - Preserved both App Icons as 1024×1024 RGB PNG files without alpha channels.
+- Added a current Simulator screenshot of the deep-gray chat interface to this README.
 
 ### Release metadata
 
