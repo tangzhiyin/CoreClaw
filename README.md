@@ -1,7 +1,5 @@
 <div align="center">
 
-![banner](assets/banner.jpg)
-
 Turn your phone into a local AI agent runtime.
 
 ![Swift](https://img.shields.io/badge/Swift-5.10-orange?style=flat-square)
