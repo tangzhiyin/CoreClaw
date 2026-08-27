@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.png" width="100%" alt="PhoneAI banner">
+</p>
+
 # PhoneAI
 
 PhoneAI is a local AI assistant application for iPhone. This README was reset on August 27, 2026 and records only the project work completed on August 26–27, 2026.
