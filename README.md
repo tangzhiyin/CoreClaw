@@ -2,6 +2,10 @@
 
 PhoneAI is a local AI assistant application for iPhone. This README was reset on August 27, 2026 and records only the project work completed on August 26–27, 2026.
 
+## TestFlight
+
+PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testflight.apple.com/join/83pVSbzt)**.
+
 ## App UI
 
 <p align="center">
@@ -51,6 +55,7 @@ PhoneAI is a local AI assistant application for iPhone. This README was reset on
 
 ### Release metadata
 
+- Published PhoneAI to TestFlight with a public invitation link: <https://testflight.apple.com/join/83pVSbzt>.
 - Updated the application version to `1.4.1`.
 - Updated the build number to `46`.
 - Synchronized the version and build number between the main app and Live Activity widget.
