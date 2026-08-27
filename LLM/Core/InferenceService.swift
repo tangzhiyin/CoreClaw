@@ -214,6 +214,7 @@ public enum ModelBackendError: LocalizedError {
     case modelNotLoaded
     case modelFileMissing(String)
     case memoryRisk(model: String, headroomMB: Int, recommendation: String)
+    case unsupportedSimulator
 
     public var errorDescription: String? {
         switch self {
@@ -231,6 +232,11 @@ public enum ModelBackendError: LocalizedError {
             return tr(
                 "\(model) 当前剩余内存仅约 \(headroomMB) MB。\(recommendation)",
                 "\(model): only about \(headroomMB) MB of memory is available. \(recommendation)"
+            )
+        case .unsupportedSimulator:
+            return tr(
+                "iOS 模拟器不支持 LiteRT 本地模型推理，请在真机 iPhone 上运行 PhoneAI。",
+                "The iOS Simulator does not support LiteRT local model inference. Run PhoneAI on a physical iPhone."
             )
         }
     }

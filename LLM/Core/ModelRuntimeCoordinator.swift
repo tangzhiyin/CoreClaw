@@ -427,6 +427,13 @@ public extension RuntimeError {
         let message = error.localizedDescription
 
         // Classify the error
+        if message.contains("iOS Simulator") || message.contains("iOS 模拟器") {
+            return RuntimeError(
+                message: message,
+                category: .backendNotAvailable
+            )
+        }
+
         if message.contains("engine_create returned NULL") || message.contains("engine init failed") {
             return RuntimeError(
                 message: message,

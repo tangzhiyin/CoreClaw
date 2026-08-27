@@ -1093,9 +1093,12 @@ struct ContentView: View {
     }
 
     private func handleRuntimeStateChange(_ state: RuntimeSessionState) {
-        if case .failed = state {
+        if case .failed(let error) = state {
+            let message = error.category == .backendNotAvailable
+                ? error.message
+                : tr("模型加载失败", "Model load failed", "モデルの読み込みに失敗")
             showTransientTopNotice(
-                tr("模型加载失败", "Model load failed", "モデルの読み込みに失敗"),
+                message,
                 symbolName: "exclamationmark.circle",
                 isWarning: true
             )

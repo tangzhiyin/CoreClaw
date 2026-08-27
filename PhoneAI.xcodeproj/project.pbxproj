@@ -1490,7 +1490,7 @@
 					"$(SRCROOT)/Frameworks/piper_plus.xcframework/ios-arm64",
 					"$(SRCROOT)/Frameworks/sherpa-onnx.xcframework/ios-arm64",
 				);
-				MARKETING_VERSION = 1.4.1;
+				MARKETING_VERSION = 1.5.0;
 				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
 					"$(inherited)",
 					"-lonnxruntime",
@@ -1521,7 +1521,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.4.1;
+				MARKETING_VERSION = 1.5.0;
 				PHONEAI_WIDGET_BUNDLE_ID = "$(PHONEAI_APP_BUNDLE_ID).LiveActivityWidget";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PHONEAI_WIDGET_BUNDLE_ID)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1548,7 +1548,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.4.1;
+				MARKETING_VERSION = 1.5.0;
 				PHONEAI_WIDGET_BUNDLE_ID = "$(PHONEAI_APP_BUNDLE_ID).LiveActivityWidget";
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PHONEAI_WIDGET_BUNDLE_ID)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1592,7 +1592,7 @@
 					"$(SRCROOT)/Frameworks/piper_plus.xcframework/ios-arm64",
 					"$(SRCROOT)/Frameworks/sherpa-onnx.xcframework/ios-arm64",
 				);
-				MARKETING_VERSION = 1.4.1;
+				MARKETING_VERSION = 1.5.0;
 				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
 					"$(inherited)",
 					"-lonnxruntime",

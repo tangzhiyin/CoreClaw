@@ -66,6 +66,20 @@ final class SkillRouterCompatibilityContractTests: XCTestCase {
                 continue
             }
 
+            func testLiteRTSimulatorFailureIsReportedBeforeEngineCreation() throws {
+                let backend = try source("LLM/Backends/LiteRT/LiteRTBackend.swift")
+                let errors = try source("LLM/Core/InferenceService.swift")
+                let coordinator = try source("LLM/Core/ModelRuntimeCoordinator.swift")
+                let contentView = try source("UI/ContentView.swift")
+
+                XCTAssertTrue(backend.contains("#if targetEnvironment(simulator)"))
+                XCTAssertTrue(backend.contains("ModelBackendError.unsupportedSimulator"))
+                XCTAssertTrue(errors.contains("case unsupportedSimulator"))
+                XCTAssertTrue(errors.contains("physical iPhone"))
+                XCTAssertTrue(coordinator.contains("category: .backendNotAvailable"))
+                XCTAssertTrue(contentView.contains("error.category == .backendNotAvailable"))
+            }
+
             for case let fileURL as URL in enumerator where fileURL.pathExtension == "swift" {
                 let content = try String(contentsOf: fileURL, encoding: .utf8)
                 for forbiddenImport in forbiddenImports {

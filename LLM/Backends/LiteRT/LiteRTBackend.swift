@@ -77,6 +77,13 @@ final class LiteRTBackend: InferenceService {
     private var engine: LiteRTLMEngine?
     private var loadedModelID: String?
     private var cancelled = false
+    private static var isRunningInSimulator: Bool {
+        #if targetEnvironment(simulator)
+        true
+        #else
+        false
+        #endif
+    }
 
     // MARK: - KV Cache Session State
     /// persistent session 是否已打开
@@ -182,6 +189,13 @@ final class LiteRTBackend: InferenceService {
                 "先に設定で \(name) モデルをダウンロードしてください。"
             )
             throw ModelBackendError.modelFileMissing(name)
+        }
+
+        if Self.isRunningInSimulator {
+            let simulatorError = ModelBackendError.unsupportedSimulator
+            statusMessage = simulatorError.localizedDescription
+            PCLog.debug("[LiteRT] \(simulatorError.localizedDescription)")
+            throw simulatorError
         }
 
         isLoading = true

@@ -58,6 +58,13 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 - Kept Debug builds lightweight and preserved the existing in-app downloader as the fallback for source builds without the local model.
 - Kept the 2.59 GB model binary out of GitHub; release builders place `gemma-4-E2B-it.litertlm` in the ignored `Models/` directory before archiving.
 
+### Simulator model-loading diagnosis
+
+- Diagnosed downloaded Gemma 4 E2B load failures as an iOS Simulator runtime limitation rather than a damaged model file.
+- Confirmed the complete 2,588,147,712-byte model passes LiteRT container parsing before the Simulator Metal shader compiler fails.
+- Added an immediate, localized explanation that LiteRT local inference requires a physical iPhone.
+- Classified this failure as an unavailable backend so the interface shows the actual cause instead of a generic model-load error.
+
 ### Deep-gray visual refresh
 
 - Replaced the previous light porcelain and copper palette with a unified deep-gray color system.
@@ -70,7 +77,7 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 ### Release metadata
 
 - Published PhoneAI to TestFlight with a public invitation link: <https://testflight.apple.com/join/83pVSbzt>.
-- Updated the application version to `1.4.1`.
+- Updated the application version to `1.5.0`.
 - Updated the build number to `47`.
 - Synchronized the version and build number between the main app and Live Activity widget.
 - Removed the embedded-extension version mismatch warning that could affect archive validation.
@@ -123,7 +130,7 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 | Item | Value |
 |---|---|
 | Application | PhoneAI |
-| Version | 1.4.1 |
+| Version | 1.5.0 |
 | Build | 47 |
 | Main bundle ID | `com.yokotox.phoneai` |
 | Widget bundle ID | `com.yokotox.phoneai.LiveActivityWidget` |
