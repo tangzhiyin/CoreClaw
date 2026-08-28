@@ -117,16 +117,17 @@ struct ConfigurationsView: View {
                 dismiss()
             } label: {
                 ZStack {
+                    Circle()
+                        .fill(SettingsStyle.controlFill)
+                        .frame(
+                            width: UIScale.topStatusChipDiameter,
+                            height: UIScale.topStatusChipDiameter
+                        )
                     Image(systemName: "xmark")
                         .font(.system(size: 9, weight: .medium))
                         .foregroundStyle(SettingsStyle.secondary)
                         .opacity(0.58)
                 }
-                .frame(
-                    width: UIScale.topStatusChipDiameter,
-                    height: UIScale.topStatusChipDiameter
-                )
-                .phoneAIGlassCircleIcon(fallbackFill: SettingsStyle.controlFill)
             }
             .buttonStyle(.plain)
 

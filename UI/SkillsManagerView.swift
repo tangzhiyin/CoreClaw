@@ -55,16 +55,17 @@ struct SkillsManagerView: View {
                 dismiss()
             } label: {
                 ZStack {
+                    Circle()
+                        .fill(SkillsStyle.controlFill)
+                        .frame(
+                            width: UIScale.topStatusChipDiameter,
+                            height: UIScale.topStatusChipDiameter
+                        )
                     Image(systemName: "xmark")
                         .font(.system(size: 9, weight: .medium))
                         .foregroundStyle(SkillsStyle.secondary)
                         .opacity(0.58)
                 }
-                .frame(
-                    width: UIScale.topStatusChipDiameter,
-                    height: UIScale.topStatusChipDiameter
-                )
-                .phoneAIGlassCircleIcon(fallbackFill: SkillsStyle.controlFill)
             }
             .buttonStyle(.plain)
 
@@ -80,16 +81,17 @@ struct SkillsManagerView: View {
                 engine.reloadSkills()
             } label: {
                 ZStack {
+                    Circle()
+                        .fill(SkillsStyle.controlFill)
+                        .frame(
+                            width: UIScale.topStatusChipDiameter,
+                            height: UIScale.topStatusChipDiameter
+                        )
                     Image(systemName: "arrow.clockwise")
                         .font(.system(size: 10, weight: .medium))
                         .foregroundStyle(SkillsStyle.secondary)
                         .opacity(0.64)
                 }
-                .frame(
-                    width: UIScale.topStatusChipDiameter,
-                    height: UIScale.topStatusChipDiameter
-                )
-                .phoneAIGlassCircleIcon(fallbackFill: SkillsStyle.controlFill)
             }
             .buttonStyle(.plain)
         }

@@ -18,11 +18,11 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 
 ## Changes on August 28, 2026
 
-### Apple Liquid Glass adaptation
+### Home Screen icon compatibility
 
-- Added iOS 26 Liquid Glass styling specifically to interactive icon controls.
-- Kept toolbars, the composer, attachment tray, quick actions, prompts, and settings surfaces in the existing deep-gray visual system.
-- Added backward-compatible icon fills and outlines for devices running earlier operating-system versions.
+- Removed all Liquid Glass styling from the in-app interface and restored the original deep-gray controls.
+- Kept the standard and dark App Icon assets compatible with the system-provided Home Screen icon appearance.
+- Limited Apple system visual adaptation to the installed application icon.
 - Updated the application version to `1.5.2`.
 - Updated the build number to `49`.
 - Synchronized version and build metadata between the main app and Live Activity widget.
