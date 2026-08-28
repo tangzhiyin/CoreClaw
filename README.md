@@ -75,6 +75,13 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 - Recovered a stuck Xcode PIF transfer session that caused both Clean and Build to fail before target compilation.
 - Restarted the PhoneAI build service session and confirmed a complete Clean followed by a signed Simulator Build.
 
+### Concurrent reply isolation
+
+- Fixed delayed answers overwriting a newer answer when multiple requests complete out of order.
+- Bound streaming updates and completion callbacks to each assistant message's immutable UUID instead of a mutable array index.
+- Made the chat renderer create a separate response block for each independent assistant message rather than merging consecutive answers.
+- Preserved every completed answer in the conversation when an earlier request finishes after a later request.
+
 ### Deep-gray visual refresh
 
 - Replaced the previous light porcelain and copper palette with a unified deep-gray color system.

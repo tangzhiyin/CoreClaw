@@ -295,6 +295,7 @@ extension AgentEngine {
                 messages.append(ChatMessage(role: .assistant, content: "▍", skillName: stickyEligibleSkillID))
                 msgIndex = messages.count - 1
             }
+            let assistantMessageID = messages[msgIndex].id
             // Pure-vision path 默认返回空 system prompt (见 PromptBuilder.multimodalSystemPrompt),
             // 空字符串时跳过 .system(...) 注入, 让 Gemma 4 只看 image + user text,
             // 避免任何 system 框架把小模型带进"请提供图片"漂移.
@@ -320,7 +321,7 @@ extension AgentEngine {
                 systemPrompt: systemPrompt
             ) { [weak self] token in
                 guard let self = self,
-                      self.messages.indices.contains(msgIndex) else { return }
+                      self.messages.contains(where: { $0.id == assistantMessageID }) else { return }
                 guard self.isCurrentTurnOwner(turnContext) else {
                     self.inference.cancel()
                     return
@@ -328,7 +329,7 @@ extension AgentEngine {
                 multimodalBuffer += token
                 let cleaned = self.cleanOutputStreaming(multimodalBuffer)
                 self.enqueueStreamingMessageContentUpdate(
-                    at: msgIndex,
+                    messageID: assistantMessageID,
                     content: (cleaned.isEmpty ? "" : cleaned) + "▍"
                 )
             } onComplete: { [weak self] result in
@@ -337,7 +338,7 @@ extension AgentEngine {
                     self.finishTurn(context: turnContext)
                     return
                 }
-                guard self.messages.indices.contains(msgIndex) else {
+                guard self.messages.contains(where: { $0.id == assistantMessageID }) else {
                     self.finishTurn(context: turnContext)
                     return
                 }
@@ -349,7 +350,7 @@ extension AgentEngine {
                     #endif
                     let cleaned = self.cleanOutput(fullText)
                     self.setStreamingMessageContent(
-                        at: msgIndex,
+                        messageID: assistantMessageID,
                         content: cleaned.isEmpty ? PromptLocale.current.emptyReplyPlaceholder : cleaned
                     )
                     self.recordRecentImageFollowUpContext(
@@ -361,14 +362,16 @@ extension AgentEngine {
                 case .failure(let error):
                     if self.isUserCancellationError(error) {
                         log("[Agent] multimodal cancelled")
-                        self.settleCancelledMessage(at: msgIndex)
+                        self.settleCancelledMessage(messageID: assistantMessageID)
                         self.finishTurn(context: turnContext, userCancelled: true)
                         return
                     }
                     log("[Agent] multimodal failed: \(error.localizedDescription)")
-                    if self.messages.indices.contains(msgIndex) {
-                        self.messages[msgIndex].update(role: .system, content: "❌ \(error.localizedDescription)")
-                    }
+                    self.updateMessage(
+                        messageID: assistantMessageID,
+                        role: .system,
+                        content: "❌ \(error.localizedDescription)"
+                    )
                     self.recordCompletedObservation(
                         plan: multimodalPlan,
                         tokenCapHit: self.classifyTokenCapHit(error),
@@ -654,6 +657,7 @@ extension AgentEngine {
             messages.append(ChatMessage(role: .assistant, content: "▍", skillName: stickyEligibleSkillID))
             msgIndex = messages.count - 1
         }
+        let assistantMessageID = messages[msgIndex].id
 
         if shouldUsePlanner {
             log("[Agent] planner path triggered revision=\(plannerRevision)")
@@ -665,10 +669,10 @@ extension AgentEngine {
             )
 
             if plannerHandled {
-                if messages.indices.contains(msgIndex),
-                   messages[msgIndex].role == .assistant,
-                   messages[msgIndex].content == "▍" {
-                    messages.remove(at: msgIndex)
+                if let currentIndex = messages.firstIndex(where: { $0.id == assistantMessageID }),
+                   messages[currentIndex].role == .assistant,
+                   messages[currentIndex].content == "▍" {
+                    messages.remove(at: currentIndex)
                 }
                 return
             }
@@ -689,7 +693,7 @@ extension AgentEngine {
             runtimeToolScope: runtimeToolScope,
             onToken: { [weak self] token in
                 guard let self = self,
-                      self.messages.indices.contains(msgIndex) else { return }
+                      self.messages.contains(where: { $0.id == assistantMessageID }) else { return }
                 guard self.isCurrentTurnOwner(turnContext) else {
                     self.inference.cancel()
                     return
@@ -717,7 +721,7 @@ extension AgentEngine {
                     if "<tool_call>".hasPrefix(trimmed) { return }
                     bufferFlushed = true
                     self.enqueueStreamingMessageContentUpdate(
-                        at: msgIndex,
+                        messageID: assistantMessageID,
                         content: self.cleanOutputStreaming(buffer)
                     )
                     return
@@ -725,7 +729,10 @@ extension AgentEngine {
 
                 let cleaned = self.cleanOutputStreaming(buffer)
                 if !cleaned.isEmpty {
-                    self.enqueueStreamingMessageContentUpdate(at: msgIndex, content: cleaned)
+                    self.enqueueStreamingMessageContentUpdate(
+                        messageID: assistantMessageID,
+                        content: cleaned
+                    )
                 }
             },
             onComplete: { [weak self] result in
@@ -734,7 +741,7 @@ extension AgentEngine {
                     self.finishTurn(context: turnContext)
                     return
                 }
-                guard self.messages.indices.contains(msgIndex) else {
+                guard self.messages.contains(where: { $0.id == assistantMessageID }) else {
                     self.finishTurn(context: turnContext)
                     return
                 }
@@ -743,7 +750,7 @@ extension AgentEngine {
                     self.lastTurnRawModelOutputs.append(fullText)
 
                     if self.parseToolCall(fullText) != nil {
-                        self.setStreamingMessageContent(at: msgIndex, content: "")
+                        self.setStreamingMessageContent(messageID: assistantMessageID, content: "")
                         self.recordCompletedObservation(plan: textPromptPlan)
                         // Tool chain continues the turn — txn stays .streaming,
                         // finishTurn() will be called when the chain completes.
@@ -771,7 +778,7 @@ extension AgentEngine {
                        ) {
                         if allowPreloadedSkillFallbackForTurn {
                             log("[Agent] preloaded skill fallback triggered after missing tool_call")
-                            self.setStreamingMessageContent(at: msgIndex, content: "")
+                            self.setStreamingMessageContent(messageID: assistantMessageID, content: "")
                             self.recordCompletedObservation(plan: textPromptPlan)
                             self.activeTurnTask = Task { [weak self] in
                                 guard let self else { return }
@@ -803,9 +810,9 @@ extension AgentEngine {
                                 userQuestion: normalizedText,
                                 msgIndex: msgIndex
                             )
-                            if self.messages.indices.contains(msgIndex) {
+                            if self.messages.contains(where: { $0.id == assistantMessageID }) {
                                 self.setStreamingMessageContent(
-                                    at: msgIndex,
+                                    messageID: assistantMessageID,
                                     content: repaired.isEmpty ? PromptLocale.current.emptyReplyPlaceholder : repaired
                                 )
                             }
@@ -814,20 +821,22 @@ extension AgentEngine {
                         return
                     }
                     self.setStreamingMessageContent(
-                        at: msgIndex,
+                        messageID: assistantMessageID,
                         content: cleaned.isEmpty ? PromptLocale.current.emptyReplyPlaceholder : cleaned
                     )
                     self.finishTurn(context: turnContext)
                 case .failure(let error):
                     if self.isUserCancellationError(error) {
                         log("[Agent] generation cancelled")
-                        self.settleCancelledMessage(at: msgIndex)
+                        self.settleCancelledMessage(messageID: assistantMessageID)
                         self.finishTurn(context: turnContext, userCancelled: true)
                         return
                     }
-                    if self.messages.indices.contains(msgIndex) {
-                        self.messages[msgIndex].update(role: .system, content: "❌ \(error.localizedDescription)")
-                    }
+                    self.updateMessage(
+                        messageID: assistantMessageID,
+                        role: .system,
+                        content: "❌ \(error.localizedDescription)"
+                    )
                     self.recordCompletedObservation(
                         plan: textPromptPlan,
                         tokenCapHit: self.classifyTokenCapHit(error),
@@ -894,6 +903,8 @@ extension AgentEngine {
         turnContext: GenerationTurnContext? = nil
     ) async -> String? {
         logPromptDiagnostics(label: "streamLLM.ui", prompt: prompt)
+        guard messages.indices.contains(msgIndex) else { return nil }
+        let assistantMessageID = messages[msgIndex].id
         var buffer = ""
         return await withCheckedContinuation { (continuation: CheckedContinuation<String?, Never>) in
             var toolCallDetected = false
@@ -902,7 +913,7 @@ extension AgentEngine {
                 prompt: prompt,
                 onToken: { [weak self] token in
                     guard let self = self,
-                          self.messages.indices.contains(msgIndex) else { return }
+                          self.messages.contains(where: { $0.id == assistantMessageID }) else { return }
                     if let turnContext, !self.isCurrentTurnOwner(turnContext) {
                         self.inference.cancel()
                         return
@@ -912,8 +923,8 @@ extension AgentEngine {
                 if toolCallDetected { return }
                 if buffer.contains("<tool_call>") {
                     toolCallDetected = true
-                    if bufferFlushed && self.messages[msgIndex].role == .assistant {
-                        self.setStreamingMessageContent(at: msgIndex, content: "")
+                    if bufferFlushed {
+                        self.setStreamingMessageContent(messageID: assistantMessageID, content: "")
                     }
                     return
                 }
@@ -926,8 +937,11 @@ extension AgentEngine {
                 }
 
                 let cleaned = self.cleanOutputStreaming(buffer)
-                if !cleaned.isEmpty && self.messages[msgIndex].role == .assistant {
-                    self.enqueueStreamingMessageContentUpdate(at: msgIndex, content: cleaned)
+                if !cleaned.isEmpty {
+                    self.enqueueStreamingMessageContentUpdate(
+                        messageID: assistantMessageID,
+                        content: cleaned
+                    )
                 }
             },
             onComplete: { [weak self] result in
@@ -948,16 +962,16 @@ extension AgentEngine {
                 case .failure(let error):
                     if self.isUserCancellationError(error) {
                         log("[Agent] LLM cancelled")
-                        if self.messages.indices.contains(msgIndex) {
-                            self.settleCancelledMessage(at: msgIndex)
-                        }
+                        self.settleCancelledMessage(messageID: assistantMessageID)
                         self.finishTurn(context: turnContext, userCancelled: true)
                         continuation.resume(returning: nil)
                         return
                     }
-                    if self.messages.indices.contains(msgIndex) {
-                        self.messages[msgIndex].update(role: .system, content: "❌ \(error.localizedDescription)")
-                    }
+                    self.updateMessage(
+                        messageID: assistantMessageID,
+                        role: .system,
+                        content: "❌ \(error.localizedDescription)"
+                    )
                     continuation.resume(returning: nil)
                 }
             }
@@ -1205,8 +1219,12 @@ extension AgentEngine {
 
     func settleCancelledMessage(at index: Int) {
         guard messages.indices.contains(index) else { return }
+        settleCancelledMessage(messageID: messages[index].id)
+    }
+
+    func settleCancelledMessage(messageID: UUID) {
         flushPendingStreamingMessageContentUpdates()
-        guard messages.indices.contains(index) else { return }
+        guard let index = messages.firstIndex(where: { $0.id == messageID }) else { return }
         let content = messages[index].content
             .replacingOccurrences(of: "▍", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)

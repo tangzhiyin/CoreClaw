@@ -119,6 +119,9 @@ func buildDisplayItems(from messages: [ChatMessage], isProcessing: Bool) -> [Dis
         case .skillResult:
             break
         case .assistant:
+            if block?.responseText != nil {
+                flush()
+            }
             if block == nil { block = ResponseBlock(id: msg.id, isThinking: false) }
             if msg.content != "▍" && !msg.content.isEmpty {
                 let parsed = splitThinkingAndResponse(from: msg.content)

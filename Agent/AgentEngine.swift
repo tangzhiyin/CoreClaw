@@ -151,7 +151,17 @@ class AgentEngine {
         guard messages.indices.contains(index),
               messages[index].role == .assistant else { return }
 
-        let messageID = messages[index].id
+        enqueueStreamingMessageContentUpdate(
+            messageID: messages[index].id,
+            content: content
+        )
+    }
+
+    func enqueueStreamingMessageContentUpdate(messageID: UUID, content: String) {
+        guard messages.contains(where: { $0.id == messageID && $0.role == .assistant }) else {
+            return
+        }
+
         pendingStreamingContentByMessageID[messageID] = content
 
         guard streamingUIFlushTask == nil else { return }
@@ -164,9 +174,24 @@ class AgentEngine {
     func setStreamingMessageContent(at index: Int, content: String) {
         guard messages.indices.contains(index) else { return }
 
-        let messageID = messages[index].id
+        setStreamingMessageContent(messageID: messages[index].id, content: content)
+    }
+
+    func setStreamingMessageContent(messageID: UUID, content: String) {
         pendingStreamingContentByMessageID.removeValue(forKey: messageID)
+        guard let index = messages.firstIndex(where: { $0.id == messageID }) else { return }
         messages[index].update(content: content)
+    }
+
+    func updateMessage(
+        messageID: UUID,
+        role: ChatMessage.Role,
+        content: String,
+        skillName: String? = nil
+    ) {
+        pendingStreamingContentByMessageID.removeValue(forKey: messageID)
+        guard let index = messages.firstIndex(where: { $0.id == messageID }) else { return }
+        messages[index].update(role: role, content: content, skillName: skillName)
     }
 
     func flushPendingStreamingMessageContentUpdates() {

@@ -168,6 +168,10 @@ extension AgentEngine {
         userQuestion: String,
         msgIndex: Int
     ) async -> String {
+        guard messages.indices.contains(msgIndex) else {
+            return imageFollowUpFallbackReply(from: cleanedDraft, assistantSummary: assistantSummary)
+        }
+        let assistantMessageID = messages[msgIndex].id
         let trimmedDraft = cleanedDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedDraft.isEmpty else {
             return imageFollowUpFallbackReply(from: cleanedDraft, assistantSummary: assistantSummary)
@@ -191,7 +195,7 @@ extension AgentEngine {
             label: "ImageFollowUp",
             onToken: { [weak self] token in
                 guard let self = self,
-                      self.messages.indices.contains(msgIndex) else { return }
+                      self.messages.contains(where: { $0.id == assistantMessageID }) else { return }
 
                 if toolCallDetected {
                     buffer += token
@@ -213,7 +217,10 @@ extension AgentEngine {
 
                 let cleaned = self.cleanOutputStreaming(buffer)
                 if !cleaned.isEmpty {
-                    self.enqueueStreamingMessageContentUpdate(at: msgIndex, content: cleaned)
+                    self.enqueueStreamingMessageContentUpdate(
+                        messageID: assistantMessageID,
+                        content: cleaned
+                    )
                 }
             }
         )

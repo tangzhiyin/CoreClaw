@@ -732,6 +732,7 @@ extension AgentEngine {
             skillName: artifact.skillId ?? artifact.toolName
         ))
         let msgIndex = messages.count - 1
+        let assistantMessageID = messages[msgIndex].id
 
         if let turnContext {
             markStreamingStarted(context: turnContext)
@@ -744,9 +745,11 @@ extension AgentEngine {
                 abandonTurnIfOwner(turnContext, reason: "prior_context_session_changed")
                 return
             }
-            if messages.indices.contains(msgIndex) {
-                messages[msgIndex].update(content: fallbackReplyForPriorContextArtifact(artifact))
-            }
+            updateMessage(
+                messageID: assistantMessageID,
+                role: .assistant,
+                content: fallbackReplyForPriorContextArtifact(artifact)
+            )
             recordCompletedObservation(plan: plan)
             finishTurn(context: turnContext)
             return
@@ -766,9 +769,7 @@ extension AgentEngine {
         } else {
             finalReply = cleaned
         }
-        if messages.indices.contains(msgIndex) {
-            messages[msgIndex].update(content: finalReply)
-        }
+        updateMessage(messageID: assistantMessageID, role: .assistant, content: finalReply)
         recordCompletedObservation(plan: plan)
         finishTurn(context: turnContext)
     }

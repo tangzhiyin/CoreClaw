@@ -66,20 +66,6 @@ final class SkillRouterCompatibilityContractTests: XCTestCase {
                 continue
             }
 
-            func testLiteRTSimulatorFailureIsReportedBeforeEngineCreation() throws {
-                let backend = try source("LLM/Backends/LiteRT/LiteRTBackend.swift")
-                let errors = try source("LLM/Core/InferenceService.swift")
-                let coordinator = try source("LLM/Core/ModelRuntimeCoordinator.swift")
-                let contentView = try source("UI/ContentView.swift")
-
-                XCTAssertTrue(backend.contains("#if targetEnvironment(simulator)"))
-                XCTAssertTrue(backend.contains("ModelBackendError.unsupportedSimulator"))
-                XCTAssertTrue(errors.contains("case unsupportedSimulator"))
-                XCTAssertTrue(errors.contains("physical iPhone"))
-                XCTAssertTrue(coordinator.contains("category: .backendNotAvailable"))
-                XCTAssertTrue(contentView.contains("error.category == .backendNotAvailable"))
-            }
-
             for case let fileURL as URL in enumerator where fileURL.pathExtension == "swift" {
                 let content = try String(contentsOf: fileURL, encoding: .utf8)
                 for forbiddenImport in forbiddenImports {
@@ -91,6 +77,38 @@ final class SkillRouterCompatibilityContractTests: XCTestCase {
                 }
             }
         }
+    }
+
+    func testLiteRTSimulatorFailureIsReportedBeforeEngineCreation() throws {
+        let backend = try source("LLM/Backends/LiteRT/LiteRTBackend.swift")
+        let errors = try source("LLM/Core/InferenceService.swift")
+        let coordinator = try source("LLM/Core/ModelRuntimeCoordinator.swift")
+        let contentView = try source("UI/ContentView.swift")
+
+        XCTAssertTrue(backend.contains("#if targetEnvironment(simulator)"))
+        XCTAssertTrue(backend.contains("ModelBackendError.unsupportedSimulator"))
+        XCTAssertTrue(errors.contains("case unsupportedSimulator"))
+        XCTAssertTrue(errors.contains("physical iPhone"))
+        XCTAssertTrue(coordinator.contains("category: .backendNotAvailable"))
+        XCTAssertTrue(contentView.contains("error.category == .backendNotAvailable"))
+    }
+
+    func testConcurrentRepliesStayBoundToIndependentMessageIDs() throws {
+        let engine = try source("Agent/AgentEngine.swift")
+        let processInput = try source("Agent/Engine/ProcessInput.swift")
+        let toolChain = try source("Agent/Engine/ToolChain.swift")
+        let router = try source("Agent/Engine/Router.swift")
+        let chatModels = try source("UI/ChatModels.swift")
+
+        XCTAssertTrue(engine.contains("func enqueueStreamingMessageContentUpdate(messageID: UUID"))
+        XCTAssertTrue(engine.contains("messages.firstIndex(where: { $0.id == messageID })"))
+        XCTAssertTrue(processInput.contains("let assistantMessageID = messages[msgIndex].id"))
+        XCTAssertTrue(processInput.contains("messageID: assistantMessageID"))
+        XCTAssertTrue(toolChain.contains("preloaded_fallback_message_missing"))
+        XCTAssertTrue(toolChain.contains("updateMessage(messageID: assistantMessageID"))
+        XCTAssertTrue(router.contains("let assistantMessageID = messages[msgIndex].id"))
+        XCTAssertTrue(router.contains("messageID: assistantMessageID"))
+        XCTAssertTrue(chatModels.contains("if block?.responseText != nil {"))
     }
 
     func testGuardedDirectAnswerBlocksModelIntentFallback() throws {

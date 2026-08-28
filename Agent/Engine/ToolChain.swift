@@ -709,6 +709,11 @@ extension AgentEngine {
         fallbackText: String,
         turnContext: GenerationTurnContext? = nil
     ) async {
+        guard messages.indices.contains(msgIndex) else {
+            abandonTurnIfOwner(turnContext, reason: "preloaded_fallback_message_missing")
+            return
+        }
+        let assistantMessageID = messages[msgIndex].id
         let scopedToolNames =
             inferredPriorToolScopeForCorrection(
                 skillIds: skillIds,
@@ -722,9 +727,7 @@ extension AgentEngine {
         ) + scopedPriorToolContextInstructions(scopedToolNames: scopedToolNames)
         guard !skillInstructions.isEmpty else {
             let finalReply = fallbackReplyAfterPreloadedSkillFallbackFailure(fallbackText)
-            if messages.indices.contains(msgIndex) {
-                messages[msgIndex].update(content: finalReply)
-            }
+            updateMessage(messageID: assistantMessageID, role: .assistant, content: finalReply)
             finishTurn(context: turnContext)
             return
         }
@@ -800,17 +803,13 @@ extension AgentEngine {
             )
 
         case .needsClarification(let clarification):
-            if messages.indices.contains(msgIndex) {
-                messages[msgIndex].update(content: clarification)
-            }
+            updateMessage(messageID: assistantMessageID, role: .assistant, content: clarification)
             finishTurn(context: turnContext)
 
         case .failed:
             log("[Agent] preloaded skill fallback extraction failed")
             let finalReply = fallbackReplyAfterPreloadedSkillFallbackFailure(fallbackText)
-            if messages.indices.contains(msgIndex) {
-                messages[msgIndex].update(content: finalReply)
-            }
+            updateMessage(messageID: assistantMessageID, role: .assistant, content: finalReply)
             finishTurn(context: turnContext)
         }
     }
