@@ -152,10 +152,10 @@ final class SkillRouterCompatibilityContractTests: XCTestCase {
         XCTAssertFalse(skills.contains("phoneAIGlass"))
         XCTAssertTrue(appIcon.contains("\"platform\" : \"ios\""))
         XCTAssertTrue(appIcon.contains("\"value\" : \"dark\""))
-        XCTAssertEqual(project.components(separatedBy: "CURRENT_PROJECT_VERSION = 50;").count - 1, 4)
-        XCTAssertEqual(project.components(separatedBy: "MARKETING_VERSION = 1.5.3;").count - 1, 4)
-        XCTAssertTrue(readme.contains("### Home Screen icon compatibility"))
-        XCTAssertTrue(readme.contains("Removed all Liquid Glass styling from the in-app interface"))
+        XCTAssertEqual(project.components(separatedBy: "CURRENT_PROJECT_VERSION = 51;").count - 1, 4)
+        XCTAssertEqual(project.components(separatedBy: "MARKETING_VERSION = 1.5.4;").count - 1, 4)
+        XCTAssertTrue(readme.contains("### Home Screen App Icon adaptation"))
+        XCTAssertTrue(readme.contains("leaving the in-app interface unchanged"))
     }
 
     func testGeneralSettingsEndsWithTestFlightFeedbackLink() throws {
@@ -176,12 +176,37 @@ final class SkillRouterCompatibilityContractTests: XCTestCase {
         let feedbackRange = try XCTUnwrap(generalSection.range(of: "发送反馈"))
         XCTAssertLessThan(aboutRange.lowerBound, feedbackRange.lowerBound)
 
-        XCTAssertEqual(project.components(separatedBy: "CURRENT_PROJECT_VERSION = 50;").count - 1, 4)
-        XCTAssertEqual(project.components(separatedBy: "MARKETING_VERSION = 1.5.3;").count - 1, 4)
+        XCTAssertEqual(project.components(separatedBy: "CURRENT_PROJECT_VERSION = 51;").count - 1, 4)
+        XCTAssertEqual(project.components(separatedBy: "MARKETING_VERSION = 1.5.4;").count - 1, 4)
         XCTAssertTrue(readme.contains("### TestFlight feedback and release 1.5.3"))
         XCTAssertTrue(readme.contains("Settings → General"))
         XCTAssertTrue(readme.contains("application version to `1.5.3`"))
         XCTAssertTrue(readme.contains("build number to `50`"))
+    }
+
+    func testLargeModelStaysPersistentAcrossAppUpdates() throws {
+        let store = try source("LLM/Installation/LiteRTModelStore.swift")
+        let project = try source("PhoneAI.xcodeproj/project.pbxproj")
+        let readme = try source("README.md")
+
+        XCTAssertFalse(project.contains("Bundle Gemma 4 E2B model"))
+        XCTAssertFalse(project.contains("2588147712"))
+
+        let persistentCandidate = try XCTUnwrap(
+            store.range(of: "modelsDirectory.appendingPathComponent(model.fileName)")
+        )
+        let bundleCandidate = try XCTUnwrap(
+            store.range(of: "Bundle.main.url(forResource: baseName, withExtension: ext)")
+        )
+        XCTAssertLessThan(persistentCandidate.lowerBound, bundleCandidate.lowerBound)
+        XCTAssertTrue(store.contains("App Store / TestFlight 更新只替换 .app bundle"))
+
+        XCTAssertTrue(readme.contains("### Incremental app updates and release 1.5.4"))
+        XCTAssertTrue(readme.contains("Removed the 2.59 GB Gemma model"))
+        XCTAssertTrue(readme.contains("Documents/models"))
+        XCTAssertTrue(readme.contains("may need one in-app model download"))
+        XCTAssertTrue(readme.contains("application version to `1.5.4`"))
+        XCTAssertTrue(readme.contains("build number to `51`"))
     }
 
     func testGuardedDirectAnswerBlocksModelIntentFallback() throws {

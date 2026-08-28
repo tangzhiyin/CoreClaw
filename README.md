@@ -18,6 +18,18 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 
 ## Changes on August 28, 2026
 
+### Incremental app updates and release 1.5.4
+
+- Removed the 2.59 GB Gemma model from the Release and TestFlight application bundle so routine updates only deliver application code and resources.
+- Kept downloaded model weights in `Documents/models`, which remains available when iOS replaces the application bundle during an update.
+- Made persistent downloaded models take priority over legacy bundled copies.
+- Preserved resumable model downloads, so interrupted model transfers continue instead of restarting from zero.
+- Fresh installations download the selected model once from the app; later application updates reuse that persistent model.
+- Users upgrading directly from a bundled-model build may need one in-app model download after installing `1.5.4`; subsequent app updates retain and reuse it.
+- Updated the application version to `1.5.4`.
+- Updated the build number to `51`.
+- Synchronized version and build metadata between the main app and Live Activity widget.
+
 ### TestFlight feedback and release 1.5.3
 
 - Added a **Send Feedback** item at the bottom of **Settings → General**.
@@ -192,13 +204,13 @@ In Xcode:
 5. Select an iPhone, Simulator, or generic iOS device.
 6. Build or archive the application.
 
-To create a TestFlight archive with Gemma 4 E2B preinstalled, place the complete model at:
+Model weights are intentionally kept outside Release and TestFlight application bundles. The app downloads models into:
 
 ```text
-Models/gemma-4-E2B-it.litertlm
+Documents/models/
 ```
 
-The model must be exactly 2,588,147,712 bytes. It is intentionally ignored by Git because GitHub cannot host a binary of this size. Normal Debug builds do not copy the model; Release archives bundle it into the app automatically.
+This persistent application-data directory survives normal App Store and TestFlight updates. Local development weights under the ignored repository `Models/` directory are not copied into Release archives.
 
 ## Validation completed
 

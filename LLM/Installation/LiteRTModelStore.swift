@@ -3,7 +3,8 @@ import Foundation
 // MARK: - LiteRT Model Store
 //
 // ModelInstaller conformer for .litertlm 单文件模型。
-// 下载存储到 Documents/models/<fileName>。
+// 下载存储到 Documents/models/<fileName>。Documents 属于应用数据容器，
+// App Store / TestFlight 更新只替换 .app bundle，不会删除这里的模型。
 // 底层使用 ResumableAssetDownloader，partial/manifest 位于 Documents/models/.downloads/<modelID>/。
 
 // `@MainActor`: 4 个状态字典 (installStates / downloadProgress / resumableModelIDs /
@@ -576,16 +577,18 @@ final class LiteRTModelStore: ModelInstaller {
     }
 
     nonisolated private func primaryArtifactCandidates(for model: ModelDescriptor) -> [URL] {
-        var candidates: [URL] = []
+        // 用户下载的模型位于持久化数据容器，优先于旧版或开发构建中的 bundle
+        // 资源。这样 App 更新只需要下载代码，已安装的多 GB 权重继续复用。
+        var candidates: [URL] = [
+            modelsDirectory.appendingPathComponent(model.fileName)
+        ]
 
-        // 1. 优先检查 app bundle（打包进去的模型）
+        // 兼容旧版或内部开发构建中仍然存在的 bundle 模型。
         let baseName = (model.fileName as NSString).deletingPathExtension
         let ext = (model.fileName as NSString).pathExtension
         if let bundlePath = Bundle.main.url(forResource: baseName, withExtension: ext) {
             candidates.append(bundlePath)
         }
-        // 2. fallback 到 Documents/models/（下载的模型）
-        candidates.append(modelsDirectory.appendingPathComponent(model.fileName))
         return candidates
     }
 
