@@ -6,6 +6,10 @@ import UIKit
 // MARK: - Configurations 弹窗（iOS 版，适配 Theme 暖色系）
 
 struct ConfigurationsView: View {
+    private static let testFlightFeedbackURL = URL(
+        string: "https://testflight.apple.com/join/83pVSbzt"
+    )!
+
     @Bindable var engine: AgentEngine
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
@@ -358,6 +362,12 @@ struct ConfigurationsView: View {
                 languageSection
                 navRow(tr("隐私政策", "Privacy Policy", "プライバシー"), icon: "hand.raised") { showPrivacyPolicy = true }
                 aboutRow
+                navRow(
+                    tr("发送反馈", "Send Feedback", "フィードバックを送信"),
+                    icon: "paperplane"
+                ) {
+                    openURL(Self.testFlightFeedbackURL)
+                }
             }
             .padding(.horizontal, 22)
             .padding(.top, 18)

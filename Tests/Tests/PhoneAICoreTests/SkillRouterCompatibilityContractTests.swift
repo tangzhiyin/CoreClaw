@@ -152,12 +152,36 @@ final class SkillRouterCompatibilityContractTests: XCTestCase {
         XCTAssertFalse(skills.contains("phoneAIGlass"))
         XCTAssertTrue(appIcon.contains("\"platform\" : \"ios\""))
         XCTAssertTrue(appIcon.contains("\"value\" : \"dark\""))
-        XCTAssertEqual(project.components(separatedBy: "CURRENT_PROJECT_VERSION = 49;").count - 1, 4)
-        XCTAssertEqual(project.components(separatedBy: "MARKETING_VERSION = 1.5.2;").count - 1, 4)
+        XCTAssertEqual(project.components(separatedBy: "CURRENT_PROJECT_VERSION = 50;").count - 1, 4)
+        XCTAssertEqual(project.components(separatedBy: "MARKETING_VERSION = 1.5.3;").count - 1, 4)
         XCTAssertTrue(readme.contains("### Home Screen icon compatibility"))
         XCTAssertTrue(readme.contains("Removed all Liquid Glass styling from the in-app interface"))
-        XCTAssertTrue(readme.contains("application version to `1.5.2`"))
-        XCTAssertTrue(readme.contains("build number to `49`"))
+    }
+
+    func testGeneralSettingsEndsWithTestFlightFeedbackLink() throws {
+        let settings = try source("UI/ConfigurationsView.swift")
+        let project = try source("PhoneAI.xcodeproj/project.pbxproj")
+        let readme = try source("README.md")
+
+        XCTAssertTrue(settings.contains("https://testflight.apple.com/join/83pVSbzt"))
+        XCTAssertTrue(settings.contains("tr(\"发送反馈\", \"Send Feedback\", \"フィードバックを送信\")"))
+        XCTAssertTrue(settings.contains("openURL(Self.testFlightFeedbackURL)"))
+
+        let generalStart = try XCTUnwrap(settings.range(of: "private var generalGroupContent"))
+        let generalEnd = try XCTUnwrap(
+            settings.range(of: "private var settingsTabs", range: generalStart.upperBound..<settings.endIndex)
+        )
+        let generalSection = String(settings[generalStart.lowerBound..<generalEnd.lowerBound])
+        let aboutRange = try XCTUnwrap(generalSection.range(of: "aboutRow"))
+        let feedbackRange = try XCTUnwrap(generalSection.range(of: "发送反馈"))
+        XCTAssertLessThan(aboutRange.lowerBound, feedbackRange.lowerBound)
+
+        XCTAssertEqual(project.components(separatedBy: "CURRENT_PROJECT_VERSION = 50;").count - 1, 4)
+        XCTAssertEqual(project.components(separatedBy: "MARKETING_VERSION = 1.5.3;").count - 1, 4)
+        XCTAssertTrue(readme.contains("### TestFlight feedback and release 1.5.3"))
+        XCTAssertTrue(readme.contains("Settings → General"))
+        XCTAssertTrue(readme.contains("application version to `1.5.3`"))
+        XCTAssertTrue(readme.contains("build number to `50`"))
     }
 
     func testGuardedDirectAnswerBlocksModelIntentFallback() throws {

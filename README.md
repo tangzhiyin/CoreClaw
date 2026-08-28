@@ -18,6 +18,14 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 
 ## Changes on August 28, 2026
 
+### TestFlight feedback and release 1.5.3
+
+- Added a **Send Feedback** item at the bottom of **Settings → General**.
+- Made the feedback item open the PhoneAI TestFlight page, where beta testers can send feedback to the developer.
+- Updated the application version to `1.5.3`.
+- Updated the build number to `50`.
+- Synchronized version and build metadata between the main app and Live Activity widget.
+
 ### Home Screen icon compatibility
 
 - Removed all Liquid Glass styling from the in-app interface and restored the original deep-gray controls.
