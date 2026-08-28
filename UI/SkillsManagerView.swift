@@ -8,7 +8,11 @@ struct SkillsManagerView: View {
     @State private var expandedSkills: Set<String> = []
     @State private var activeInfoTopic: SkillsInfoTopic?
 
-    private var enabledCount: Int { engine.skillEntries.filter(\.isEnabled).count }
+    private var visibleEntries: [SkillEntry] {
+        engine.visibleSkillEntryIndices.map { engine.skillEntries[$0] }
+    }
+
+    private var enabledCount: Int { visibleEntries.filter(\.isEnabled).count }
 
     var body: some View {
         ZStack {
@@ -112,7 +116,7 @@ struct SkillsManagerView: View {
     }
 
     private var skillStateLine: String {
-        let total = engine.skillEntries.count
+        let total = visibleEntries.count
         if total == 0 {
             return tr("暂无可用技能", "No skills available", "利用できるスキルがありません")
         }
@@ -152,7 +156,7 @@ struct SkillsManagerView: View {
             }
 
             VStack(spacing: 0) {
-                ForEach(engine.skillEntries.indices, id: \.self) { i in
+                ForEach(engine.visibleSkillEntryIndices, id: \.self) { i in
                     SkillDetailCard(
                         entry: $engine.skillEntries[i],
                         isExpanded: expandedSkills.contains(engine.skillEntries[i].id),
@@ -166,7 +170,7 @@ struct SkillsManagerView: View {
                         }
                     )
 
-                    if i < engine.skillEntries.count - 1 {
+                    if i != engine.visibleSkillEntryIndices.last {
                         Rectangle()
                             .fill(SkillsStyle.hairline)
                             .frame(height: 1)

@@ -147,7 +147,7 @@ struct ContentView: View {
 
     private var composerSkillPrompts: [String] {
         var seen = Set<String>()
-        let prompts = engine.enabledSkillInfos.compactMap(composerPrompt)
+        let prompts = engine.visibleEnabledSkillInfos.compactMap(composerPrompt)
 
         let unique = prompts.filter { seen.insert($0).inserted }
         if unique.isEmpty {
@@ -1186,7 +1186,7 @@ struct ContentView: View {
     private var skillChips: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(engine.enabledSkillInfos.compactMap { skill -> (SkillInfo, label: String, prompt: String)? in
+                ForEach(engine.visibleEnabledSkillInfos.compactMap { skill -> (SkillInfo, label: String, prompt: String)? in
                     guard let prompt = skill.chipPrompt, !prompt.isEmpty else { return nil }
                     let label = (skill.chipLabel?.isEmpty == false) ? skill.chipLabel! : prompt
                     return (skill, label, prompt)

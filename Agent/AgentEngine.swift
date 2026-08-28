@@ -125,6 +125,8 @@ class AgentEngine {
 
     // MARK: - Computed Properties
 
+    static let hiddenSkillIDs: Set<String> = ["crisp"]
+
     var enabledSkillInfos: [SkillInfo] {
         skillEntries.filter(\.isEnabled).map {
             SkillInfo(name: $0.id, description: $0.description,
@@ -138,6 +140,14 @@ class AgentEngine {
                      chipPrompt: $0.chipPrompt,
                      chipLabel: $0.chipLabel)
         }
+    }
+
+    var visibleSkillEntryIndices: [Int] {
+        skillEntries.indices.filter { !Self.hiddenSkillIDs.contains(skillEntries[$0].id) }
+    }
+
+    var visibleEnabledSkillInfos: [SkillInfo] {
+        enabledSkillInfos.filter { !Self.hiddenSkillIDs.contains($0.name) }
     }
 
     // MARK: - Streaming UI Commit
@@ -335,6 +345,10 @@ class AgentEngine {
         let normalizedToolName = toolName?.trimmingCharacters(in: .whitespacesAndNewlines)
         let normalizedSkillID = skillID?.trimmingCharacters(in: .whitespacesAndNewlines)
         let normalizedSkillName = skillName?.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard normalizedSkillID?.lowercased() != "crisp",
+              normalizedSkillName?.lowercased() != "crisp" else {
+            return
+        }
         let detail = skillActivityDetail(
             skillID: normalizedSkillID,
             skillName: normalizedSkillName,

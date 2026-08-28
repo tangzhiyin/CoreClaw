@@ -520,7 +520,9 @@ extension AgentEngine {
     }
 
     func setAllSkills(enabled: Bool) {
-        let ids = skillEntries.map(\.id)
+        let ids = skillEntries
+            .filter { !Self.hiddenSkillIDs.contains($0.id) }
+            .map(\.id)
         ids.forEach { setSkill(id: $0, enabled: enabled) }
     }
 

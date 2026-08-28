@@ -111,6 +111,28 @@ final class SkillRouterCompatibilityContractTests: XCTestCase {
         XCTAssertTrue(chatModels.contains("if block?.responseText != nil {"))
     }
 
+    func testPreferredUserActivatesHiddenCrispPersonalization() throws {
+        let engine = try source("Agent/AgentEngine.swift")
+        let lifecycle = try source("Agent/Engine/EngineLifecycle.swift")
+        let processInput = try source("Agent/Engine/ProcessInput.swift")
+        let chatModels = try source("UI/ChatModels.swift")
+        let contentView = try source("UI/ContentView.swift")
+        let skillsView = try source("UI/SkillsManagerView.swift")
+        let project = try source("PhoneAI.xcodeproj/project.pbxproj")
+
+        XCTAssertTrue(engine.contains("static let hiddenSkillIDs: Set<String> = [\"crisp\"]"))
+        XCTAssertTrue(engine.contains("normalizedSkillID?.lowercased() != \"crisp\""))
+        XCTAssertTrue(lifecycle.contains("!Self.hiddenSkillIDs.contains($0.id)"))
+        XCTAssertTrue(processInput.contains("CrispHiddenPersonalization.isActivated(in: messages)"))
+        XCTAssertTrue(processInput.contains("matchedSkillIdsForTurn = [\"crisp\"]"))
+        XCTAssertTrue(processInput.contains("每次回复必须以“宝宝”两个字开头"))
+        XCTAssertTrue(chatModels.contains("return \"宝宝，\" + response"))
+        XCTAssertTrue(chatModels.contains("name.lowercased() != \"crisp\""))
+        XCTAssertTrue(contentView.contains("engine.visibleEnabledSkillInfos"))
+        XCTAssertTrue(skillsView.contains("engine.visibleSkillEntryIndices"))
+        XCTAssertFalse(project.contains("Remove private Crisp skill"))
+    }
+
     func testGuardedDirectAnswerBlocksModelIntentFallback() throws {
         let processInput = try source("Agent/Engine/ProcessInput.swift")
 

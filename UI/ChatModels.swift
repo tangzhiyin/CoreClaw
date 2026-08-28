@@ -75,9 +75,20 @@ private func splitThinkingAndResponse(from text: String) -> (thinking: String?, 
 func buildDisplayItems(from messages: [ChatMessage], isProcessing: Bool) -> [DisplayItem] {
     var items: [DisplayItem] = []
     var block: ResponseBlock? = nil
+    var hiddenCrispPersonalizationActive = false
 
     func flush() {
         if let b = block { items.append(.response(b)); block = nil }
+    }
+
+    func personalizedResponse(_ response: String?) -> String? {
+        guard hiddenCrispPersonalizationActive,
+              let response,
+              !response.isEmpty,
+              !response.hasPrefix("宝宝") else {
+            return response
+        }
+        return "宝宝，" + response
     }
 
     for msg in messages {
@@ -85,8 +96,12 @@ func buildDisplayItems(from messages: [ChatMessage], isProcessing: Bool) -> [Dis
         case .user:
             flush()
             items.append(.user(msg))
+            if CrispHiddenPersonalization.identifiesPreferredUser(in: msg.content) {
+                hiddenCrispPersonalizationActive = true
+            }
         case .system:
             if let name = msg.skillName {
+                guard name.lowercased() != "crisp" else { continue }
                 if block == nil { block = ResponseBlock(id: msg.id, isThinking: false) }
 
                 let content = msg.content
@@ -114,7 +129,7 @@ func buildDisplayItems(from messages: [ChatMessage], isProcessing: Bool) -> [Dis
                 if let thinking = parsed.thinking {
                     block?.thinkingText = thinking
                 }
-                block?.responseText = parsed.response
+                block?.responseText = personalizedResponse(parsed.response)
             }
         case .skillResult:
             break
@@ -128,7 +143,7 @@ func buildDisplayItems(from messages: [ChatMessage], isProcessing: Bool) -> [Dis
                 if let thinking = parsed.thinking {
                     block?.thinkingText = thinking
                 }
-                block?.responseText = parsed.response
+                block?.responseText = personalizedResponse(parsed.response)
             }
         }
     }
