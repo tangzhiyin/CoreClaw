@@ -26,14 +26,9 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 - Updated the build number to `50`.
 - Synchronized version and build metadata between the main app and Live Activity widget.
 
-### Home Screen icon compatibility
+### Home Screen App Icon adaptation
 
-- Removed all Liquid Glass styling from the in-app interface and restored the original deep-gray controls.
-- Kept the standard and dark App Icon assets compatible with the system-provided Home Screen icon appearance.
-- Limited Apple system visual adaptation to the installed application icon.
-- Updated the application version to `1.5.2`.
-- Updated the build number to `49`.
-- Synchronized version and build metadata between the main app and Live Activity widget.
+- Adapted the PhoneAI Home Screen App Icon to Apple's system-provided Liquid Glass appearance while leaving the in-app interface unchanged.
 
 ### Concurrent reply isolation
 
