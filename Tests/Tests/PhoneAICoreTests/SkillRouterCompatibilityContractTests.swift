@@ -133,6 +133,28 @@ final class SkillRouterCompatibilityContractTests: XCTestCase {
         XCTAssertFalse(project.contains("Remove private Crisp skill"))
     }
 
+    func testLiquidGlassUsesAvailabilityFallbackAndSynchronizedReleaseMetadata() throws {
+        let theme = try source("UI/Theme.swift")
+        let contentView = try source("UI/ContentView.swift")
+        let settings = try source("UI/ConfigurationsView.swift")
+        let skills = try source("UI/SkillsManagerView.swift")
+        let project = try source("PhoneAI.xcodeproj/project.pbxproj")
+        let readme = try source("README.md")
+
+        XCTAssertTrue(theme.contains("#available(iOS 26.0, macOS 26.0, *)"))
+        XCTAssertTrue(theme.contains(".glassEffect("))
+        XCTAssertTrue(theme.contains(".background(fallbackFill"))
+        XCTAssertTrue(contentView.contains(".phoneAIGlassCapsule("))
+        XCTAssertTrue(contentView.contains(".phoneAIGlassSurface("))
+        XCTAssertTrue(settings.contains(".phoneAIGlassSurface("))
+        XCTAssertTrue(skills.contains(".phoneAIGlassSurface("))
+        XCTAssertEqual(project.components(separatedBy: "CURRENT_PROJECT_VERSION = 49;").count - 1, 4)
+        XCTAssertEqual(project.components(separatedBy: "MARKETING_VERSION = 1.5.2;").count - 1, 4)
+        XCTAssertTrue(readme.contains("### Apple Liquid Glass adaptation"))
+        XCTAssertTrue(readme.contains("application version to `1.5.2`"))
+        XCTAssertTrue(readme.contains("build number to `49`"))
+    }
+
     func testGuardedDirectAnswerBlocksModelIntentFallback() throws {
         let processInput = try source("Agent/Engine/ProcessInput.swift")
 

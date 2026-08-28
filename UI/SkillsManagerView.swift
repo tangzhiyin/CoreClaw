@@ -97,6 +97,12 @@ struct SkillsManagerView: View {
         }
         .padding(.horizontal, Theme.inputPadH)
         .padding(.vertical, 10)
+        .phoneAIGlassSurface(
+            cornerRadius: 20,
+            fallbackFill: Theme.bgElevated.opacity(0.32),
+            fallbackStroke: Theme.borderSubtle.opacity(0.45)
+        )
+        .padding(.horizontal, 8)
     }
 
     private var heroSection: some View {

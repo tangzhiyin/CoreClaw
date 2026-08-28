@@ -456,14 +456,10 @@ struct ContentView: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 18)
                 .frame(maxWidth: 330)
-                .background(
-                    Theme.bgElevated.opacity(0.98),
-                    in: RoundedRectangle(cornerRadius: 18, style: .continuous)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .strokeBorder(Theme.border.opacity(0.86), lineWidth: 1)
-                        .allowsHitTesting(false)
+                .phoneAIGlassSurface(
+                    cornerRadius: 18,
+                    fallbackFill: Theme.bgElevated.opacity(0.98),
+                    fallbackStroke: Theme.border.opacity(0.86)
                 )
                 .shadow(color: Color.black.opacity(0.24), radius: 22, x: 0, y: 14)
                 .padding(.horizontal, 28)
@@ -766,6 +762,12 @@ struct ContentView: View {
         }
         .padding(.horizontal, Theme.inputPadH)
         .padding(.vertical, 10)
+        .phoneAIGlassSurface(
+            cornerRadius: 20,
+            fallbackFill: Theme.bgElevated.opacity(0.18),
+            fallbackStroke: Theme.borderSubtle.opacity(0.32)
+        )
+        .padding(.horizontal, 8)
         .animation(.easeInOut(duration: 0.18), value: activeTopStatusHint)
         .animation(.easeInOut(duration: 0.18), value: engine.config.enableThinking)
         .animation(.easeInOut(duration: 0.18), value: currentModelSupportsThinking)
@@ -1204,12 +1206,12 @@ struct ContentView: View {
                         .foregroundStyle(Theme.textSecondary)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 20)
-                                .strokeBorder(Theme.border, lineWidth: 1)
-                        )
                     }
                     .buttonStyle(.plain)
+                    .phoneAIGlassCapsule(
+                        fallbackFill: Color.clear,
+                        fallbackStroke: Theme.border
+                    )
                 }
             }
             .padding(.horizontal, Theme.chatPadH)
@@ -1333,13 +1335,10 @@ struct ContentView: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 7)
-        .background(
-            Theme.bgElevated.opacity(0.78),
-            in: RoundedRectangle(cornerRadius: 22, style: .continuous)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .strokeBorder(Theme.border.opacity(0.62), lineWidth: 1)
+        .phoneAIGlassSurface(
+            cornerRadius: 22,
+            fallbackFill: Theme.bgElevated.opacity(0.78),
+            fallbackStroke: Theme.border.opacity(0.62)
         )
         .shadow(color: Color.black.opacity(0.10), radius: 18, x: 0, y: 8)
     }
@@ -1446,10 +1445,9 @@ struct ContentView: View {
         }
         .padding(.horizontal, UIScale.chipInnerMargin)
         .padding(.vertical, (UIScale.pillHeight - UIScale.chipDiameter) / 2)
-        .background(Theme.bgElevated, in: Capsule())
-        .overlay(
-            Capsule()
-                .strokeBorder(Theme.borderSubtle.opacity(colorScheme == .dark ? 0.56 : 0.18), lineWidth: 1)
+        .phoneAIGlassCapsule(
+            fallbackFill: Theme.bgElevated,
+            fallbackStroke: Theme.borderSubtle.opacity(colorScheme == .dark ? 0.56 : 0.18)
         )
         .shadow(
             color: Color.black.opacity(colorScheme == .dark ? 0 : 0.035),

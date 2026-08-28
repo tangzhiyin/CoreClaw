@@ -147,6 +147,12 @@ struct ConfigurationsView: View {
         }
         .padding(.horizontal, Theme.inputPadH)
         .padding(.vertical, 10)
+        .phoneAIGlassSurface(
+            cornerRadius: 20,
+            fallbackFill: Theme.bgElevated.opacity(0.32),
+            fallbackStroke: Theme.borderSubtle.opacity(0.45)
+        )
+        .padding(.horizontal, 8)
     }
 
     // MARK: - Phase2 单页分组:组头 + 导航行 + 提示词段

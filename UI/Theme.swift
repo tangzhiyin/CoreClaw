@@ -54,6 +54,79 @@ struct Theme {
     #endif
 }
 
+// MARK: - Liquid Glass
+
+private struct PhoneAIGlassSurface: ViewModifier {
+    let shape: PhoneAIGlassShape
+    let fallbackFill: Color
+    let fallbackStroke: Color
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, macOS 26.0, *) {
+            switch shape {
+            case .capsule:
+                content.glassEffect(
+                    .regular.tint(Theme.bgElevated.opacity(0.28)),
+                    in: .capsule
+                )
+            case .rounded(let cornerRadius):
+                content.glassEffect(
+                    .regular.tint(Theme.bgElevated.opacity(0.28)),
+                    in: .rect(cornerRadius: cornerRadius)
+                )
+            }
+        } else {
+            switch shape {
+            case .capsule:
+                content
+                    .background(fallbackFill, in: Capsule())
+                    .overlay(Capsule().strokeBorder(fallbackStroke, lineWidth: 1))
+            case .rounded(let cornerRadius):
+                content
+                    .background(
+                        fallbackFill,
+                        in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                            .strokeBorder(fallbackStroke, lineWidth: 1)
+                    )
+            }
+        }
+    }
+}
+
+private enum PhoneAIGlassShape {
+    case capsule
+    case rounded(CGFloat)
+}
+
+extension View {
+    func phoneAIGlassCapsule(
+        fallbackFill: Color = Theme.bgElevated,
+        fallbackStroke: Color = Theme.borderSubtle.opacity(0.56)
+    ) -> some View {
+        modifier(PhoneAIGlassSurface(
+            shape: .capsule,
+            fallbackFill: fallbackFill,
+            fallbackStroke: fallbackStroke
+        ))
+    }
+
+    func phoneAIGlassSurface(
+        cornerRadius: CGFloat,
+        fallbackFill: Color = Theme.bgElevated,
+        fallbackStroke: Color = Theme.border.opacity(0.62)
+    ) -> some View {
+        modifier(PhoneAIGlassSurface(
+            shape: .rounded(cornerRadius),
+            fallbackFill: fallbackFill,
+            fallbackStroke: fallbackStroke
+        ))
+    }
+}
+
 // MARK: - Hex Color（跨平台）
 
 extension Color {
