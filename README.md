@@ -4,7 +4,7 @@
 
 # PhoneAI
 
-PhoneAI is a local AI assistant application for iPhone. This README was reset on August 27, 2026 and records only the project work completed on August 26–27, 2026.
+PhoneAI is a local AI assistant application for iPhone. This README records ongoing project updates, fixes, release changes, and important development notes.
 
 ## TestFlight
 
@@ -15,6 +15,17 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 <p align="center">
   <img src="assets/phoneai-ui-2026-08-27.png" width="360" alt="PhoneAI deep-gray iPhone chat interface">
 </p>
+
+## Changes on August 28, 2026
+
+### Concurrent reply isolation
+
+- Fixed delayed answers overwriting a newer answer when multiple requests complete out of order.
+- Bound streaming updates and completion callbacks to each assistant message's immutable UUID instead of a mutable array index.
+- Extended UUID-based reply ownership across standard generation, multimodal replies, image follow-ups, planner completion, tool fallback, and prior-context answers.
+- Made the chat renderer create a separate response block for each independent assistant message rather than merging consecutive answers.
+- Preserved every completed answer in the conversation when an earlier request finishes after a later request.
+- Added regression contracts covering message ownership and independent response rendering.
 
 ## Changes on August 27, 2026
 
@@ -74,13 +85,6 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 - Added tracked placeholder metadata for the ignored `Models/` directory so incremental builds can detect local model additions without publishing model weights.
 - Recovered a stuck Xcode PIF transfer session that caused both Clean and Build to fail before target compilation.
 - Restarted the PhoneAI build service session and confirmed a complete Clean followed by a signed Simulator Build.
-
-### Concurrent reply isolation
-
-- Fixed delayed answers overwriting a newer answer when multiple requests complete out of order.
-- Bound streaming updates and completion callbacks to each assistant message's immutable UUID instead of a mutable array index.
-- Made the chat renderer create a separate response block for each independent assistant message rather than merging consecutive answers.
-- Preserved every completed answer in the conversation when an earlier request finishes after a later request.
 
 ### Deep-gray visual refresh
 
