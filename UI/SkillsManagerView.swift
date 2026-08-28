@@ -55,17 +55,16 @@ struct SkillsManagerView: View {
                 dismiss()
             } label: {
                 ZStack {
-                    Circle()
-                        .fill(SkillsStyle.controlFill)
-                        .frame(
-                            width: UIScale.topStatusChipDiameter,
-                            height: UIScale.topStatusChipDiameter
-                        )
                     Image(systemName: "xmark")
                         .font(.system(size: 9, weight: .medium))
                         .foregroundStyle(SkillsStyle.secondary)
                         .opacity(0.58)
                 }
+                .frame(
+                    width: UIScale.topStatusChipDiameter,
+                    height: UIScale.topStatusChipDiameter
+                )
+                .phoneAIGlassCircleIcon(fallbackFill: SkillsStyle.controlFill)
             }
             .buttonStyle(.plain)
 
@@ -81,28 +80,21 @@ struct SkillsManagerView: View {
                 engine.reloadSkills()
             } label: {
                 ZStack {
-                    Circle()
-                        .fill(SkillsStyle.controlFill)
-                        .frame(
-                            width: UIScale.topStatusChipDiameter,
-                            height: UIScale.topStatusChipDiameter
-                        )
                     Image(systemName: "arrow.clockwise")
                         .font(.system(size: 10, weight: .medium))
                         .foregroundStyle(SkillsStyle.secondary)
                         .opacity(0.64)
                 }
+                .frame(
+                    width: UIScale.topStatusChipDiameter,
+                    height: UIScale.topStatusChipDiameter
+                )
+                .phoneAIGlassCircleIcon(fallbackFill: SkillsStyle.controlFill)
             }
             .buttonStyle(.plain)
         }
         .padding(.horizontal, Theme.inputPadH)
         .padding(.vertical, 10)
-        .phoneAIGlassSurface(
-            cornerRadius: 20,
-            fallbackFill: Theme.bgElevated.opacity(0.32),
-            fallbackStroke: Theme.borderSubtle.opacity(0.45)
-        )
-        .padding(.horizontal, 8)
     }
 
     private var heroSection: some View {

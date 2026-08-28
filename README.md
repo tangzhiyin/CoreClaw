@@ -20,9 +20,9 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 
 ### Apple Liquid Glass adaptation
 
-- Added iOS 26 Liquid Glass materials to the main composer, attachment tray, quick actions, prompts, and settings navigation surfaces.
-- Preserved the deep-gray PhoneAI visual identity while allowing supported Apple platforms to render system glass depth, tint, and translucency.
-- Added backward-compatible solid-surface fallbacks for devices running earlier operating-system versions.
+- Added iOS 26 Liquid Glass styling specifically to interactive icon controls.
+- Kept toolbars, the composer, attachment tray, quick actions, prompts, and settings surfaces in the existing deep-gray visual system.
+- Added backward-compatible icon fills and outlines for devices running earlier operating-system versions.
 - Updated the application version to `1.5.2`.
 - Updated the build number to `49`.
 - Synchronized version and build metadata between the main app and Live Activity widget.

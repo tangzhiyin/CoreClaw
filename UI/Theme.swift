@@ -54,10 +54,10 @@ struct Theme {
     #endif
 }
 
-// MARK: - Liquid Glass
+// MARK: - Liquid Glass Icons
 
-private struct PhoneAIGlassSurface: ViewModifier {
-    let shape: PhoneAIGlassShape
+private struct PhoneAIGlassIcon: ViewModifier {
+    let shape: PhoneAIGlassIconShape
     let fallbackFill: Color
     let fallbackStroke: Color
 
@@ -65,10 +65,10 @@ private struct PhoneAIGlassSurface: ViewModifier {
     func body(content: Content) -> some View {
         if #available(iOS 26.0, macOS 26.0, *) {
             switch shape {
-            case .capsule:
+            case .circle:
                 content.glassEffect(
                     .regular.tint(Theme.bgElevated.opacity(0.28)),
-                    in: .capsule
+                    in: .circle
                 )
             case .rounded(let cornerRadius):
                 content.glassEffect(
@@ -78,10 +78,10 @@ private struct PhoneAIGlassSurface: ViewModifier {
             }
         } else {
             switch shape {
-            case .capsule:
+            case .circle:
                 content
-                    .background(fallbackFill, in: Capsule())
-                    .overlay(Capsule().strokeBorder(fallbackStroke, lineWidth: 1))
+                    .background(fallbackFill, in: Circle())
+                    .overlay(Circle().strokeBorder(fallbackStroke, lineWidth: 1))
             case .rounded(let cornerRadius):
                 content
                     .background(
@@ -97,29 +97,29 @@ private struct PhoneAIGlassSurface: ViewModifier {
     }
 }
 
-private enum PhoneAIGlassShape {
-    case capsule
+private enum PhoneAIGlassIconShape {
+    case circle
     case rounded(CGFloat)
 }
 
 extension View {
-    func phoneAIGlassCapsule(
-        fallbackFill: Color = Theme.bgElevated,
-        fallbackStroke: Color = Theme.borderSubtle.opacity(0.56)
+    func phoneAIGlassCircleIcon(
+        fallbackFill: Color = Theme.bgHover,
+        fallbackStroke: Color = Color.clear
     ) -> some View {
-        modifier(PhoneAIGlassSurface(
-            shape: .capsule,
+        modifier(PhoneAIGlassIcon(
+            shape: .circle,
             fallbackFill: fallbackFill,
             fallbackStroke: fallbackStroke
         ))
     }
 
-    func phoneAIGlassSurface(
+    func phoneAIGlassRoundedIcon(
         cornerRadius: CGFloat,
-        fallbackFill: Color = Theme.bgElevated,
+        fallbackFill: Color = Color.clear,
         fallbackStroke: Color = Theme.border.opacity(0.62)
     ) -> some View {
-        modifier(PhoneAIGlassSurface(
+        modifier(PhoneAIGlassIcon(
             shape: .rounded(cornerRadius),
             fallbackFill: fallbackFill,
             fallbackStroke: fallbackStroke

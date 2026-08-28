@@ -456,10 +456,14 @@ struct ContentView: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 18)
                 .frame(maxWidth: 330)
-                .phoneAIGlassSurface(
-                    cornerRadius: 18,
-                    fallbackFill: Theme.bgElevated.opacity(0.98),
-                    fallbackStroke: Theme.border.opacity(0.86)
+                .background(
+                    Theme.bgElevated.opacity(0.98),
+                    in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .strokeBorder(Theme.border.opacity(0.86), lineWidth: 1)
+                        .allowsHitTesting(false)
                 )
                 .shadow(color: Color.black.opacity(0.24), radius: 22, x: 0, y: 14)
                 .padding(.horizontal, 28)
@@ -762,12 +766,6 @@ struct ContentView: View {
         }
         .padding(.horizontal, Theme.inputPadH)
         .padding(.vertical, 10)
-        .phoneAIGlassSurface(
-            cornerRadius: 20,
-            fallbackFill: Theme.bgElevated.opacity(0.18),
-            fallbackStroke: Theme.borderSubtle.opacity(0.32)
-        )
-        .padding(.horizontal, 8)
         .animation(.easeInOut(duration: 0.18), value: activeTopStatusHint)
         .animation(.easeInOut(duration: 0.18), value: engine.config.enableThinking)
         .animation(.easeInOut(duration: 0.18), value: currentModelSupportsThinking)
@@ -787,9 +785,9 @@ struct ContentView: View {
                 .foregroundStyle(Theme.textSecondary)
                 .opacity(UIScale.gearIconOpacity)
                 .frame(width: 22, height: 22)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 7, style: .continuous)
-                        .strokeBorder(Theme.textSecondary.opacity(0.42), lineWidth: 1)
+                .phoneAIGlassRoundedIcon(
+                    cornerRadius: 7,
+                    fallbackStroke: Theme.textSecondary.opacity(0.42)
                 )
                 .frame(
                     width: UIScale.topStatusChipDiameter,
@@ -807,11 +805,6 @@ struct ContentView: View {
             showHistory = true
         }) {
             ZStack {
-                // 可见外圈缩到 24 (略大于 +/T chip 的 22), 不再像 28 那样偏大;
-                // 外层仍保留 28 点击区, 跟其它三个图标的 tap / 垂直对齐一致。
-                Circle()
-                    .fill(Theme.bgHover.opacity(UIScale.topStatusChipBgOpacity))
-                    .frame(width: 24, height: 24)
                 Circle()
                     .fill(engine.isModelLoaded ? Theme.accentMuted : Theme.textTertiary)
                     .frame(
@@ -819,6 +812,10 @@ struct ContentView: View {
                         height: UIScale.topStatusChipDotSize
                     )
             }
+            .frame(width: 24, height: 24)
+            .phoneAIGlassCircleIcon(
+                fallbackFill: Theme.bgHover.opacity(UIScale.topStatusChipBgOpacity)
+            )
             .frame(
                 width: UIScale.topStatusChipDiameter,
                 height: UIScale.topStatusChipDiameter
@@ -847,16 +844,10 @@ struct ContentView: View {
                 .foregroundStyle(tint)
                 .opacity(glyphOpacity)
                 .frame(width: 22, height: 22)
-                .background(
-                    RoundedRectangle(cornerRadius: 7, style: .continuous)
-                        .fill(isActive ? Theme.accentSubtle : Color.clear)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 7, style: .continuous)
-                        .strokeBorder(
-                            isActive ? Color.clear : tint.opacity(isUsable ? 0.42 : 0.24),
-                            lineWidth: 1
-                        )
+                .phoneAIGlassRoundedIcon(
+                    cornerRadius: 7,
+                    fallbackFill: isActive ? Theme.accentSubtle : Color.clear,
+                    fallbackStroke: isActive ? Color.clear : tint.opacity(isUsable ? 0.42 : 0.24)
                 )
                 .frame(
                     width: UIScale.topStatusChipDiameter,
@@ -882,13 +873,10 @@ struct ContentView: View {
                 .foregroundStyle(tint)
                 .opacity(glyphOpacity)
                 .frame(width: 22, height: 22)
-                .background(
-                    RoundedRectangle(cornerRadius: 7, style: .continuous)
-                        .fill(hasModel ? Theme.accentSubtle : Color.clear)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 7, style: .continuous)
-                        .strokeBorder(hasModel ? Color.clear : tint.opacity(0.42), lineWidth: 1)
+                .phoneAIGlassRoundedIcon(
+                    cornerRadius: 7,
+                    fallbackFill: hasModel ? Theme.accentSubtle : Color.clear,
+                    fallbackStroke: hasModel ? Color.clear : tint.opacity(0.42)
                 )
                 .frame(
                     width: UIScale.topStatusChipDiameter,
@@ -1208,10 +1196,6 @@ struct ContentView: View {
                         .padding(.vertical, 8)
                     }
                     .buttonStyle(.plain)
-                    .phoneAIGlassCapsule(
-                        fallbackFill: Color.clear,
-                        fallbackStroke: Theme.border
-                    )
                 }
             }
             .padding(.horizontal, Theme.chatPadH)
@@ -1335,10 +1319,13 @@ struct ContentView: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 7)
-        .phoneAIGlassSurface(
-            cornerRadius: 22,
-            fallbackFill: Theme.bgElevated.opacity(0.78),
-            fallbackStroke: Theme.border.opacity(0.62)
+        .background(
+            Theme.bgElevated.opacity(0.78),
+            in: RoundedRectangle(cornerRadius: 22, style: .continuous)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .strokeBorder(Theme.border.opacity(0.62), lineWidth: 1)
         )
         .shadow(color: Color.black.opacity(0.10), radius: 18, x: 0, y: 8)
     }
@@ -1402,9 +1389,8 @@ struct ContentView: View {
                     .font(.system(size: UIScale.chipIconSize, weight: .regular))
                     .foregroundStyle(Theme.textSecondary)
                     .frame(width: UIScale.chipDiameter, height: UIScale.chipDiameter)
-                    .background(
-                        showAttachmentTray ? Theme.bgHover.opacity(0.88) : Theme.bgHover,
-                        in: Circle()
+                    .phoneAIGlassCircleIcon(
+                        fallbackFill: showAttachmentTray ? Theme.bgHover.opacity(0.88) : Theme.bgHover
                     )
                     .rotationEffect(.degrees(showAttachmentTray ? 45 : 0))
                     .animation(.easeInOut(duration: 0.18), value: showAttachmentTray)
@@ -1445,9 +1431,10 @@ struct ContentView: View {
         }
         .padding(.horizontal, UIScale.chipInnerMargin)
         .padding(.vertical, (UIScale.pillHeight - UIScale.chipDiameter) / 2)
-        .phoneAIGlassCapsule(
-            fallbackFill: Theme.bgElevated,
-            fallbackStroke: Theme.borderSubtle.opacity(colorScheme == .dark ? 0.56 : 0.18)
+        .background(Theme.bgElevated, in: Capsule())
+        .overlay(
+            Capsule()
+                .strokeBorder(Theme.borderSubtle.opacity(colorScheme == .dark ? 0.56 : 0.18), lineWidth: 1)
         )
         .shadow(
             color: Color.black.opacity(colorScheme == .dark ? 0 : 0.035),
@@ -1575,6 +1562,7 @@ struct ContentView: View {
                 .symbolReplaceTransition()
                 .opacity(isEnteringVoiceDisabled ? 0.24 : 0.55)  // 比 LIVE chip 更弱, 强化"辅助" 而非 "主操作"
                 .frame(width: UIScale.chipDiameter, height: UIScale.chipDiameter)
+                .phoneAIGlassCircleIcon(fallbackFill: Color.clear)
                 .contentShape(Rectangle())  // 保持 chip 大小的点击区
         }
         .buttonStyle(.plain)
@@ -1600,7 +1588,7 @@ struct ContentView: View {
                 .symbolReplaceTransition()
                 .opacity(iconOpacity)
                 .frame(width: UIScale.chipDiameter, height: UIScale.chipDiameter)
-                .background(style.bgColor, in: Circle())
+                .phoneAIGlassCircleIcon(fallbackFill: style.bgColor)
         }
         .buttonStyle(.plain)
         .animation(.easeInOut(duration: 0.15), value: hasComposedInput)
