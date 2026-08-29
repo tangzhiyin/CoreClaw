@@ -48,7 +48,7 @@ enum RemindersTools {
 
     private static func newReminderListTitle() -> String {
         let prefersChinese = LanguageService.shared.current.isChinese
-        return prefersChinese ? "PhoneAI 提醒事项" : "PhoneAI Reminders"
+        return prefersChinese ? "CoreClaw 提醒事项" : "CoreClaw Reminders"
     }
 
     private static func reminderCalendarCreationSources() -> [EKSource] {

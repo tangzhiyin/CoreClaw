@@ -98,7 +98,7 @@ final class LiteRTModelStore: ModelInstaller {
     ///     max(partialBytes, file.downloadedBytes) 决定断点, 即使 .part 已删,
     ///     manifest 里 downloadedBytes>0 的旧 coreml entry 仍会让 V4.6 被标
     ///     成"可继续下载"。只 filter 掉 coreml 条目, 主 LLM / mmproj 保留。
-    private static let coreMLV46CleanupKey = "PhoneAI.coreMLV46Cleanup.v1"
+    private static let coreMLV46CleanupKey = "CoreClaw.coreMLV46Cleanup.v1"
 
     /// V4.6 asset ID; 经 sanitizedAssetID 不变 (字符全在允许集), 因此 .downloads 子目录
     /// 名就是它本身。这里 hardcode 而不调 DownloadManifestStore.workspaceDirectory,

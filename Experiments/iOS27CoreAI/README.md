@@ -1,10 +1,10 @@
 # iOS 27 Core AI Experiment
 
-This package is an isolated research surface for iOS 27 APIs. It is intentionally not wired into `PhoneAI.xcodeproj`.
+This package is an isolated research surface for iOS 27 APIs. It is intentionally not wired into `CoreClaw.xcodeproj`.
 
 ## Goals
 
-- Keep current PhoneAI production runtime untouched.
+- Keep current CoreClaw production runtime untouched.
 - Compile on the current non-iOS-27 toolchain.
 - Provide a guarded place to test Core AI and Foundation Models once Xcode 27 is installed.
 - Validate routing and argument-extraction ideas before changing `AgentEngine`, `BackendDispatcher`, or `ModelRuntimeCoordinator`.

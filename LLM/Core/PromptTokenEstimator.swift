@@ -422,7 +422,7 @@ public struct PromptRuntimeProfile: Sendable, Codable, Equatable {
                 case .assistant:
                     role = "assistant"
                 case .tool, .unknown:
-                    // PhoneAI tools are still represented by the app's text protocol.
+                    // CoreClaw tools are still represented by the app's text protocol.
                     // OpenAI-compatible gateways may reject native "tool" messages without
                     // tool_call_id, so keep non-user/assistant evidence as plain user context.
                     role = "user"

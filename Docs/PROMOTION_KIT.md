@@ -1,30 +1,30 @@
-# PhoneAI Promotion Kit
+# CoreClaw Promotion Kit
 
-Short copy, post templates, and positioning notes for sharing PhoneAI.
+Short copy, post templates, and positioning notes for sharing CoreClaw.
 
 ## One-line positioning
 
 Canonical (use this verbatim in launches, listings, and directory submissions — matches Docs/SEO_GEO_STRATEGY.md):
 
-> PhoneAI is a mobile-native local AI Agent framework for phones and edge devices. Its iOS runtime runs on-device models and native iOS Skills by default, and supports optional Mac Gateway remote inference for heavier local models.
+> CoreClaw is a mobile-native local AI Agent framework for phones and edge devices. Its iOS runtime runs on-device models and native iOS Skills by default, and supports optional Mac Gateway remote inference for heavier local models.
 
 English (short variant):
 
-> PhoneAI turns phones into local AI agent runtimes with on-device models, native mobile Skills, LiveLand, and optional Mac Gateway inference.
+> CoreClaw turns phones into local AI agent runtimes with on-device models, native mobile Skills, LiveLand, and optional Mac Gateway inference.
 
 Chinese:
 
-> PhoneAI 把手机变成本地 AI Agent 运行时，提供端侧模型、原生移动端 Skills、LiveLand 和可选 Mac Gateway 推理。
+> CoreClaw 把手机变成本地 AI Agent 运行时，提供端侧模型、原生移动端 Skills、LiveLand 和可选 Mac Gateway 推理。
 
 ## Short description
 
 English:
 
-> PhoneAI brings local agent workflows to the phone: on-device Gemma inference, native mobile Skills, image understanding, voice interaction, HealthKit and Calendar queries, LiveLand, and explicit Web Search when realtime information is needed.
+> CoreClaw brings local agent workflows to the phone: on-device Gemma inference, native mobile Skills, image understanding, voice interaction, HealthKit and Calendar queries, LiveLand, and explicit Web Search when realtime information is needed.
 
 Chinese:
 
-> PhoneAI 把本地 Agent 带到手机：端侧 Gemma 推理、原生移动端 Skills、图片理解、语音交互、健康与日历查询、LiveLand，以及用户明确需要时的联网搜索。
+> CoreClaw 把本地 Agent 带到手机：端侧 Gemma 推理、原生移动端 Skills、图片理解、语音交互、健康与日历查询、LiveLand，以及用户明确需要时的联网搜索。
 
 ## What to emphasize
 
@@ -38,7 +38,7 @@ Chinese:
 
 ## Product boundaries
 
-- PhoneAI focuses on phone-scale local agent workflows.
+- CoreClaw focuses on phone-scale local agent workflows.
 - Local inference and native Skills run on the device by default.
 - Web Search, webpage reading, and Mac Gateway are explicit user-triggered capabilities.
 - Native actions follow mobile OS permission boundaries.
@@ -49,7 +49,7 @@ Chinese:
 English:
 
 ```text
-PhoneAI is an open-source local AI agent runtime for phones.
+CoreClaw is an open-source local AI agent runtime for phones.
 
 It runs models and native mobile Skills on device:
 - Calendar and reminders
@@ -59,13 +59,13 @@ It runs models and native mobile Skills on device:
 - Voice interaction
 - Web Search when explicitly requested
 
-GitHub: https://github.com/tangzhiyin/PhoneAI
+GitHub: https://github.com/tangzhiyin/CoreClaw
 ```
 
 Chinese:
 
 ```text
-PhoneAI 是一个开源的手机本地 AI Agent 运行时。
+CoreClaw 是一个开源的手机本地 AI Agent 运行时。
 
 基于 Gemma 端侧推理，可以调用原生移动端 Skills：
 - 日历 / 提醒事项
@@ -75,22 +75,22 @@ PhoneAI 是一个开源的手机本地 AI Agent 运行时。
 - 语音交互
 - 明确需要时联网搜索
 
-GitHub: https://github.com/tangzhiyin/PhoneAI
+GitHub: https://github.com/tangzhiyin/CoreClaw
 ```
 
 ## Hacker News / Reddit style post
 
 ```text
-Show HN: PhoneAI - a mobile-native local AI Agent framework
+Show HN: CoreClaw - a mobile-native local AI Agent framework
 
-PhoneAI is a mobile-native local AI Agent framework for phones and edge devices. Its iOS runtime runs on-device models and native iOS Skills by default, and supports optional Mac Gateway remote inference for heavier local models.
+CoreClaw is a mobile-native local AI Agent framework for phones and edge devices. Its iOS runtime runs on-device models and native iOS Skills by default, and supports optional Mac Gateway remote inference for heavier local models.
 
-PhoneAI runs inference and Skill calls on device. It is designed for practical phone workflows: calendar queries, reminders, contacts, HealthKit summaries, clipboard, image understanding, voice, LiveLand, and explicit Web Search.
+CoreClaw runs inference and Skill calls on device. It is designed for practical phone workflows: calendar queries, reminders, contacts, HealthKit summaries, clipboard, image understanding, voice, LiveLand, and explicit Web Search.
 
 The Skill system is file-driven: each capability is defined by SKILL.md and backed by permission-scoped native mobile tools.
 
-GitHub: https://github.com/tangzhiyin/PhoneAI
-Site: https://tangzhiyin.github.io/PhoneAI/
+GitHub: https://github.com/tangzhiyin/CoreClaw
+Site: https://tangzhiyin.github.io/CoreClaw/
 ```
 
 ## Demo scripts
@@ -142,10 +142,10 @@ swiftui
 
 ## Useful links
 
-- GitHub: https://github.com/tangzhiyin/PhoneAI
-- Site: https://tangzhiyin.github.io/PhoneAI/
-- Chinese landing: https://tangzhiyin.github.io/PhoneAI/zh/
-- Benchmarks: https://tangzhiyin.github.io/PhoneAI/benchmarks/
+- GitHub: https://github.com/tangzhiyin/CoreClaw
+- Site: https://tangzhiyin.github.io/CoreClaw/
+- Chinese landing: https://tangzhiyin.github.io/CoreClaw/zh/
+- Benchmarks: https://tangzhiyin.github.io/CoreClaw/benchmarks/
 - On-device Gemma note: ON_DEVICE_GEMMA.md
 - Skill system note: SKILL_SYSTEM.md
 - iOS memory note: IOS_MEMORY_LIMITS.md

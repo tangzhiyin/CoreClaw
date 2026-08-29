@@ -5,7 +5,7 @@ import UIKit
 import AppKit
 #endif
 
-// MARK: - PhoneAI 设计系统(深灰,v3)
+// MARK: - CoreClaw 设计系统(深灰,v3)
 // 跨平台共享:macOS + iOS
 //
 // light/dark appearance 都保持深灰基调，依靠表面层级和文字明度区分。

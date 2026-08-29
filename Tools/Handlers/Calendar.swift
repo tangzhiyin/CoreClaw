@@ -774,7 +774,7 @@ enum CalendarTools {
                 isAllDay: false,
                 location: location,
                 notes: notes,
-                calendarTitle: "PhoneAI Mock",
+                calendarTitle: "CoreClaw Mock",
                 availability: "busy"
             ))
             events.sort { $0.start < $1.start }
@@ -815,7 +815,7 @@ enum CalendarTools {
                     isAllDay: false,
                     location: nil,
                     notes: nil,
-                    calendarTitle: "PhoneAI Mock",
+                    calendarTitle: "CoreClaw Mock",
                     availability: "busy"
                 ),
                 CalendarEventSnapshot(
@@ -826,7 +826,7 @@ enum CalendarTools {
                     isAllDay: false,
                     location: tr("3 楼会议室", "3F Meeting Room", "3階 会議室"),
                     notes: nil,
-                    calendarTitle: "PhoneAI Mock",
+                    calendarTitle: "CoreClaw Mock",
                     availability: "busy"
                 ),
                 CalendarEventSnapshot(
@@ -837,7 +837,7 @@ enum CalendarTools {
                     isAllDay: false,
                     location: nil,
                     notes: nil,
-                    calendarTitle: "PhoneAI Mock",
+                    calendarTitle: "CoreClaw Mock",
                     availability: "busy"
                 )
             ]

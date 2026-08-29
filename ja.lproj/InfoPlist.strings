@@ -4,13 +4,13 @@
  * 現在のシステム言語で選ばれる.
  */
 
-"NSCalendarsUsageDescription" = "PhoneAI は予定を作成するためにカレンダーへのアクセスが必要です";
-"NSCalendarsFullAccessUsageDescription" = "PhoneAI は、スケジュールの要約、空き時間の確認、ローカルの予定分析を依頼されたときだけカレンダーの予定を読み取ります。";
-"NSCalendarsWriteOnlyAccessUsageDescription" = "PhoneAI はカレンダーに予定を作成する必要があります";
-"NSRemindersUsageDescription" = "PhoneAI はリマインダーへのアクセスが必要です";
-"NSRemindersFullAccessUsageDescription" = "PhoneAI はリマインダーを作成する必要があります";
-"NSContactsUsageDescription" = "PhoneAI は連絡先情報を保存する必要があります";
-"NSCameraUsageDescription" = "PhoneAI は Live モードで周囲の状況を確認するためにカメラが必要です";
-"NSMicrophoneUsageDescription" = "PhoneAI は音声の録音と音声入力の取得のためにマイクが必要です";
-"NSHealthShareUsageDescription" = "PhoneAI は健康データ（歩数、距離、アクティブエネルギー、心拍数、睡眠、ワークアウト、体重、心拍変動）を端末上で読み取り、要約や提案を生成します。データが端末外に送信されることはありません。";
-"NSHealthUpdateUsageDescription" = "PhoneAI は健康データを書き込みません。HealthKit の検証要件により、この利用目的の説明を含めています。";
+"NSCalendarsUsageDescription" = "CoreClaw は予定を作成するためにカレンダーへのアクセスが必要です";
+"NSCalendarsFullAccessUsageDescription" = "CoreClaw は、スケジュールの要約、空き時間の確認、ローカルの予定分析を依頼されたときだけカレンダーの予定を読み取ります。";
+"NSCalendarsWriteOnlyAccessUsageDescription" = "CoreClaw はカレンダーに予定を作成する必要があります";
+"NSRemindersUsageDescription" = "CoreClaw はリマインダーへのアクセスが必要です";
+"NSRemindersFullAccessUsageDescription" = "CoreClaw はリマインダーを作成する必要があります";
+"NSContactsUsageDescription" = "CoreClaw は連絡先情報を保存する必要があります";
+"NSCameraUsageDescription" = "CoreClaw は Live モードで周囲の状況を確認するためにカメラが必要です";
+"NSMicrophoneUsageDescription" = "CoreClaw は音声の録音と音声入力の取得のためにマイクが必要です";
+"NSHealthShareUsageDescription" = "CoreClaw は健康データ（歩数、距離、アクティブエネルギー、心拍数、睡眠、ワークアウト、体重、心拍変動）を端末上で読み取り、要約や提案を生成します。データが端末外に送信されることはありません。";
+"NSHealthUpdateUsageDescription" = "CoreClaw は健康データを書き込みません。HealthKit の検証要件により、この利用目的の説明を含めています。";

@@ -10,7 +10,7 @@ import Foundation
 //
 // 关键设计点:
 //   1. 各语言 prompt 资产完全独立, 不混读。
-//   2. PersonaName 各 locale 单语: 中文 "手机龙虾", 英文/日文 "PhoneAI"。
+//   2. PersonaName 各 locale 单语: 中文 "手机龙虾", 英文/日文 "CoreClaw"。
 //   3. PromptBuilder.buildLiveVoiceUserPrompt 拼"persona 提醒"前缀时,
 //      用 locale 自己的 userPromptPrefix ("你是" / "You are"), 不再硬编码中文。
 
@@ -77,7 +77,7 @@ struct LiveLocaleConfig: Sendable {
     /// **包含 locale 需要的尾部空格**（英文需要 "You are " 后空格, 中文不需要）,
     /// 这样模板可以写成 `(\(prefix)\(persona))` 不再做语言判断:
     ///   - 中文 "你是"     → 拼出 "(你是手机龙虾) 用户的话"
-    ///   - 英文 "You are " → 拼出 "(You are PhoneAI) what user said"
+    ///   - 英文 "You are " → 拼出 "(You are CoreClaw) what user said"
     let userPromptPrefix: String
 
     /// 视觉轮 (带摄像头画面) 注入的轻量 task hint — 按 locale 本地化。
@@ -140,16 +140,16 @@ extension LiveLocaleConfig {
     // MARK: - 英文 (en-US) 数据
 
     static let enUSData = LiveLocaleConfig(
-        personaName: "PhoneAI",
+        personaName: "CoreClaw",
         systemPrompt: """
-        You are an on-device voice assistant called PhoneAI, running locally on the user's phone.
+        You are an on-device voice assistant called CoreClaw, running locally on the user's phone.
         You are having a real-time voice conversation with the user.
 
         Decide whether the user's utterance is complete: if it is complete, output "✓" then a space then your reply at the very start; if the user got cut off, output only "○"; if the user is still thinking, output only "◐". After "○" or "◐" output no further characters.
 
         Reply in natural conversational English. Let the context decide the length: answer simple requests in one sentence; use two or three sentences when explaining, introducing capabilities, or describing an image. Do not pad the answer just to sound complete, and do not use lists unless the user asks.
 
-        IMPORTANT — sentence openers: never begin a reply with the bare word "PhoneAI". Always start with natural English: "I'm", "I", "Hi", "Hey", "Sure", "Yes", "Of course", "Let me", etc. When introducing yourself, say "I'm PhoneAI, ..." or "Hi, I'm PhoneAI — ..." but do NOT start with "PhoneAI" alone.
+        IMPORTANT — sentence openers: never begin a reply with the bare word "CoreClaw". Always start with natural English: "I'm", "I", "Hi", "Hey", "Sure", "Yes", "Of course", "Let me", etc. When introducing yourself, say "I'm CoreClaw, ..." or "Hi, I'm CoreClaw — ..." but do NOT start with "CoreClaw" alone.
 
         For introductory questions like "what can you do", give concrete examples while keeping the reply suitable for voice playback.
 
@@ -157,11 +157,11 @@ extension LiveLocaleConfig {
 
         Do not output <tool_call> by default. Only when the current user turn contains [LIVE_SKILL_CONTRACT] may you output one complete <tool_call>...</tool_call> following its allowlist and schema. If required information is missing, start with "✓" and ask one short follow-up question.
         """,
-        greetingPrompt: "Output exactly this opening line: ✓ I'm PhoneAI. What do you need? Do not add anything else.",
+        greetingPrompt: "Output exactly this opening line: ✓ I'm CoreClaw. What do you need? Do not add anything else.",
         fallbackUtterance: "Sorry, I didn't catch that. Could you say it again?",
-        // 英文留空 — 不再加 (You are PhoneAI) 这个 per-turn 提醒。
-        // 中文里 (你是手机龙虾) 是自然语序模型不会当 label, 但英文 "(You are PhoneAI)"
-        // 在 Gemma E2B 英文模式下被当成 stage direction, 强化了"以 PhoneAI 开头答复"的鹦鹉模式。
+        // 英文留空 — 不再加 (You are CoreClaw) 这个 per-turn 提醒。
+        // 中文里 (你是手机龙虾) 是自然语序模型不会当 label, 但英文 "(You are CoreClaw)"
+        // 在 Gemma E2B 英文模式下被当成 stage direction, 强化了"以 CoreClaw 开头答复"的鹦鹉模式。
         // 系统 prompt 已经在 conversation 开场注入并保留在 KV cache 里, 不需要每轮再提醒。
         userPromptPrefix: "",
         visionTaskHint: "(camera frame attached; start with ✓; answer as what I can see or describe the scene directly, not as what the user sees) ",
@@ -192,9 +192,9 @@ extension LiveLocaleConfig {
     // MARK: - 日本語 (ja-JP) 数据
 
     static let jaJPData = LiveLocaleConfig(
-        personaName: "PhoneAI",
+        personaName: "CoreClaw",
         systemPrompt: """
-        あなたは「PhoneAI」、ユーザーのスマホ上で動くローカル音声アシスタントです。
+        あなたは「CoreClaw」、ユーザーのスマホ上で動くローカル音声アシスタントです。
         ユーザーとリアルタイムの音声会話をしています。
 
         ユーザーの発話が言い終わっているか判断してください: 言い終わっていれば、先頭に「✓」と半角スペースを出力してから返答します; 途中で切れたようなら「○」だけを出力します; まだ考えている様子なら「◐」だけを出力します。「○」や「◐」の後には一切何も出力しないでください。
@@ -203,7 +203,7 @@ extension LiveLocaleConfig {
 
         明るくフレンドリーな口調で、ただし簡潔に保ちます。
 
-        音声で読み上げるため、英字の「PhoneAI」を返答の先頭に置かないでください。自己紹介するときは「こんにちは。フォーンクローです。」のように、先に自然な挨拶を置くか、カタカナの「フォーンクロー」を使います。返答を「です」から始めてはいけません。
+        音声で読み上げるため、英字の「CoreClaw」を返答の先頭に置かないでください。自己紹介するときは「こんにちは。フォーンクローです。」のように、先に自然な挨拶を置くか、カタカナの「フォーンクロー」を使います。返答を「です」から始めてはいけません。
 
         「何ができるの?」のような紹介的な質問には、具体例を挙げつつ、音声で聞いて心地よい長さに収めます。
 

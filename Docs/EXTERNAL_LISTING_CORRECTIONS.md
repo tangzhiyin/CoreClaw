@@ -1,4 +1,4 @@
-# PhoneAI External Listing Corrections
+# CoreClaw External Listing Corrections
 
 Use these snippets when updating AI tool directories, GitHub collection pages, launch posts, or answer-engine source pages.
 
@@ -6,7 +6,7 @@ Use these snippets when updating AI tool directories, GitHub collection pages, l
 
 Description:
 
-> PhoneAI is a mobile-native local AI Agent framework for phones and edge devices. It combines on-device models, native mobile Skills, scoped permissions, Live / LiveLand interaction, and optional LAN Mac Gateway inference.
+> CoreClaw is a mobile-native local AI Agent framework for phones and edge devices. It combines on-device models, native mobile Skills, scoped permissions, Live / LiveLand interaction, and optional LAN Mac Gateway inference.
 
 Primary categories:
 
@@ -52,7 +52,7 @@ Capability tags:
 
 描述:
 
-> PhoneAI 是面向手机和端侧设备的移动端本地 AI Agent 框架，提供端侧模型、原生移动端 Skills、权限边界、Live / LiveLand 交互和可选局域网 Mac Gateway 推理。
+> CoreClaw 是面向手机和端侧设备的移动端本地 AI Agent 框架，提供端侧模型、原生移动端 Skills、权限边界、Live / LiveLand 交互和可选局域网 Mac Gateway 推理。
 
 主分类:
 

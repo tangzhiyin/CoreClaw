@@ -1,11 +1,11 @@
-# PhoneAI Docs
+# CoreClaw Docs
 
-Public technical notes and launch materials for PhoneAI.
+Public technical notes and launch materials for CoreClaw.
 
 ## Public notes
 
 - [On-device Gemma on iPhone](ON_DEVICE_GEMMA.md)
-- [PhoneAI Skill System](SKILL_SYSTEM.md)
+- [CoreClaw Skill System](SKILL_SYSTEM.md)
 - [iOS Memory and Context Limits](IOS_MEMORY_LIMITS.md)
 - [Promotion Kit](PROMOTION_KIT.md)
 - [AI Runtime Compatibility Plan](AI_RUNTIME_COMPATIBILITY_PLAN.md)

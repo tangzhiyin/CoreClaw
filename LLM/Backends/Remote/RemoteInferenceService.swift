@@ -32,8 +32,8 @@ final class RemoteInferenceService: InferenceService {
 
     // MARK: - Endpoint Config (P0 throwaway)
 
-    static let endpointDefaultsKey = "PhoneAI.remote.endpointURL"  // e.g. http://192.168.1.10:11434/v1
-    static let modelNameDefaultsKey = "PhoneAI.remote.modelName"   // e.g. gemma2:9b (Ollama tag)
+    static let endpointDefaultsKey = "CoreClaw.remote.endpointURL"  // e.g. http://192.168.1.10:11434/v1
+    static let modelNameDefaultsKey = "CoreClaw.remote.modelName"   // e.g. gemma2:9b (Ollama tag)
 
     /// OpenAI 兼容网关 base (内部拼 /chat/completions、/models)。nil = 未配置。
     var baseURL: URL?
@@ -323,7 +323,7 @@ final class RemoteInferenceService: InferenceService {
                     PCLog.debug("[Remote] prepare \(cleanModel) status=\(status ?? "unknown")")
                 }
             case 404, 405:
-                // 兼容旧的手填 OpenAI-compatible endpoint:没有 PhoneAI prepare 端点也能继续使用。
+                // 兼容旧的手填 OpenAI-compatible endpoint:没有 CoreClaw prepare 端点也能继续使用。
                 PCLog.debug("[Remote] prepare endpoint unavailable (\(http.statusCode)); continuing without preload")
             default:
                 throw RemoteInferenceError.httpStatus(http.statusCode)
@@ -343,7 +343,7 @@ final class RemoteInferenceService: InferenceService {
     //
     // `PromptRuntimeProfile` is the compatibility bridge shared with the iOS 27
     // Foundation Models adapter. Remote keeps native tool calling disabled at the
-    // gateway boundary; PhoneAI's text tool protocol still drives execution.
+    // gateway boundary; CoreClaw's text tool protocol still drives execution.
     private func maxInputTokensForCurrentRequest() -> Int {
         max(512, Self.defaultRemoteContextBudgetTokens - max(256, maxOutputTokens))
     }

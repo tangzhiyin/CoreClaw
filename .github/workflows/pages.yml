@@ -41,18 +41,18 @@ jobs:
             -d '{
               "host": "tangzhiyin.github.io",
               "key": "0bf623a9a5805fafd04bad9f20177812",
-              "keyLocation": "https://tangzhiyin.github.io/PhoneAI/0bf623a9a5805fafd04bad9f20177812.txt",
+              "keyLocation": "https://tangzhiyin.github.io/CoreClaw/0bf623a9a5805fafd04bad9f20177812.txt",
               "urlList": [
-                "https://tangzhiyin.github.io/PhoneAI/",
-                "https://tangzhiyin.github.io/PhoneAI/zh/",
-                "https://tangzhiyin.github.io/PhoneAI/ja/",
-                "https://tangzhiyin.github.io/PhoneAI/privacy/",
-                "https://tangzhiyin.github.io/PhoneAI/mac-remote/",
-                "https://tangzhiyin.github.io/PhoneAI/mobile-agent-framework/",
-                "https://tangzhiyin.github.io/PhoneAI/on-device-gemma/",
-                "https://tangzhiyin.github.io/PhoneAI/skills/",
-                "https://tangzhiyin.github.io/PhoneAI/liveland/",
-                "https://tangzhiyin.github.io/PhoneAI/faq/",
-                "https://tangzhiyin.github.io/PhoneAI/benchmarks/"
+                "https://tangzhiyin.github.io/CoreClaw/",
+                "https://tangzhiyin.github.io/CoreClaw/zh/",
+                "https://tangzhiyin.github.io/CoreClaw/ja/",
+                "https://tangzhiyin.github.io/CoreClaw/privacy/",
+                "https://tangzhiyin.github.io/CoreClaw/mac-remote/",
+                "https://tangzhiyin.github.io/CoreClaw/mobile-agent-framework/",
+                "https://tangzhiyin.github.io/CoreClaw/on-device-gemma/",
+                "https://tangzhiyin.github.io/CoreClaw/skills/",
+                "https://tangzhiyin.github.io/CoreClaw/liveland/",
+                "https://tangzhiyin.github.io/CoreClaw/faq/",
+                "https://tangzhiyin.github.io/CoreClaw/benchmarks/"
               ]
             }'

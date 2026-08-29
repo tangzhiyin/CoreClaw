@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Draft generator for PhoneAI Skill Contract V2 manifests."""
+"""Draft generator for CoreClaw Skill Contract V2 manifests."""
 
 from __future__ import annotations
 
@@ -177,7 +177,7 @@ def render(manifest_path: pathlib.Path, output_root: pathlib.Path, force: bool =
     validate_manifest(manifest)
 
     skill_dir = output_root / "Skills" / "Library" / manifest["id"]
-    scenario_dir = output_root / "PhoneAICLI" / "Scenarios"
+    scenario_dir = output_root / "CoreClawCLI" / "Scenarios"
     outputs: list[tuple[pathlib.Path, str]] = []
 
     for locale, file_name in LOCALES.items():

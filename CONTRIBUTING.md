@@ -1,4 +1,4 @@
-# Contributing to PhoneAI
+# Contributing to CoreClaw
 
 Thanks for your interest in the project. Contributions of all kinds are welcome — bug reports, documentation fixes, and code.
 
@@ -12,16 +12,16 @@ Requirements (from the [README](README.md)):
 - A real device with a developer account (Apple ID)
 
 ```bash
-git clone https://github.com/tangzhiyin/PhoneAI.git
-cd PhoneAI
+git clone https://github.com/tangzhiyin/CoreClaw.git
+cd CoreClaw
 pod install
 ```
 
-Open `PhoneAI.xcworkspace` in Xcode and build for a **physical iPhone** (`-destination 'generic/platform=iOS'` when using `xcodebuild`). The iOS Simulator is not a supported build destination: the bundled `Frameworks/piper_plus.xcframework` (as well as `sherpa-onnx.xcframework` and `onnxruntime.xcframework`) ships only an `ios-arm64` device slice, so simulator builds fail to link.
+Open `CoreClaw.xcworkspace` in Xcode and build for a **physical iPhone** (`-destination 'generic/platform=iOS'` when using `xcodebuild`). The iOS Simulator is not a supported build destination: the bundled `Frameworks/piper_plus.xcframework` (as well as `sherpa-onnx.xcframework` and `onnxruntime.xcframework`) ships only an `ios-arm64` device slice, so simulator builds fail to link.
 
 ## Filing issues
 
-Please open issues at <https://github.com/tangzhiyin/PhoneAI/issues>. For bugs, include:
+Please open issues at <https://github.com/tangzhiyin/CoreClaw/issues>. For bugs, include:
 
 - Device model (e.g. iPhone 15 Pro)
 - iOS version

@@ -476,7 +476,7 @@ final class MacGateway {
     }
 
     private static func pairedDefaultsKey(macID: String) -> String {
-        "PhoneAI.gateway.pairedDevices.\(macID)"
+        "CoreClaw.gateway.pairedDevices.\(macID)"
     }
 
     private static func loadPaired(macID: String) -> [PairedDevice] {

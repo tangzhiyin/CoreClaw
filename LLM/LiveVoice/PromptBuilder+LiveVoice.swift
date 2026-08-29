@@ -36,8 +36,8 @@ extension PromptBuilder {
 
     /// 当前 Live turn 的纯文本 user message.
     /// 历史: 中文场景每轮带一句极短 persona 提醒 `(你是手机龙虾)` 防止 E4B 模型自我认同漂移。
-    /// 英文场景实测下来这个 wrapping 反而有害 — Gemma E2B 把 `(You are PhoneAI)` 当 stage
-    /// direction 强化成"以 PhoneAI 开头答复"鹦鹉模式 (中文不会, 是 E2B 中英行为差异 +
+    /// 英文场景实测下来这个 wrapping 反而有害 — Gemma E2B 把 `(You are CoreClaw)` 当 stage
+    /// direction 强化成"以 CoreClaw 开头答复"鹦鹉模式 (中文不会, 是 E2B 中英行为差异 +
     /// 单词级 persona name 容易当 sentence opener)。
     ///
     /// 现在按 locale.config.userPromptPrefix 是否为空决定是否加 wrapping:

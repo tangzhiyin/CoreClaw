@@ -100,7 +100,7 @@ public final class GenerationTransaction: @unchecked Sendable {
     /// Continuations waiting for terminal state.
     private let contLock = OSAllocatedUnfairLock(initialState: [Waiter]())
 
-    private let log = Logger(subsystem: "PhoneAI", category: "GenTxn")
+    private let log = Logger(subsystem: "CoreClaw", category: "GenTxn")
 
     // MARK: - Init
 

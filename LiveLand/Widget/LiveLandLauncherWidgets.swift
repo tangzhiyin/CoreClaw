@@ -5,17 +5,17 @@ import WidgetKit
 
 // MARK: - 桌面 / 锁屏 LiveLand 快速入口
 
-struct PhoneAILiveLandLauncherWidget: Widget {
+struct CoreClawLiveLandLauncherWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(
-            kind: "PhoneAILiveLandLauncherWidget",
-            provider: PhoneAILiveLandLauncherProvider()
+            kind: "CoreClawLiveLandLauncherWidget",
+            provider: CoreClawLiveLandLauncherProvider()
         ) { entry in
-            PhoneAILiveLandLauncherView(entry: entry)
+            CoreClawLiveLandLauncherView(entry: entry)
                 .widgetURL(phoneAILiveLandLaunchURL)
         }
         .configurationDisplayName("LiveLand")
-        .description("Open PhoneAI and start LiveLand microphone listening.")
+        .description("Open CoreClaw and start LiveLand microphone listening.")
         .supportedFamilies([
             .systemSmall,
             .accessoryCircular,
@@ -26,27 +26,27 @@ struct PhoneAILiveLandLauncherWidget: Widget {
     }
 }
 
-private struct PhoneAILiveLandLauncherEntry: TimelineEntry {
+private struct CoreClawLiveLandLauncherEntry: TimelineEntry {
     let date: Date
 }
 
-private struct PhoneAILiveLandLauncherProvider: TimelineProvider {
-    func placeholder(in context: Context) -> PhoneAILiveLandLauncherEntry {
-        PhoneAILiveLandLauncherEntry(date: Date())
+private struct CoreClawLiveLandLauncherProvider: TimelineProvider {
+    func placeholder(in context: Context) -> CoreClawLiveLandLauncherEntry {
+        CoreClawLiveLandLauncherEntry(date: Date())
     }
 
     func getSnapshot(
         in context: Context,
-        completion: @escaping (PhoneAILiveLandLauncherEntry) -> Void
+        completion: @escaping (CoreClawLiveLandLauncherEntry) -> Void
     ) {
-        completion(PhoneAILiveLandLauncherEntry(date: Date()))
+        completion(CoreClawLiveLandLauncherEntry(date: Date()))
     }
 
     func getTimeline(
         in context: Context,
-        completion: @escaping (Timeline<PhoneAILiveLandLauncherEntry>) -> Void
+        completion: @escaping (Timeline<CoreClawLiveLandLauncherEntry>) -> Void
     ) {
-        completion(Timeline(entries: [PhoneAILiveLandLauncherEntry(date: Date())], policy: .never))
+        completion(Timeline(entries: [CoreClawLiveLandLauncherEntry(date: Date())], policy: .never))
     }
 }
 
@@ -133,8 +133,8 @@ private extension Color {
     static let liveLandAmber = Color(red: 1.0, green: 0.62, blue: 0.16)
 }
 
-private struct PhoneAILiveLandLauncherView: View {
-    let entry: PhoneAILiveLandLauncherEntry
+private struct CoreClawLiveLandLauncherView: View {
+    let entry: CoreClawLiveLandLauncherEntry
     @Environment(\.widgetFamily) private var widgetFamily
 
     @ViewBuilder
@@ -160,7 +160,7 @@ private struct PhoneAILiveLandLauncherView: View {
         launcherFill
             .containerBackground(.clear, for: .widget)
             .accessibilityElement()
-            .accessibilityLabel(Text("PhoneAI LiveLand"))
+            .accessibilityLabel(Text("CoreClaw LiveLand"))
             .accessibilityHint(Text("点按监听"))
     }
 
@@ -192,7 +192,7 @@ private struct PhoneAILiveLandLauncherView: View {
                 .frame(width: 22)
 
             VStack(alignment: .leading, spacing: 1) {
-                Text("PhoneAI LiveLand")
+                Text("CoreClaw LiveLand")
                     .font(.caption.weight(.semibold))
                     .lineLimit(1)
                 Text("点按监听")
@@ -211,15 +211,15 @@ private struct PhoneAILiveLandLauncherView: View {
 }
 
 @available(iOS 18.0, *)
-struct PhoneAILiveLandControlWidget: ControlWidget {
+struct CoreClawLiveLandControlWidget: ControlWidget {
     var body: some ControlWidgetConfiguration {
-        StaticControlConfiguration(kind: "PhoneAILiveLandControlWidget") {
+        StaticControlConfiguration(kind: "CoreClawLiveLandControlWidget") {
             ControlWidgetButton(action: OpenURLIntent(phoneAILiveLandLaunchURL)) {
                 Label("LiveLand", systemImage: "waveform")
             }
             .tint(.orange)
         }
         .displayName("LiveLand")
-        .description("Open PhoneAI and start LiveLand microphone listening.")
+        .description("Open CoreClaw and start LiveLand microphone listening.")
     }
 }

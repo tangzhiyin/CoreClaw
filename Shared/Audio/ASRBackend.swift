@@ -3,7 +3,7 @@ import Foundation
 // MARK: - ASR Backend Selector
 //
 // 提取 backend 枚举到独立文件 (无 sherpa / WhisperKit 依赖), 让 LiveModelDefinition
-// 在 CLI 端 (PhoneAICLI 跨平台 harness) 也能编译——CLI 把 ASRService.swift 整个排除了
+// 在 CLI 端 (CoreClawCLI 跨平台 harness) 也能编译——CLI 把 ASRService.swift 整个排除了
 // (Sherpa C bindings 不能在 Mac 上链接), 所以不能再让 Backend 嵌套在 ASRService 里。
 
 enum ASRBackend: Sendable {

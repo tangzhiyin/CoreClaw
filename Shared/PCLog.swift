@@ -1,7 +1,7 @@
 import Foundation
 import os
 
-// MARK: - PhoneAI Structured Logging
+// MARK: - CoreClaw Structured Logging
 //
 // Four categories, sorted by signal value:
 //
@@ -18,8 +18,8 @@ import os
 
 enum PCLog {
 
-    private static let logger = Logger(subsystem: "PhoneAI", category: "App")
-    private static let debugLogger = Logger(subsystem: "PhoneAI", category: "Debug")
+    private static let logger = Logger(subsystem: "CoreClaw", category: "App")
+    private static let debugLogger = Logger(subsystem: "CoreClaw", category: "Debug")
 
     // MARK: - [Debug] Free-form (Agent layer free text)
     //

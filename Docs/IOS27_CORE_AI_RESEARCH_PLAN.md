@@ -8,7 +8,7 @@
 
 ## Objective
 
-Research whether iOS 27 APIs can improve PhoneAI's multi-model runtime without weakening its current offline-first product model.
+Research whether iOS 27 APIs can improve CoreClaw's multi-model runtime without weakening its current offline-first product model.
 
 The target outcome is a staged technical path for:
 
@@ -18,7 +18,7 @@ The target outcome is a staged technical path for:
 
 This branch should not replace the existing LiteRT, MiniCPM-V, or Mac remote inference paths until benchmarks prove a clear win.
 
-Current implementation focus: iOS 27 native APIs that PhoneAI can use directly and measure safely. The active production-facing path is `FoundationModels` for availability checks, prewarming, structured routing, deterministic generation options, context options, metadata, and token-usage diagnostics. This is an automatic internal capability, not a user-facing setting. `ENABLE_IOS27_FOUNDATION_ROUTER=0` remains only as an engineering kill switch. Automatic creation or editing of the user's Apple Shortcuts is out of scope for this branch because it is not a dependable public API path.
+Current implementation focus: iOS 27 native APIs that CoreClaw can use directly and measure safely. The active production-facing path is `FoundationModels` for availability checks, prewarming, structured routing, deterministic generation options, context options, metadata, and token-usage diagnostics. This is an automatic internal capability, not a user-facing setting. `ENABLE_IOS27_FOUNDATION_ROUTER=0` remains only as an engineering kill switch. Automatic creation or editing of the user's Apple Shortcuts is out of scope for this branch because it is not a dependable public API path.
 
 ## Official API Baseline
 
@@ -44,26 +44,26 @@ Findings on 2026-06-09:
 - `CoreAI` module is present on device.
 - `AIModel.deviceArchitectureName` reports `h18p`.
 - One simple `LanguageModelSession` response took roughly 2.3 seconds in the first visible manual run.
-- Prompt adherence needs deeper testing: a simple instruction asking the model to mention PhoneAI returned a generic sentence instead.
+- Prompt adherence needs deeper testing: a simple instruction asking the model to mention CoreClaw returned a generic sentence instead.
 - A raw JSON router prompt correctly selected `calendar` / `calendar-create-event` for `明天下午两点帮我安排产品评审会议`; the visible manual run took roughly 2.3 seconds.
 - The raw JSON router still wrapped its answer in a Markdown code fence despite explicit "no Markdown" instructions, so production code must use structured generation or strict JSON extraction and validation.
 - Xcode 27 SDK exposes `@Generable`, `@Guide`, and `LanguageModelSession.respond(to:generating:)`; the probe app includes a guided route test and builds successfully against `iphoneos27.0`.
 - The first guided route run returned valid typed output but chose `answerDirectly` / `null` for a calendar scheduling request. Structured generation fixes output shape, not semantic policy. The probe now uses stricter action definitions and reports a `Guided validation` pass/fail line.
 - With stricter policy, the guided route test selected `useSkill` / `calendar` / `calendar-create-event` for the same scheduling request and passed validation. The manual run used 603 input tokens, 51 output tokens, 654 total tokens, and took roughly 2.7 seconds.
 - The first route matrix run passed 3/5: calendar, reminder, and translate passed; direct-answer and clarification failed. Token counts increased from 765 to 2750 because the matrix reused one `LanguageModelSession`, so later cases were polluted by transcript history.
-- The route matrix now uses a fresh `LanguageModelSession` per case and labels the run as `stateless sessions`, which is the correct default for PhoneAI request routing.
+- The route matrix now uses a fresh `LanguageModelSession` per case and labels the run as `stateless sessions`, which is the correct default for CoreClaw request routing.
 - The stateless route matrix also passed 3/5. Token counts stabilized around 754-770, confirming history contamination was fixed; remaining failures were semantic policy failures: `解释一下什么是本地模型` was incorrectly routed to translate, and a meeting request without date/time was incorrectly routed to calendar creation instead of clarification.
 - The probe app now includes a guarded route matrix: deterministic rules handle non-tool explanation requests and missing calendar date/time before falling back to Foundation Models for structured skill selection.
 - The first guarded route matrix passed 4/5. Explanation and missing-calendar-info cases were correctly handled by rules, but the calendar case failed because the model treated `明天下午两点` as insufficient date/time information. The guarded router now handles calendar intent plus relative date/time signals as a deterministic calendar route before invoking the model.
 - With deterministic calendar intent plus relative date/time signal handling, the guarded route matrix passed 5/5. Calendar, direct-answer, and clarification cases were resolved by rules; reminder and translate fell back to Foundation Models and passed with roughly 917-928 total tokens each.
-- The main PhoneAI branch now has a minimal guarded pre-router between SKILL.md trigger matching and the existing network intent router. It is controlled by `ENABLE_GUARDED_SKILL_ROUTER`, defaults on for this branch, and does not import Foundation Models into the production target.
+- The main CoreClaw branch now has a minimal guarded pre-router between SKILL.md trigger matching and the existing network intent router. It is controlled by `ENABLE_GUARDED_SKILL_ROUTER`, defaults on for this branch, and does not import Foundation Models into the production target.
 - Xcode console shows beta system instrumentation noise around Biome / `GenerativeModels.GenerativeFunctions.Instrumentation`; it did not prevent model response.
 
 ### Core AI
 
 Core AI is still the most relevant new runtime candidate, but the local iPhoneOS 27 SDK currently exposes only a thin readable `CoreAI.swiftinterface` from the public framework and prebuilt modules for the deeper runtime pieces. The true-device probe confirms `import CoreAI` and `AIModel.deviceArchitectureName`, but the production app should not depend on unverified CoreAI runtime types yet.
 
-PhoneAI implication: Core AI should be evaluated first for small and medium specialized models: router, argument extractor, OCR, embedding, reranker, speech/vision encoders, and small local language models. Replacing the main Gemma LiteRT path is a later decision, not the first experiment.
+CoreClaw implication: Core AI should be evaluated first for small and medium specialized models: router, argument extractor, OCR, embedding, reranker, speech/vision encoders, and small local language models. Replacing the main Gemma LiteRT path is a later decision, not the first experiment.
 
 ### Foundation Models
 
@@ -81,9 +81,9 @@ iOS 27 broadens Foundation Models into a higher-level Swift agent layer:
 - Vision framework tools such as OCR and barcode readers callable by the model,
 - Evaluations framework and Instruments profiling.
 
-PhoneAI implication: Foundation Models is a strong fit for router and structured planning experiments, especially where PhoneAI currently relies on the main chat model to choose Skills or extract parameters. It should not be treated as always available: Apple Intelligence support, regional availability, model download state, and user settings must all gate usage.
+CoreClaw implication: Foundation Models is a strong fit for router and structured planning experiments, especially where CoreClaw currently relies on the main chat model to choose Skills or extract parameters. It should not be treated as always available: Apple Intelligence support, regional availability, model download state, and user settings must all gate usage.
 
-Production branch status: PhoneAI now has an automatic `IOS27FoundationSkillRouter` fallback layer between deterministic guarded routing and the existing E2B model-intent router. It uses `SystemLanguageModel.default.availability`, `LanguageModelSession.prewarm()`, `@Generable` structured output, `GenerationOptions`, `ContextOptions`, request metadata, and `LanguageModelSession.Response.usage` for token accounting. The layer is guarded by `#if canImport(FoundationModels)` and `#available(iOS 27.0, *)`, and it only attempts routing for skill-like text so ordinary chat does not pay the extra local-model routing cost. iOS 17-26 devices continue to use the existing path.
+Production branch status: CoreClaw now has an automatic `IOS27FoundationSkillRouter` fallback layer between deterministic guarded routing and the existing E2B model-intent router. It uses `SystemLanguageModel.default.availability`, `LanguageModelSession.prewarm()`, `@Generable` structured output, `GenerationOptions`, `ContextOptions`, request metadata, and `LanguageModelSession.Response.usage` for token accounting. The layer is guarded by `#if canImport(FoundationModels)` and `#available(iOS 27.0, *)`, and it only attempts routing for skill-like text so ordinary chat does not pay the extra local-model routing cost. iOS 17-26 devices continue to use the existing path.
 
 ### App Intents and Shortcuts
 
@@ -95,7 +95,7 @@ iOS 27 App Intents adds stronger schemas and Siri / Apple Intelligence integrati
 - App Intents Testing framework,
 - Shortcuts natural-language automation assembly using app actions.
 
-PhoneAI implication: every stable device Skill should have an App Intent representation. This makes PhoneAI actions visible to Siri, Spotlight, and Shortcuts. It still does not imply that PhoneAI can silently CRUD arbitrary user shortcuts; the practical path is to expose actions well enough that Shortcuts and Siri can assemble workflows from natural language.
+CoreClaw implication: every stable device Skill should have an App Intent representation. This makes CoreClaw actions visible to Siri, Spotlight, and Shortcuts. It still does not imply that CoreClaw can silently CRUD arbitrary user shortcuts; the practical path is to expose actions well enough that Shortcuts and Siri can assemble workflows from natural language.
 
 ### MetricKit
 
@@ -107,13 +107,13 @@ iOS 27 adds useful diagnostics:
 - developer-defined state reporting integration,
 - Metal frame pacing metrics.
 
-PhoneAI implication: model load, generation, Live mode, backend switch, and Core AI specialization should emit state markers so MetricKit reports can be tied to actual runtime phases.
+CoreClaw implication: model load, generation, Live mode, backend switch, and Core AI specialization should emit state markers so MetricKit reports can be tied to actual runtime phases.
 
 ## Architecture Proposal
 
 ### Keep the Existing Runtime Boundary
 
-Current PhoneAI already has the right top-level seams:
+Current CoreClaw already has the right top-level seams:
 
 - `ModelDescriptor`
 - `ArtifactKind`
@@ -154,7 +154,7 @@ Candidate implementations:
 
 - `FoundationPlanningModelService`: uses `LanguageModelSession` and `@Generable`.
 - `CoreAIPlanningModelService`: uses a small `.aimodel` classifier / extractor.
-- `FallbackPlanningModelService`: current PhoneAI main-model path.
+- `FallbackPlanningModelService`: current CoreClaw main-model path.
 
 This layer should be used for Skill routing, multi-step plan shape, and argument extraction before changing the full text generation path.
 
@@ -181,7 +181,7 @@ final class CoreAIBackend: InferenceService {
 }
 ```
 
-If using `CoreAILanguageModel` from Apple's model packages, prefer adapting it through Foundation Models' `LanguageModelSession` before forcing it into PhoneAI's token-streaming protocol.
+If using `CoreAILanguageModel` from Apple's model packages, prefer adapting it through Foundation Models' `LanguageModelSession` before forcing it into CoreClaw's token-streaming protocol.
 
 ### Model Installation and Assets
 
@@ -197,18 +197,18 @@ Research needs to answer:
 - whether compiled assets are device-family-specific enough to require per-device packaging,
 - whether app-bundled compiled assets are App Store friendly for the target model sizes,
 - whether Background Assets is a better fit than the current downloader for large optional `.aimodel` files,
-- how `AIModelCache` storage should be surfaced in PhoneAI's model settings UI.
+- how `AIModelCache` storage should be surfaced in CoreClaw's model settings UI.
 
 ### App Intents Bridge
 
 Add a generator or hand-written bridge from stable Skills to App Intents:
 
-- one generic `RunPhoneAICommandIntent` for natural-language commands,
+- one generic `RunCoreClawCommandIntent` for natural-language commands,
 - one explicit App Intent per stable Skill family where system composition benefits from typed parameters,
-- App Entity definitions for reusable user content where PhoneAI owns or indexes it,
+- App Entity definitions for reusable user content where CoreClaw owns or indexes it,
 - App Intents tests for Siri / Shortcuts pathways.
 
-This is the correct path for the user's "natural language creates shortcut-like automation" goal: expose PhoneAI actions richly, then let Shortcuts / Siri assemble flows from those actions.
+This is the correct path for the user's "natural language creates shortcut-like automation" goal: expose CoreClaw actions richly, then let Shortcuts / Siri assemble flows from those actions.
 
 ## Research Phases
 
@@ -246,7 +246,7 @@ Tasks:
 Exit criteria:
 
 - a repeatable benchmark note with cold/warm numbers,
-- a decision on whether Core AI is suitable for PhoneAI small models.
+- a decision on whether Core AI is suitable for CoreClaw small models.
 
 ### Phase 2: Foundation Models Router Spike
 
@@ -281,11 +281,11 @@ Initial status:
 - a stateless pure-model route matrix also passed 3/5, confirming deterministic pre-routing is needed for production,
 - a guarded route matrix passed 4/5 and exposed the need for deterministic relative-date handling,
 - a guarded true-device route matrix with deterministic calendar date/time signal detection passed 5/5,
-- the next gate is a minimal PhoneAI Router integration that uses rules first and keeps Foundation Models optional/fallback-gated.
+- the next gate is a minimal CoreClaw Router integration that uses rules first and keeps Foundation Models optional/fallback-gated.
 
 ### Phase 3: Core AI Backend Prototype
 
-Goal: determine whether Core AI can fit PhoneAI's backend model.
+Goal: determine whether Core AI can fit CoreClaw's backend model.
 
 Tasks:
 
@@ -304,11 +304,11 @@ Exit criteria:
 
 ### Phase 4: App Intents and Shortcuts Prototype
 
-Goal: make PhoneAI Skills first-class system actions.
+Goal: make CoreClaw Skills first-class system actions.
 
 Tasks:
 
-- add `RunPhoneAICommandIntent`,
+- add `RunCoreClawCommandIntent`,
 - add explicit intents for Calendar, Reminders, Clipboard, Health, and Web if stable enough,
 - define intent schemas and parameter summaries,
 - test Siri invocation,
@@ -317,8 +317,8 @@ Tasks:
 
 Exit criteria:
 
-- Siri can invoke a PhoneAI Skill without opening the chat UI first,
-- Shortcuts can discover and compose PhoneAI actions,
+- Siri can invoke a CoreClaw Skill without opening the chat UI first,
+- Shortcuts can discover and compose CoreClaw actions,
 - manual shortcut editing is reduced to trigger selection and confirmation where iOS requires it.
 
 ### Phase 5: Product Decision
@@ -359,16 +359,16 @@ Every benchmark should record:
 - backend,
 - compute unit selection,
 - cold or warm cache state,
-- PhoneAI feature flag set.
+- CoreClaw feature flag set.
 
 ## Risks
 
 - iOS 27 is beta; APIs and behavior can change.
 - Core AI model conversion may be easy for samples but hard for Gemma/MiniCPM-like production models.
 - Apple Intelligence and Foundation Models availability is not guaranteed for all users.
-- Private Cloud Compute is not a fit for PhoneAI's default offline promise unless explicitly opt-in.
+- Private Cloud Compute is not a fit for CoreClaw's default offline promise unless explicitly opt-in.
 - AOT compiled assets may complicate distribution across device families.
-- Background Assets may require a separate install UX from PhoneAI's current downloader.
+- Background Assets may require a separate install UX from CoreClaw's current downloader.
 - App Intents improves natural-language composition, but does not remove all iOS confirmation requirements.
 
 ## Recommended First PRs on This Branch
@@ -388,6 +388,6 @@ Treat Core AI as the new preferred path for custom on-device specialized models,
 
 Treat Foundation Models as a structured planning and provider abstraction layer, especially for Skill routing and argument extraction.
 
-Treat App Intents as the system automation bridge for PhoneAI Skills.
+Treat App Intents as the system automation bridge for CoreClaw Skills.
 
 Keep LiteRT and MiniCPM-V as the stable production path until iOS 27 APIs prove better on real devices.

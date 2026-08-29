@@ -1,6 +1,6 @@
 # Black-box User Task Test Matrix
 
-This document defines PhoneAI's black-box test coverage from the user's point
+This document defines CoreClaw's black-box test coverage from the user's point
 of view. It intentionally does not start from built-in skills or tool names.
 
 The test author should behave as if they do not know what capabilities exist.

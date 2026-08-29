@@ -1,4 +1,4 @@
-# PhoneAI — https://tangzhiyin.github.io/PhoneAI/
+# CoreClaw — https://tangzhiyin.github.io/CoreClaw/
 User-agent: *
 Allow: /
 
@@ -24,4 +24,4 @@ Allow: /
 # User-agent: GPTBot
 # Disallow: /
 
-Sitemap: https://tangzhiyin.github.io/PhoneAI/sitemap.xml
+Sitemap: https://tangzhiyin.github.io/CoreClaw/sitemap.xml

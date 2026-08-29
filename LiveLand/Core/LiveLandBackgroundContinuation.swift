@@ -15,7 +15,7 @@ final class LiveLandBackgroundContinuation {
     private var sessionActive = false
     private var activeTask: AnyObject?
     private var activeRequestIdentifier: String?
-    private var activeTitle = "PhoneAI LiveLand"
+    private var activeTitle = "CoreClaw LiveLand"
     private var activeSubtitle = "Listening"
 
     private init() {}
@@ -54,7 +54,7 @@ final class LiveLandBackgroundContinuation {
         #endif
     }
 
-    func begin(title: String = "PhoneAI LiveLand", subtitle: String = "Listening") {
+    func begin(title: String = "CoreClaw LiveLand", subtitle: String = "Listening") {
         #if canImport(BackgroundTasks)
         guard #available(iOS 26.0, *) else {
             print("[LiveLandBackground] continuous task unavailable before iOS 26")

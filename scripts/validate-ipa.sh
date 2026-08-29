@@ -1,7 +1,7 @@
 #!/bin/bash
 # validate-ipa.sh — App Store Connect 合规自动检查
 #
-# PhoneAI 踩过的坑（全部固化为检查项）：
+# CoreClaw 踩过的坑（全部固化为检查项）：
 #   - 裸 .dylib 塞在 Frameworks/*.framework/ 里 → App Store 拒包
 #   - framework binary 名与目录名不匹配 → 签名校验失败
 #   - MinimumOSVersion 不一致 → 审核警告
@@ -9,8 +9,8 @@
 #   - @rpath hard-link 指向不存在的裸 dylib → 启动崩溃
 #
 # 用法:
-#   ./scripts/validate-ipa.sh /path/to/PhoneAI.ipa
-#   ./scripts/validate-ipa.sh /path/to/PhoneAI.xcarchive
+#   ./scripts/validate-ipa.sh /path/to/CoreClaw.ipa
+#   ./scripts/validate-ipa.sh /path/to/CoreClaw.xcarchive
 #
 # 退出码: 0 = 全部通过, >0 = 错误数
 #

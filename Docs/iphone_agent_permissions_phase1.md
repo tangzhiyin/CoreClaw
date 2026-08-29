@@ -1,4 +1,4 @@
-# PhoneAI: iPhone Agent 权限全景图
+# CoreClaw: iPhone Agent 权限全景图
 
 > 基于 Apple 官方文档的真实 iOS API 清单，非想象。每一条都是可调用的系统能力。
 

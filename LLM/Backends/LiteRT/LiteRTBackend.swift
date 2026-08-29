@@ -1,6 +1,6 @@
 import Foundation
 import CoreImage
-import PhoneAIEngine
+import CoreClawEngine
 
 // MARK: - LiteRT Backend
 //

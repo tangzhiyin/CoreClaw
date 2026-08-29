@@ -4,11 +4,11 @@ import Foundation
 
 @Observable
 class ModelConfig {
-    static let selectedModelDefaultsKey = "PhoneAI.selectedModelID"
-    static let enableThinkingDefaultsKey = "PhoneAI.enableThinking"
-    static let preferredBackendDefaultsKey = "PhoneAI.preferredBackend"
-    private static let preferredBackendDefaultGPUMigrationKey = "PhoneAI.preferredBackendDefaultGPU.v1"
-    static let enableSpeculativeDecodingDefaultsKey = "PhoneAI.enableSpeculativeDecoding"
+    static let selectedModelDefaultsKey = "CoreClaw.selectedModelID"
+    static let enableThinkingDefaultsKey = "CoreClaw.enableThinking"
+    static let preferredBackendDefaultsKey = "CoreClaw.preferredBackend"
+    private static let preferredBackendDefaultGPUMigrationKey = "CoreClaw.preferredBackendDefaultGPU.v1"
+    static let enableSpeculativeDecodingDefaultsKey = "CoreClaw.enableSpeculativeDecoding"
     static let defaultPreferredBackend = "gpu"
 
     // 采样参数不再暴露给用户调节。topK/topP/temperature 用 Gemma 4 推荐默认。

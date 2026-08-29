@@ -1757,9 +1757,9 @@ private struct PrivacyPolicyView: View {
             (
                 tr("本地优先", "Local-first", "ローカル優先"),
                 tr(
-                    "PhoneAI 的聊天、图片理解、语音和工具执行默认在设备本地处理。聊天内容、图片和个人数据不会上传到 PhoneAI 服务器。",
-                    "PhoneAI processes chat, image understanding, voice, and tool execution locally by default. Chat content, images, and personal data are not uploaded to PhoneAI servers.",
-                    "PhoneAI のチャット、画像理解、音声、ツール実行は既定で端末内で処理されます。チャット内容・画像・個人データが PhoneAI のサーバーにアップロードされることはありません。"
+                    "CoreClaw 的聊天、图片理解、语音和工具执行默认在设备本地处理。聊天内容、图片和个人数据不会上传到 CoreClaw 服务器。",
+                    "CoreClaw processes chat, image understanding, voice, and tool execution locally by default. Chat content, images, and personal data are not uploaded to CoreClaw servers.",
+                    "CoreClaw のチャット、画像理解、音声、ツール実行は既定で端末内で処理されます。チャット内容・画像・個人データが CoreClaw のサーバーにアップロードされることはありません。"
                 )
             ),
             (
@@ -1781,9 +1781,9 @@ private struct PrivacyPolicyView: View {
             (
                 tr("跟踪", "Tracking", "トラッキング"),
                 tr(
-                    "PhoneAI 不使用 App Tracking Transparency 跟踪你, 不将数据用于跨 App 或网站追踪。",
-                    "PhoneAI does not use App Tracking Transparency tracking and does not use your data to track you across apps or websites.",
-                    "PhoneAI は App Tracking Transparency によるトラッキングを使用せず、アプリやサイトをまたいであなたを追跡するためにデータを利用することはありません。"
+                    "CoreClaw 不使用 App Tracking Transparency 跟踪你, 不将数据用于跨 App 或网站追踪。",
+                    "CoreClaw does not use App Tracking Transparency tracking and does not use your data to track you across apps or websites.",
+                    "CoreClaw は App Tracking Transparency によるトラッキングを使用せず、アプリやサイトをまたいであなたを追跡するためにデータを利用することはありません。"
                 )
             )
         ]
@@ -1838,9 +1838,9 @@ private struct PrivacyPolicyView: View {
                             .padding(.top, 30)
 
                         Text(tr(
-                            "这份说明概述 PhoneAI 如何在设备本地处理数据, 以及何时访问系统权限。",
-                            "This summary explains how PhoneAI handles data locally on device and when it accesses system permissions.",
-                            "この説明では、PhoneAI が端末内でデータをどのように処理し、いつシステム権限にアクセスするかを概説します。"
+                            "这份说明概述 CoreClaw 如何在设备本地处理数据, 以及何时访问系统权限。",
+                            "This summary explains how CoreClaw handles data locally on device and when it accesses system permissions.",
+                            "この説明では、CoreClaw が端末内でデータをどのように処理し、いつシステム権限にアクセスするかを概説します。"
                         ))
                         .font(.system(size: 14, weight: .regular))
                         .foregroundStyle(SettingsStyle.secondary)

@@ -8,7 +8,7 @@ import HealthKit
 //
 // HealthKit 是 iOS-only framework. macOS 系统物理上没有 HealthKit, 这整个文件主体
 // 用 #if canImport(HealthKit) 守护. macOS CLI 走文件末尾的 #else 分支 — 但
-// PhoneAICLI/Sources/PhoneAICLI/MockToolHandlers.swift 里有 fixture-based
+// CoreClawCLI/Sources/CoreClawCLI/MockToolHandlers.swift 里有 fixture-based
 // HealthTools, ToolRegistry 注册到那个版本. CLI scenario 仍能跑, 用 fixture 数据.
 // (这不是 design 选择, 是 Mac 没真实健康数据的物理事实.)
 //
@@ -19,7 +19,7 @@ enum HealthTools {
 
     /// HealthKit store 单例 — Apple 官方建议整个 app 只创建一个
     private static let store = HKHealthStore()
-    static let readAuthorizationRequestedDefaultsKey = "PhoneAIHealthReadAuthorizationRequested"
+    static let readAuthorizationRequestedDefaultsKey = "CoreClawHealthReadAuthorizationRequested"
 
     static var hasRequestedReadAuthorization: Bool {
         UserDefaults.standard.bool(forKey: readAuthorizationRequestedDefaultsKey)

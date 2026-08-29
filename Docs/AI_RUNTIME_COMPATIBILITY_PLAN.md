@@ -1,6 +1,6 @@
 # AI Runtime Compatibility Plan
 
-This plan keeps PhoneAI compatible across current systems while adopting newer Apple AI APIs incrementally. Product code should depend on PhoneAI contracts (`InferenceService`, `SkillRegistry`, `ToolRegistry`, `PhoneGroundToolContract`), not on a specific model framework or OS version.
+This plan keeps CoreClaw compatible across current systems while adopting newer Apple AI APIs incrementally. Product code should depend on CoreClaw contracts (`InferenceService`, `SkillRegistry`, `ToolRegistry`, `PhoneGroundToolContract`), not on a specific model framework or OS version.
 
 ## Current Runtime Baseline
 

@@ -227,8 +227,8 @@ struct LiveModeView: View {
             Button(tr("取消", "Cancel"), role: .cancel) {}
         } message: {
             Text(tr(
-                "请到 设置 → 隐私与安全性 → 相机 里允许 PhoneAI 使用相机。",
-                "Enable camera access for PhoneAI in Settings → Privacy & Security → Camera."
+                "请到 设置 → 隐私与安全性 → 相机 里允许 CoreClaw 使用相机。",
+                "Enable camera access for CoreClaw in Settings → Privacy & Security → Camera."
             ))
         }
     }
@@ -530,7 +530,7 @@ struct LiveModeView: View {
         }
     }
 
-    /// 打开系统 设置 → PhoneAI 页, 让用户手动开相机权限。
+    /// 打开系统 设置 → CoreClaw 页, 让用户手动开相机权限。
     /// 仅 UIKit 平台 (iOS) 可用; UIApplication.openSettingsURLString 在 macCatalyst
     /// 上也有效, 在纯 macOS 不存在 — 整段 #if 兜底。
     private func openAppSettings() {

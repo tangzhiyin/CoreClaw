@@ -1,5 +1,5 @@
 #!/bin/bash
-# PhoneAI Skill translation sync check.
+# CoreClaw Skill translation sync check.
 #
 # 拦住的失败模式:
 #   1. SKILL.md 存在但 SKILL.<locale>.md 缺失

@@ -100,7 +100,7 @@ func main() async {
     }
 
     let modelDir = modelTag == "e4b" ? "gemma-4-e4b-it-4bit" : "gemma-4-e2b-it-4bit"
-    let modelPath = URL(fileURLWithPath: "/Users/zxw/AITOOL/PhoneAI/Models/\(modelDir)")
+    let modelPath = URL(fileURLWithPath: "/Users/zxw/AITOOL/CoreClaw/Models/\(modelDir)")
 
     print("===========================================")
     print("[AudioTest] model=\(modelDir)")

@@ -25,7 +25,7 @@ struct MacBinding: Codable, Equatable, Sendable {
 
 /// 绑定持久化。UserDefaults JSON 只保存非秘密元数据;secret/token 存 Keychain。
 final class BindingStore {
-    static let defaultsKey = "PhoneAI.remote.bindings"
+    static let defaultsKey = "CoreClaw.remote.bindings"
     private let defaults: UserDefaults
     init(defaults: UserDefaults = .standard) { self.defaults = defaults }
 

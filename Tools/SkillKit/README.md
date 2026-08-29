@@ -1,6 +1,6 @@
 # SkillKit
 
-SkillKit is a draft generator for PhoneAI skills. It is intentionally small and dependency-free so the contract can evolve before it becomes part of the app build.
+SkillKit is a draft generator for CoreClaw skills. It is intentionally small and dependency-free so the contract can evolve before it becomes part of the app build.
 
 ## Current Commands
 
@@ -17,7 +17,7 @@ python3 Tools/SkillKit/skillkit.py render --force Tools/SkillKit/examples/skill.
 - `SKILL.md`
 - `SKILL.en.md`
 - `SKILL.ja.md`
-- `PhoneAICLI/Scenarios/<skill-id>_generated_smoke.yaml`
+- `CoreClawCLI/Scenarios/<skill-id>_generated_smoke.yaml`
 
 The generated files are skeletons. They are meant to make new skills consistent, not to replace human review.
 `render` refuses to overwrite existing files unless `--force` is passed.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PhoneAI pre-commit hook — harness 守门 + skill i18n sync 守门
+# CoreClaw pre-commit hook — harness 守门 + skill i18n sync 守门
 #
 # 两个检查独立:
 #   1. Skill bilingual sync (总是跑, 不吃 HARNESS skip)
@@ -40,8 +40,8 @@ GUARDED_PATHS=(
     "LLM/"
     "Skills/Library/"
     "Tools/"
-    "PhoneAICLI/Sources/"
-    "PhoneAICLI/Scenarios/"
+    "CoreClawCLI/Sources/"
+    "CoreClawCLI/Scenarios/"
 )
 
 STAGED=$(git diff --cached --name-only --diff-filter=ACMR)
@@ -62,7 +62,7 @@ fi
 echo "[pre-commit] 触发 harness (守门路径: $MATCHED)"
 
 REPO_ROOT=$(git rev-parse --show-toplevel)
-cd "$REPO_ROOT/PhoneAICLI"
+cd "$REPO_ROOT/CoreClawCLI"
 
 # 跑两个 .litertlm 模型 — E2B 是默认部署模型, E4B 是升级选项, 任何一个红就拒绝。
 # CLI 守门必须跟 iOS 设备运行时一致走 LiteRT, 不能回落到旧 MLX 目录模型。

@@ -1,8 +1,8 @@
 platform :ios, '17.0'
 
-workspace 'PhoneAI'
+workspace 'CoreClaw'
 
-target 'PhoneAI' do
+target 'CoreClaw' do
   # YAML 解析（SkillLoader 用于解析 SKILL.md frontmatter）
   pod 'Yams'
 end

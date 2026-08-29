@@ -57,7 +57,7 @@ public final class ModelRuntimeCoordinator {
     /// 用于 generating → ready 和 cancel → ready 回退时恢复 backend 信息。
     private var lastKnownBackend: String = "cpu"
 
-    private let log = Logger(subsystem: "PhoneAI", category: "Coordinator")
+    private let log = Logger(subsystem: "CoreClaw", category: "Coordinator")
 
     // MARK: - Init
 

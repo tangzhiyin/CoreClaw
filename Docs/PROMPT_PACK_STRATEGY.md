@@ -1,6 +1,6 @@
 # Prompt Pack Strategy
 
-PhoneAI already has strong prompt scaffolding in `PromptBuilder`: locked abilities, compact tool schemas, tool allowlists, argument extraction, web answer repair, and Live voice prompts. Prompt Pack Strategy turns that implementation into named, versioned contracts that can be tested across LiteRT, MiniCPM-V, Remote, and future Foundation Models/Core AI adapters.
+CoreClaw already has strong prompt scaffolding in `PromptBuilder`: locked abilities, compact tool schemas, tool allowlists, argument extraction, web answer repair, and Live voice prompts. Prompt Pack Strategy turns that implementation into named, versioned contracts that can be tested across LiteRT, MiniCPM-V, Remote, and future Foundation Models/Core AI adapters.
 
 ## Problems To Solve
 
@@ -55,9 +55,9 @@ tests:
 | Skill activation | Preloaded skill block | Skills/Dynamic Profile activation where available |
 | History trimming | PromptBuilder/history trim | Profile modifiers where available |
 
-The runtime output must still pass PhoneAI validation. Structured output improves shape, but it does not replace `ToolRegistry` and `SkillRegistry` checks.
+The runtime output must still pass CoreClaw validation. Structured output improves shape, but it does not replace `ToolRegistry` and `SkillRegistry` checks.
 
-The registry-driven Foundation Models router now uses a runtime schema built from `DynamicGenerationSchema` with `anyOf` choices generated from the active `SkillRegistry` and `ToolRegistry`, so invalid skill IDs and tool names are constrained before generation. The runtime output still goes through local allowlist validation because schema shape does not replace PhoneAI's registry contracts.
+The registry-driven Foundation Models router now uses a runtime schema built from `DynamicGenerationSchema` with `anyOf` choices generated from the active `SkillRegistry` and `ToolRegistry`, so invalid skill IDs and tool names are constrained before generation. The runtime output still goes through local allowlist validation because schema shape does not replace CoreClaw's registry contracts.
 
 ## Progressive Disclosure Rules
 

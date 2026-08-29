@@ -17,7 +17,7 @@ main Xcode app source folders are intentionally left in place to avoid noisy
 - `Tools/` - tool handlers, developer utilities, and SkillKit scaffolding.
 - `Shared/` - shared models and utilities used across app modules.
 - `UI/` - reusable SwiftUI surfaces.
-- `PhoneAICLI/` - command-line harnesses for local routing, skill, and model
+- `CoreClawCLI/` - command-line harnesses for local routing, skill, and model
   validation.
 - `MacGateway/` - macOS gateway app for LAN remote inference.
 - `Tests/` - Swift test package plus standalone test harnesses such as
@@ -35,8 +35,8 @@ main Xcode app source folders are intentionally left in place to avoid noisy
 
 - Put new documentation under `Docs/`.
 - Put Mac gateway changes under `MacGateway/`; keep the built app name
-  `PhoneAIGateway.app` for user-facing continuity.
-- Put reusable CLI validation in `PhoneAICLI/`.
+  `CoreClawGateway.app` for user-facing continuity.
+- Put reusable CLI validation in `CoreClawCLI/`.
 - Put standalone or experimental test harnesses under `Tests/` or
   `Experiments/`, depending on whether they are expected to remain part of the
   verification workflow.

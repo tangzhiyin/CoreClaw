@@ -13,7 +13,7 @@ ASSETS_DIR = Path(__file__).resolve().parent
 MASTER_PNG = ASSETS_DIR / "MacAppIcon-1024.png"
 ICONSET_DIR = ASSETS_DIR / "AppIcon.iconset"
 ICNS_PATH = ASSETS_DIR / "AppIcon.icns"
-RUNTIME_ICNS_PATH = ASSETS_DIR.parent / "Sources" / "PhoneAIGateway" / "Resources" / "AppIcon.icns"
+RUNTIME_ICNS_PATH = ASSETS_DIR.parent / "Sources" / "CoreClawGateway" / "Resources" / "AppIcon.icns"
 
 
 def load_master() -> Image.Image:

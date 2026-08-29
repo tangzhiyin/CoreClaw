@@ -1,6 +1,6 @@
 # Skill bilingual sync
 
-PhoneAI 的 skill 库每个 skill 在 `Skills/Library/<id>/` 下有两个 markdown:
+CoreClaw 的 skill 库每个 skill 在 `Skills/Library/<id>/` 下有两个 markdown:
 
 - `SKILL.md` — 中文 (authoritative source, 用户/开发者先写这个)
 - `SKILL.en.md` — 英文翻译版 (zh 改了之后必须同步重翻)

@@ -66,13 +66,13 @@ private_keys/
 *.o
 # 但保留 xcframework 内的静态库 + 动态库 (issue #12)
 # LocalPackages/**/*.xcframework — vendored LiteRTLM (see
-# LocalPackages/PhoneAIEngine/Package.swift for build pipeline).
+# LocalPackages/CoreClawEngine/Package.swift for build pipeline).
 !Frameworks/**/*.a
 !LocalPackages/**/*.a
 !LocalPackages/**/*.dylib
 
-# ─── PhoneAICLI (本地开发测试工具, 不入仓库) ───────────────────
-PhoneAICLI/
+# ─── CoreClawCLI (本地开发测试工具, 不入仓库) ───────────────────
+CoreClawCLI/
 
 # ─── Private local Skills ──────────────────────────────────────────
 # Crisp remains available in the local working copy but is not published.

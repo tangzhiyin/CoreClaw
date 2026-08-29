@@ -231,7 +231,7 @@ final class BackendDispatcher: InferenceService {
                 }
                 target = foundationModels
             case .mlxDirectory:
-                // 当前 PhoneAI 不集成 MLX backend, descriptor 也不应该出现 mlxDirectory,
+                // 当前 CoreClaw 不集成 MLX backend, descriptor 也不应该出现 mlxDirectory,
                 // 但 enum case 存在所以这里给个明确错误而不是 silent fallback。
                 throw BackendDispatcherError.unsupportedArtifactKind(modelID: modelID, kind: ".mlxDirectory")
             }

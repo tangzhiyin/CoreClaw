@@ -1,34 +1,47 @@
 <p align="center">
-  <img src="assets/banner.png" width="100%" alt="PhoneAI banner">
+  <img src="assets/banner.png" width="100%" alt="CoreClaw banner">
 </p>
 
-# PhoneAI
+# CoreClaw
 
-PhoneAI is a local AI assistant application for iPhone. This README records ongoing project updates, fixes, release changes, and important development notes.
+CoreClaw is a local AI assistant application for iPhone. This README records ongoing project updates, fixes, release changes, and important development notes.
 
 ## TestFlight
 
-PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testflight.apple.com/join/83pVSbzt)**.
+CoreClaw is now available on TestFlight: **[Join the CoreClaw beta](https://testflight.apple.com/join/83pVSbzt)**.
 
 ## App UI
 
 <p align="center">
-  <img src="assets/phoneai-ui-2026-08-27.png" width="360" alt="PhoneAI deep-gray iPhone chat interface">
+  <img src="assets/phoneai-ui-2026-08-27.png" width="360" alt="CoreClaw deep-gray iPhone chat interface">
 </p>
+
+## Changes on August 29, 2026
+
+### Complete CoreClaw project rename
+
+- Unified the application name as `CoreClaw` across source code, user-facing metadata, permission descriptions, documentation, website content, and CI configuration.
+- Renamed the main app, Live Activity widget, local inference engine, Core test module, and macOS gateway targets and Swift symbols.
+- Renamed the Xcode project to `CoreClaw.xcodeproj`, the workspace to `CoreClaw.xcworkspace`, and the shared app scheme to `CoreClaw`.
+- Renamed the main application product to `CoreClaw.app` and the extension product to `CoreClawLiveActivityWidget.appex`.
+- Regenerated CocoaPods integration for the `CoreClaw` target and updated local Swift Package module paths.
+- Preserved the registered app and widget bundle identifiers so existing TestFlight and App Store installations can continue receiving in-place updates.
+- Confirmed that the renamed Core and Gateway test suites pass.
+- Confirmed a successful `1.5.4 (51)` Xcode Release build from the renamed workspace.
 
 ## Changes on August 28, 2026
 
 ### TestFlight feedback and release 1.5.3
 
 - Added a **Send Feedback** item at the bottom of **Settings → General**.
-- Made the feedback item open the PhoneAI TestFlight page, where beta testers can send feedback to the developer.
+- Made the feedback item open the CoreClaw TestFlight page, where beta testers can send feedback to the developer.
 - Updated the application version to `1.5.3`.
 - Updated the build number to `50`.
 - Synchronized version and build metadata between the main app and Live Activity widget.
 
 ### Home Screen App Icon adaptation
 
-- Adapted the PhoneAI Home Screen App Icon to Apple's system-provided Liquid Glass appearance while leaving the in-app interface unchanged.
+- Adapted the CoreClaw Home Screen App Icon to Apple's system-provided Liquid Glass appearance while leaving the in-app interface unchanged.
 
 ### Concurrent reply isolation
 
@@ -41,17 +54,17 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 
 ## Changes on August 27, 2026
 
-### Complete PhoneAI migration
+### Complete CoreClaw migration
 
-- Renamed the application from PhoneClaw to PhoneAI across the app target, Live Activity widget, Xcode project, workspace, shared scheme, Swift packages, tests, files, folders, products, documentation, website, and CI workflows.
-- Renamed the main application product to `PhoneAI.app` and the extension to `PhoneAILiveActivityWidget.appex`.
+- Renamed the application from PhoneClaw to CoreClaw across the app target, Live Activity widget, Xcode project, workspace, shared scheme, Swift packages, tests, files, folders, products, documentation, website, and CI workflows.
+- Renamed the main application product to `CoreClaw.app` and the extension to `CoreClawLiveActivityWidget.appex`.
 - Updated the application bundle identifier to `com.yokotox.phoneai`.
 - Updated the widget bundle identifier to `com.yokotox.phoneai.LiveActivityWidget`.
 - Renamed the URL scheme, Bonjour service, background identifiers, persistence identifiers, package modules, and test modules.
 - Updated public repository and GitHub Pages links to:
-  - <https://github.com/tangzhiyin/PhoneAI>
-  - <https://tangzhiyin.github.io/PhoneAI/>
-- Preserved the previous remote repository as a legacy Git remote while making `tangzhiyin/PhoneAI` the primary origin.
+  - <https://github.com/tangzhiyin/CoreClaw>
+  - <https://tangzhiyin.github.io/CoreClaw/>
+- Preserved the previous remote repository as a legacy Git remote while making `tangzhiyin/CoreClaw` the primary origin.
 
 ### Private local Skill handling
 
@@ -74,7 +87,7 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 
 ### Bundled default AI model
 
-- Added Release and TestFlight archive support for bundling Gemma 4 E2B directly inside `PhoneAI.app`.
+- Added Release and TestFlight archive support for bundling Gemma 4 E2B directly inside `CoreClaw.app`.
 - Made the bundled model the immediately available default model on a fresh installation, without requiring a separate in-app download.
 - Added an exact 2,588,147,712-byte integrity check before packaging the model.
 - Made Archive fail with a clear error when the local E2B file is missing, preventing an accidental TestFlight upload without the default model.
@@ -90,13 +103,13 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 
 ### Xcode package-resolution repair
 
-- Fixed simultaneous missing-module errors for MLX, WhisperKit, Numerics, Tokenizers, and MarkdownUI caused by corrupted PhoneAI DerivedData.
-- Replaced only the stale PhoneAI build cache and regenerated the Swift Package dependency graph.
+- Fixed simultaneous missing-module errors for MLX, WhisperKit, Numerics, Tokenizers, and MarkdownUI caused by corrupted CoreClaw DerivedData.
+- Replaced only the stale CoreClaw build cache and regenerated the Swift Package dependency graph.
 - Restored successful signed Simulator builds in Xcode's normal DerivedData location.
 - Removed the final two Xcode build-phase issues by making the Gemma bundling and private-Skill removal scripts dependency-aware.
 - Added tracked placeholder metadata for the ignored `Models/` directory so incremental builds can detect local model additions without publishing model weights.
 - Recovered a stuck Xcode PIF transfer session that caused both Clean and Build to fail before target compilation.
-- Restarted the PhoneAI build service session and confirmed a complete Clean followed by a signed Simulator Build.
+- Restarted the CoreClaw build service session and confirmed a complete Clean followed by a signed Simulator Build.
 
 ### Deep-gray visual refresh
 
@@ -109,7 +122,7 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 
 ### Release metadata
 
-- Published PhoneAI to TestFlight with a public invitation link: <https://testflight.apple.com/join/83pVSbzt>.
+- Published CoreClaw to TestFlight with a public invitation link: <https://testflight.apple.com/join/83pVSbzt>.
 - Updated the application version to `1.5.0`.
 - Updated the build number to `47`.
 - Synchronized the version and build number between the main app and Live Activity widget.
@@ -148,13 +161,13 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 
 - Replaced remaining Kellyvv identity references with Crisp.
 - Added a simplified iPhone and AI App Icon with separate default and dark appearances.
-- Removed all remaining PhoneClaw path and content variants during the PhoneAI migration preparation.
+- Removed all remaining PhoneClaw path and content variants during the CoreClaw migration preparation.
 
 ### GitHub and CI
 
 - Added and repaired GitHub Actions workflows for iOS builds and GitHub Pages.
 - Configured CI to use Xcode 26.4.1 and the iOS 26 SDK.
-- Updated the Pages deployment base path for the PhoneAI repository.
+- Updated the Pages deployment base path for the CoreClaw repository.
 - Rebased local work onto the latest remote history without force-pushing.
 - Audited the publishable tree for credentials, generated artifacts, old identity paths, and private Skill files.
 
@@ -162,30 +175,30 @@ PhoneAI is now available on TestFlight: **[Join the PhoneAI beta](https://testfl
 
 | Item | Value |
 |---|---|
-| Application | PhoneAI |
+| Application | CoreClaw |
 | Version | 1.5.0 |
 | Build | 47 |
 | Main bundle ID | `com.yokotox.phoneai` |
 | Widget bundle ID | `com.yokotox.phoneai.LiveActivityWidget` |
-| Xcode workspace | `PhoneAI.xcworkspace` |
-| Shared scheme | `PhoneAI` |
+| Xcode workspace | `CoreClaw.xcworkspace` |
+| Shared scheme | `CoreClaw` |
 | Minimum iOS version | iOS 17 |
-| Primary repository | <https://github.com/tangzhiyin/PhoneAI> |
+| Primary repository | <https://github.com/tangzhiyin/CoreClaw> |
 
 ## Build from source
 
 ```bash
-git clone https://github.com/tangzhiyin/PhoneAI.git
-cd PhoneAI
+git clone https://github.com/tangzhiyin/CoreClaw.git
+cd CoreClaw
 pod install
-open PhoneAI.xcworkspace
+open CoreClaw.xcworkspace
 ```
 
-Always open `PhoneAI.xcworkspace`, not `PhoneAI.xcodeproj`, because the application uses CocoaPods dependencies.
+Always open `CoreClaw.xcworkspace`, not `CoreClaw.xcodeproj`, because the application uses CocoaPods dependencies.
 
 In Xcode:
 
-1. Select the `PhoneAI` target.
+1. Select the `CoreClaw` target.
 2. Open **Signing & Capabilities**.
 3. Select the correct Apple Developer team.
 4. Confirm that automatic signing is enabled.
@@ -207,8 +220,8 @@ This persistent application-data directory survives normal App Store and TestFli
 - Release iOS device build: passed.
 - Unsigned archive: passed.
 - Native Xcode workspace build: passed without errors or warnings.
-- PhoneAI Core tests: 113 passed.
-- PhoneAI Gateway tests: 3 passed.
+- CoreClaw Core tests: 113 passed.
+- CoreClaw Gateway tests: 3 passed.
 - App Icon validation: both icons are 1024×1024 RGB PNG files without alpha.
 
 ## Repository privacy note

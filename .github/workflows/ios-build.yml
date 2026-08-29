@@ -34,8 +34,8 @@ jobs:
         run: |
           set -o pipefail
           xcodebuild \
-            -workspace PhoneAI.xcworkspace \
-            -scheme PhoneAI \
+            -workspace CoreClaw.xcworkspace \
+            -scheme CoreClaw \
             -configuration Release \
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO \

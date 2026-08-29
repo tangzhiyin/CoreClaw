@@ -129,6 +129,6 @@ The first Health authorization request asks for read access to steps, walking+ru
 
 If the tool returns a failurePayload and the error mentions "authorization denied" or "settings", tell the user:
 
-> I wasn't able to read your Health data. Please go to Settings → Privacy & Security → Health → PhoneAI, confirm that the relevant Health data read permissions are enabled, and then ask me again.
+> I wasn't able to read your Health data. Please go to Settings → Privacy & Security → Health → CoreClaw, confirm that the relevant Health data read permissions are enabled, and then ask me again.
 
 Do not repeatedly retry calling the tool.

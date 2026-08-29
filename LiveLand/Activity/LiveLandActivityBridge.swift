@@ -38,7 +38,7 @@ actor LiveLandActivityBridge {
     }
 
     func startSession(
-        headline: String = "PhoneAI LIVE",
+        headline: String = "CoreClaw LIVE",
         detail: String = "正在启动",
         entryPoint: String = "liveLand"
     ) async {
@@ -278,7 +278,7 @@ actor LiveLandActivityBridge {
     }
 
     func endSession(
-        headline: String = "PhoneAI LIVE",
+        headline: String = "CoreClaw LIVE",
         detail: String = "已结束",
         entryPoint: String? = nil
     ) async {

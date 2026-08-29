@@ -136,49 +136,49 @@ Action Extension Target
 ```xml
 <!-- 硬件 -->
 <key>NSCameraUsageDescription</key>
-<string>PhoneAI 需要相机来拍照识别和扫码</string>
+<string>CoreClaw 需要相机来拍照识别和扫码</string>
 <key>NSMicrophoneUsageDescription</key>
-<string>PhoneAI 需要麦克风来语音对话和录音</string>
+<string>CoreClaw 需要麦克风来语音对话和录音</string>
 <key>NSSpeechRecognitionUsageDescription</key>
-<string>PhoneAI 需要语音识别来理解你的语音指令</string>
+<string>CoreClaw 需要语音识别来理解你的语音指令</string>
 <key>NSLocationWhenInUseUsageDescription</key>
-<string>PhoneAI 需要位置来搜索附近和导航</string>
+<string>CoreClaw 需要位置来搜索附近和导航</string>
 <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>PhoneAI 需要后台定位来实现地理围栏提醒</string>
+<string>CoreClaw 需要后台定位来实现地理围栏提醒</string>
 <key>NSMotionUsageDescription</key>
-<string>PhoneAI 需要运动数据来记录步数和检测活动</string>
+<string>CoreClaw 需要运动数据来记录步数和检测活动</string>
 <key>NFCReaderUsageDescription</key>
-<string>PhoneAI 需要 NFC 来读写标签</string>
+<string>CoreClaw 需要 NFC 来读写标签</string>
 <key>NSBluetoothAlwaysUsageDescription</key>
-<string>PhoneAI 需要蓝牙来连接周边设备</string>
+<string>CoreClaw 需要蓝牙来连接周边设备</string>
 
 <!-- 用户数据 -->
 <key>NSPhotoLibraryUsageDescription</key>
-<string>PhoneAI 需要相册来搜索和分析照片</string>
+<string>CoreClaw 需要相册来搜索和分析照片</string>
 <key>NSPhotoLibraryAddUsageDescription</key>
-<string>PhoneAI 需要保存照片到相册</string>
+<string>CoreClaw 需要保存照片到相册</string>
 <key>NSContactsUsageDescription</key>
-<string>PhoneAI 需要通讯录来查找和管理联系人</string>
+<string>CoreClaw 需要通讯录来查找和管理联系人</string>
 <key>NSCalendarsFullAccessUsageDescription</key>
-<string>PhoneAI 需要日历来管理你的日程</string>
+<string>CoreClaw 需要日历来管理你的日程</string>
 <key>NSRemindersFullAccessUsageDescription</key>
-<string>PhoneAI 需要提醒事项来管理待办</string>
+<string>CoreClaw 需要提醒事项来管理待办</string>
 <key>NSHealthShareUsageDescription</key>
-<string>PhoneAI 需要读取健康数据来提供健康建议</string>
+<string>CoreClaw 需要读取健康数据来提供健康建议</string>
 <key>NSHealthUpdateUsageDescription</key>
-<string>PhoneAI 需要写入健康数据来记录运动</string>
+<string>CoreClaw 需要写入健康数据来记录运动</string>
 <key>NSAppleMusicUsageDescription</key>
-<string>PhoneAI 需要音乐库来播放和搜索音乐</string>
+<string>CoreClaw 需要音乐库来播放和搜索音乐</string>
 
 <!-- 系统集成 -->
 <key>NSFaceIDUsageDescription</key>
-<string>PhoneAI 使用 Face ID 保护敏感操作</string>
+<string>CoreClaw 使用 Face ID 保护敏感操作</string>
 <key>NSHomeKitUsageDescription</key>
-<string>PhoneAI 需要 HomeKit 来控制智能家居</string>
+<string>CoreClaw 需要 HomeKit 来控制智能家居</string>
 <key>NSSiriUsageDescription</key>
-<string>PhoneAI 通过 Siri 提供语音助手能力</string>
+<string>CoreClaw 通过 Siri 提供语音助手能力</string>
 <key>NSFocusStatusUsageDescription</key>
-<string>PhoneAI 需要专注状态来避免在专注模式下打扰你</string>
+<string>CoreClaw 需要专注状态来避免在专注模式下打扰你</string>
 <key>NSLocalNetworkUsageDescription</key>
-<string>PhoneAI 需要局域网来发现本地设备</string>
+<string>CoreClaw 需要局域网来发现本地设备</string>
 ```

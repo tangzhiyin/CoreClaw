@@ -387,7 +387,7 @@ final class MiniCPMVBackend: InferenceService {
     //   1. 模型看到嵌套乱码 marker (Qwen 把整块 Gemma 包裹在 user 里),
     //      生成乱跳 / 输出残破 turn marker 不停。
     //   2. mtmd_ios 自动在最前面塞默认 "You are a helpful assistant" system,
-    //      把 PhoneAI 真正的 system prompt 顶下去, agent 行为完全失效。
+    //      把 CoreClaw 真正的 system prompt 顶下去, agent 行为完全失效。
     //
     // 这里做转换: 解析 Gemma marker 把 prompt 拆成 (role, content) 数组,
     // 按顺序逐段 prefill_text 喂给 mtmd_ios, 让它走原生 Qwen 模板。

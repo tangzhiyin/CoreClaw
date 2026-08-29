@@ -7,13 +7,13 @@
 		<string>com.crisp.phoneai.liveland-continuation</string>
 	</array>
 	<key>CFBundleDisplayName</key>
-	<string>PhoneAI</string>
+	<string>CoreClaw</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleName</key>
-	<string>PhoneAI</string>
+	<string>CoreClaw</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -42,27 +42,27 @@
 		<string>_phoneai-llm._tcp</string>
 	</array>
 	<key>NSCalendarsFullAccessUsageDescription</key>
-	<string>PhoneAI reads calendar events only when you ask for schedule summaries, availability checks, or local planning analysis.</string>
+	<string>CoreClaw reads calendar events only when you ask for schedule summaries, availability checks, or local planning analysis.</string>
 	<key>NSCalendarsUsageDescription</key>
-	<string>PhoneAI uses Calendar access to create events and read schedules only when you ask for local planning analysis.</string>
+	<string>CoreClaw uses Calendar access to create events and read schedules only when you ask for local planning analysis.</string>
 	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
-	<string>PhoneAI needs to create calendar events</string>
+	<string>CoreClaw needs to create calendar events</string>
 	<key>NSCameraUsageDescription</key>
-	<string>PhoneAI uses the camera in LIVE mode to perceive your surroundings</string>
+	<string>CoreClaw uses the camera in LIVE mode to perceive your surroundings</string>
 	<key>NSContactsUsageDescription</key>
-	<string>PhoneAI needs to store contact information</string>
+	<string>CoreClaw needs to store contact information</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>PhoneAI reads Health data (steps, distance, active energy, heart rate, sleep, workouts, weight, and HRV) locally to generate summaries and insights. Nothing leaves your device.</string>
+	<string>CoreClaw reads Health data (steps, distance, active energy, heart rate, sleep, workouts, weight, and HRV) locally to generate summaries and insights. Nothing leaves your device.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>PhoneAI does not write Health data. This permission description is included because HealthKit access requires a write-purpose string for App Store validation.</string>
+	<string>CoreClaw does not write Health data. This permission description is included because HealthKit access requires a write-purpose string for App Store validation.</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>PhoneAI 在局域网内发现并连接你的 Mac,把推理交给 Mac 上更强的大模型运行。</string>
+	<string>CoreClaw 在局域网内发现并连接你的 Mac,把推理交给 Mac 上更强的大模型运行。</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>PhoneAI uses the microphone for LIVE voice conversations, including an active LIVE session that can continue while the app is in the background.</string>
+	<string>CoreClaw uses the microphone for LIVE voice conversations, including an active LIVE session that can continue while the app is in the background.</string>
 	<key>NSRemindersFullAccessUsageDescription</key>
-	<string>PhoneAI needs Reminders access to create reminders</string>
+	<string>CoreClaw needs Reminders access to create reminders</string>
 	<key>NSRemindersUsageDescription</key>
-	<string>PhoneAI needs access to Reminders</string>
+	<string>CoreClaw needs access to Reminders</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UIBackgroundModes</key>

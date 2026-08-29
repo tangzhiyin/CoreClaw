@@ -1,9 +1,9 @@
 import AppIntents
 import Foundation
 
-struct StartPhoneAILiveModeIntent: AppIntent {
-    static var title: LocalizedStringResource = "Start PhoneAI LIVE Mode"
-    static var description = IntentDescription("Open PhoneAI in the realtime LIVE voice mode.")
+struct StartCoreClawLiveModeIntent: AppIntent {
+    static var title: LocalizedStringResource = "Start CoreClaw LIVE Mode"
+    static var description = IntentDescription("Open CoreClaw in the realtime LIVE voice mode.")
     static var openAppWhenRun: Bool = true
 
     @MainActor
@@ -15,7 +15,7 @@ struct StartPhoneAILiveModeIntent: AppIntent {
 
 struct OpenLiveLandIntent: AppIntent {
     static var title: LocalizedStringResource = "Open LiveLand"
-    static var description = IntentDescription("Open PhoneAI and start LiveLand microphone listening in Dynamic Island.")
+    static var description = IntentDescription("Open CoreClaw and start LiveLand microphone listening in Dynamic Island.")
     static var openAppWhenRun: Bool = true
 
     @MainActor
@@ -25,7 +25,7 @@ struct OpenLiveLandIntent: AppIntent {
     }
 }
 
-struct PhoneAIAppShortcuts: AppShortcutsProvider {
+struct CoreClawAppShortcuts: AppShortcutsProvider {
     static var shortcutTileColor: ShortcutTileColor = .orange
 
     static var appShortcuts: [AppShortcut] {
@@ -41,7 +41,7 @@ struct PhoneAIAppShortcuts: AppShortcutsProvider {
             systemImageName: "waveform"
         )
         AppShortcut(
-            intent: StartPhoneAILiveModeIntent(),
+            intent: StartCoreClawLiveModeIntent(),
             phrases: [
                 "Start \(.applicationName) LIVE Mode",
                 "Open \(.applicationName) LIVE Mode",

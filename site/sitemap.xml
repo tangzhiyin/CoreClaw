@@ -2,69 +2,69 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://tangzhiyin.github.io/PhoneAI/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://tangzhiyin.github.io/PhoneAI/"/>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tangzhiyin.github.io/PhoneAI/zh/"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://tangzhiyin.github.io/PhoneAI/ja/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://tangzhiyin.github.io/PhoneAI/"/>
+    <loc>https://tangzhiyin.github.io/CoreClaw/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tangzhiyin.github.io/CoreClaw/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tangzhiyin.github.io/CoreClaw/zh/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tangzhiyin.github.io/CoreClaw/ja/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tangzhiyin.github.io/CoreClaw/"/>
     <lastmod>2026-08-06</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://tangzhiyin.github.io/PhoneAI/zh/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://tangzhiyin.github.io/PhoneAI/"/>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tangzhiyin.github.io/PhoneAI/zh/"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://tangzhiyin.github.io/PhoneAI/ja/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://tangzhiyin.github.io/PhoneAI/"/>
+    <loc>https://tangzhiyin.github.io/CoreClaw/zh/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tangzhiyin.github.io/CoreClaw/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tangzhiyin.github.io/CoreClaw/zh/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tangzhiyin.github.io/CoreClaw/ja/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tangzhiyin.github.io/CoreClaw/"/>
     <lastmod>2026-08-06</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://tangzhiyin.github.io/PhoneAI/ja/</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://tangzhiyin.github.io/PhoneAI/"/>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tangzhiyin.github.io/PhoneAI/zh/"/>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://tangzhiyin.github.io/PhoneAI/ja/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://tangzhiyin.github.io/PhoneAI/"/>
+    <loc>https://tangzhiyin.github.io/CoreClaw/ja/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tangzhiyin.github.io/CoreClaw/"/>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tangzhiyin.github.io/CoreClaw/zh/"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tangzhiyin.github.io/CoreClaw/ja/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tangzhiyin.github.io/CoreClaw/"/>
     <lastmod>2026-08-06</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://tangzhiyin.github.io/PhoneAI/privacy/</loc>
+    <loc>https://tangzhiyin.github.io/CoreClaw/privacy/</loc>
     <lastmod>2026-08-06</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://tangzhiyin.github.io/PhoneAI/mac-remote/</loc>
+    <loc>https://tangzhiyin.github.io/CoreClaw/mac-remote/</loc>
     <lastmod>2026-08-06</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://tangzhiyin.github.io/PhoneAI/mobile-agent-framework/</loc>
+    <loc>https://tangzhiyin.github.io/CoreClaw/mobile-agent-framework/</loc>
     <lastmod>2026-08-06</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://tangzhiyin.github.io/PhoneAI/on-device-gemma/</loc>
+    <loc>https://tangzhiyin.github.io/CoreClaw/on-device-gemma/</loc>
     <lastmod>2026-08-06</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://tangzhiyin.github.io/PhoneAI/skills/</loc>
+    <loc>https://tangzhiyin.github.io/CoreClaw/skills/</loc>
     <lastmod>2026-08-06</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://tangzhiyin.github.io/PhoneAI/liveland/</loc>
+    <loc>https://tangzhiyin.github.io/CoreClaw/liveland/</loc>
     <lastmod>2026-08-06</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://tangzhiyin.github.io/PhoneAI/faq/</loc>
+    <loc>https://tangzhiyin.github.io/CoreClaw/faq/</loc>
     <lastmod>2026-08-06</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://tangzhiyin.github.io/PhoneAI/benchmarks/</loc>
+    <loc>https://tangzhiyin.github.io/CoreClaw/benchmarks/</loc>
     <lastmod>2026-08-06</lastmod>
     <priority>0.7</priority>
   </url>

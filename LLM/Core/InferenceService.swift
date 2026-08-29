@@ -235,8 +235,8 @@ public enum ModelBackendError: LocalizedError {
             )
         case .unsupportedSimulator:
             return tr(
-                "iOS 模拟器不支持 LiteRT 本地模型推理，请在真机 iPhone 上运行 PhoneAI。",
-                "The iOS Simulator does not support LiteRT local model inference. Run PhoneAI on a physical iPhone."
+                "iOS 模拟器不支持 LiteRT 本地模型推理，请在真机 iPhone 上运行 CoreClaw。",
+                "The iOS Simulator does not support LiteRT local model inference. Run CoreClaw on a physical iPhone."
             )
         }
     }

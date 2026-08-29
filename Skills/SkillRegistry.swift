@@ -21,7 +21,7 @@ class SkillRegistry {
 
     init() {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        self.overridesDirectory = appSupport.appendingPathComponent("PhoneAI/skills", isDirectory: true)
+        self.overridesDirectory = appSupport.appendingPathComponent("CoreClaw/skills", isDirectory: true)
         try? FileManager.default.createDirectory(at: overridesDirectory, withIntermediateDirectories: true)
         registerBuiltInSkills()
     }
@@ -132,7 +132,7 @@ class SkillRegistry {
     ///
     /// 加新内置 skill 的流程:
     ///   1. 在 `Skills/Library/<new-id>/` 创建 SKILL.md
-    ///   2. 在 Xcode 里把 Library/<new-id>/ 加进 PhoneAI target (bundle)
+    ///   2. 在 Xcode 里把 Library/<new-id>/ 加进 CoreClaw target (bundle)
     ///   3. 在下面加一行 `registerBuiltIn(id: "<new-id>")`
     private func registerBuiltInSkills() {
         registerBuiltIn(id: "clipboard")
