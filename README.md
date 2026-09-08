@@ -4,7 +4,35 @@
 
 # CoreClaw
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 CoreClaw is a local AI assistant application for iPhone. This README records ongoing project updates, fixes, release changes, and important development notes.
+
+## Changes on September 8, 2026
+
+### iPhone 15 web-search scrolling
+
+- Defers chat presentation changes during dragging and inertial scrolling, then displays the latest complete snapshot once scrolling stops.
+- Keeps generation, tool results, and message persistence active; answers completed while scrolling are not lost.
+- Uses lightweight plain text during streaming and restores Markdown and clickable sources afterward, including when the final text is unchanged.
+- Avoids mutating label layout from size measurement and cancels pending keyboard auto-scroll when the user starts scrolling.
+- Resets deferred presentation on gesture cancellation, screen exit, app lifecycle changes, and conversation switches.
+
+## Changes on September 3, 2026
+
+### Location-aware chat repair
+
+- Connected the existing explicit Location permission to a real `location-current` chat tool.
+- Added current coordinates, accuracy, timestamp, and Apple reverse-geocoded place details.
+- Added a Location Skill for explicit current-location and nearby requests without reading location for unrelated conversations.
+- Added bounded location requests with cancellation, a 12-second timeout, and clear denied, restricted, and unavailable results.
+
+### Web-search resource optimization
+
+- Reused one bounded ephemeral network session instead of repeatedly creating sessions for every provider and page.
+- Limited per-host connections, response processing size, and evidence-page fan-out according to device memory.
+- Reduced sequential fallback attempts from six sources to the three most relevant sources.
+- Added cancellation checks across query variants, page downloads, evidence extraction, and fallback fetching.
 
 ## TestFlight
 
@@ -15,6 +43,58 @@ CoreClaw is now available on TestFlight: **[Join the CoreClaw beta](https://test
 <p align="center">
   <img src="assets/phoneai-ui-2026-08-27.png" width="360" alt="CoreClaw deep-gray iPhone chat interface">
 </p>
+
+## Changes on September 2, 2026
+
+### Release 1.6.0
+
+- Updated the main app and Live Activity widget to version `1.6.0` with build number `60`.
+- Added a complete Simplified Chinese README covering all English project information and update history.
+
+### Web-search scrolling stability and release 1.5.6
+
+- Replaced the nested selectable text view used by link-heavy web-search answers with a lightweight link-aware label.
+- Preserved clickable source links while preventing text selection and inner scrolling gestures from competing with chat scrolling.
+- Avoided repeated TextKit interaction work that could freeze or crash the app and heat the device while scrolling web-search results.
+- Updated the main app and Live Activity widget to version `1.5.6` with build number `53`.
+
+### Standard iPhone runtime stability
+
+- Added a unified runtime profile for standard iPhone 14–17 hardware based on available physical memory rather than fragile model-name checks.
+- Reduced output, image preprocessing, speculative decoding, and streaming refresh pressure on 6 GB devices.
+- Added thermal-aware output limits and stops MLX generation if the device reaches a critical thermal state.
+- Clears long-answer rendering caches when iOS reports memory pressure, reducing the chance of freezes or jetsam termination during long chats.
+
+### Persistent local example training
+
+- Added **Local Example Training** under **Settings → Agent** so users can teach the local model with input and preferred-response examples.
+- Kept training private and on device by injecting relevant user examples into the local inference context.
+- Stored training examples separately under Application Support instead of modifying the downloaded base model.
+- Preserved local training data across normal TestFlight and App Store application updates and model replacements.
+- Clearly identified this as example-based in-context learning because the current LiteRT and MLX inference runtimes do not expose supported on-device weight or LoRA training APIs.
+
+### User-requested location access
+
+- Added Location to the app Permissions settings.
+- Requests **While Using the App** location authorization only after the user explicitly taps **Request**.
+- Added localized location purpose descriptions and a Settings recovery path when access is denied.
+- Preserved the existing bundle identifier so iOS keeps the user's authorization choice across normal app updates.
+
+### Automatic web search for images
+
+- Added automatic web augmentation for image requests.
+- CoreClaw first analyzes the image locally, then searches using the user's question and local visual summary.
+- The original image is not uploaded to search providers; only the generated text query is sent through the existing web-search pipeline.
+
+## Changes on August 30, 2026
+
+### Text sending without an installed model and release 1.5.5
+
+- Kept the text composer and send action available when no usable model is installed.
+- Preserved the submitted text as a user message and added an in-conversation reminder to download a model before continuing.
+- Kept image and audio submissions blocked until a compatible model is available.
+- Continued to distinguish a missing model from a model that is already installed and still loading.
+- Updated the main app and Live Activity widget to version `1.5.5` with build number `52`.
 
 ## Changes on August 29, 2026
 
@@ -176,8 +256,8 @@ CoreClaw is now available on TestFlight: **[Join the CoreClaw beta](https://test
 | Item | Value |
 |---|---|
 | Application | CoreClaw |
-| Version | 1.5.0 |
-| Build | 47 |
+| Version | 1.6.0 |
+| Build | 60 |
 | Main bundle ID | `com.yokotox.phoneai` |
 | Widget bundle ID | `com.yokotox.phoneai.LiveActivityWidget` |
 | Xcode workspace | `CoreClaw.xcworkspace` |
