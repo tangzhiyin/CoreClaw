@@ -10,6 +10,17 @@ CoreClaw is a local AI assistant application for iPhone. This README records ong
 
 ## Changes on September 8, 2026
 
+### Release 1.7.0 and runtime resource improvements
+
+- Updated the main app and Live Activity widget to version `1.7.0` with build number `61`, retaining bundle identifiers and persistent user data.
+- Enforced web response byte limits while receiving data, including chunked responses, instead of downloading an unlimited body before clipping it.
+- Cancels individual network requests promptly without tearing down other requests in the shared session; oversized pages and failed HTTP responses produce explicit errors.
+- Moved periodic chat serialization and atomic disk writes off the main thread, coalescing queued saves to the latest snapshot per conversation.
+- Kept ordered flush barriers for explicit saves, history reads, and deletion so older queued snapshots cannot overwrite newer data or restore a deleted chat.
+- Isolated each location lookup's manager and timeout, preserved all concurrent permission waiters, and stopped location work on completion or cancellation.
+- Bounded address lookup to five seconds and reports address failures explicitly while retaining valid coordinates.
+- Stops and joins the MLX token producer when streaming is cancelled, discards interrupted or memory/thermal-limited KV state only after the producer stops, and explains thermal stops in the answer.
+
 ### iPhone 15 web-search scrolling
 
 - Defers chat presentation changes during dragging and inertial scrolling, then displays the latest complete snapshot once scrolling stops.
@@ -256,8 +267,8 @@ CoreClaw is now available on TestFlight: **[Join the CoreClaw beta](https://test
 | Item | Value |
 |---|---|
 | Application | CoreClaw |
-| Version | 1.6.0 |
-| Build | 60 |
+| Version | 1.7.0 |
+| Build | 61 |
 | Main bundle ID | `com.yokotox.phoneai` |
 | Widget bundle ID | `com.yokotox.phoneai.LiveActivityWidget` |
 | Xcode workspace | `CoreClaw.xcworkspace` |
