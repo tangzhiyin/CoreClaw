@@ -6,7 +6,29 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-CoreClaw is a local AI assistant application for iPhone. This README records ongoing project updates, fixes, release changes, and important development notes.
+CoreClaw is a local-first AI assistant application for iPhone and iPad. This README records ongoing project updates, fixes, release changes, and important development notes.
+
+## Changes on October 6, 2026
+
+### Foreground-only voice and build 63
+
+- Updated the main app and Live Activity widget to version `1.7.0` with build number `63`, preserving their existing bundle identifiers and persistent user data.
+- Removed the `audio` background mode, the LiveLand continued-processing task registration, and the background GPU entitlement.
+- Kept voice input, LIVE conversations, LiveLand, camera assistance, and audio playback available in the foreground.
+- Going to the Home Screen, switching to another app, or locking the device now stops microphone capture, voice playback, and the active voice session. Returning does not automatically resume listening; start a new session to use voice again.
+- Stops audio immediately before awaiting inference teardown and prevents pending permission requests, model loading, or interruption recovery from restarting an ended session.
+- Temporary inactive states, such as system permission dialogs, do not by themselves end the voice session.
+- Preserved background model downloads and widget/Shortcut entry points that open the app.
+- Updated English, Simplified Chinese, and Japanese microphone descriptions, plus the in-app and local website information, to explain foreground-only voice behavior.
+
+### Current permission and privacy information
+
+- Permission entry screens use **Continue** before the system dialog; users choose whether to authorize access, and unrelated features remain available if they decline.
+- Contacts, Camera, and Location purpose strings explain the requested information and provide concrete examples in all three supported languages.
+- The in-app and local website privacy policies explain HealthKit, local storage, web and image-derived search queries, address lookup, optional remote models, retention, and deletion.
+- Local-first does not mean entirely offline: model downloads, web search, address lookup, and optional remote inference use network services.
+
+These entries describe the local development build. Publishing this README does not publish the application, upload a TestFlight/App Store build, or deploy the locally edited website pages.
 
 ## Changes on September 8, 2026
 
@@ -87,7 +109,7 @@ CoreClaw is now available on TestFlight: **[Join the CoreClaw beta](https://test
 ### User-requested location access
 
 - Added Location to the app Permissions settings.
-- Requests **While Using the App** location authorization only after the user explicitly taps **Request**.
+- Requests **While Using the App** location authorization through a user-initiated system dialog. The current settings entry uses **Continue** rather than the original **Request** label.
 - Added localized location purpose descriptions and a Settings recovery path when access is denied.
 - Preserved the existing bundle identifier so iOS keeps the user's authorization choice across normal app updates.
 
@@ -264,11 +286,15 @@ CoreClaw is now available on TestFlight: **[Join the CoreClaw beta](https://test
 
 ## Current project configuration
 
+This table describes the local development configuration, not an announcement of a published release.
+
 | Item | Value |
 |---|---|
 | Application | CoreClaw |
 | Version | 1.7.0 |
-| Build | 61 |
+| Build | 63 |
+| Voice operation | Foreground only; no automatic listening resume after backgrounding |
+| Background model downloads | Retained |
 | Main bundle ID | `com.yokotox.phoneai` |
 | Widget bundle ID | `com.yokotox.phoneai.LiveActivityWidget` |
 | Xcode workspace | `CoreClaw.xcworkspace` |
@@ -305,6 +331,17 @@ Documents/models/
 This persistent application-data directory survives normal App Store and TestFlight updates. Local development weights under the ignored repository `Models/` directory are not copied into Release archives.
 
 ## Validation completed
+
+### October 6, 2026 — 1.7.0 (63)
+
+- Foreground voice, permission, LIVE, and widget regressions: 29 selected tests passed.
+- Debug iOS Simulator and unsigned Release iOS device builds: passed.
+- Release product inspection: app and widget both report `1.7.0 (63)`; background audio and continued-processing declarations are absent, and localized microphone descriptions are packaged.
+- A newly signed Archive, upload, and physical-device verification are separate steps; the checks above do not establish an App Store or TestFlight release.
+
+### Earlier validation records
+
+The following records refer to earlier development builds, not to a new signed `1.7.0 (63)` archive.
 
 - Debug iOS device build: passed.
 - Debug iOS Simulator build: passed.
